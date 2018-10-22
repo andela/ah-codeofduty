@@ -17,8 +17,8 @@ from django.conf.urls import include, url
 from django.contrib import admin
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
+    url('admin/', admin.site.urls),
 
-    url(r'^api/', include('authors.apps.authentication.urls', namespace='authentication')),
+    url('api/', include('authors.apps.authentication.urls')),
 ]
 

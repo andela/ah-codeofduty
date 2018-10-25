@@ -152,3 +152,8 @@ box-shadow: 4px 9px 25px -6px rgba(77,77,77,0.61);
     background: orange;
     padding: 10px;
 }
+
+.input-group-addon{
+    padding-top: 10px;
+    padding-right: 6px;
+}

@@ -1,0 +1,29 @@
+language: python
+
+matrix:
+  include:
+    - python: 3.6
+      sudo: true
+
+services:
+  - postgresql
+
+env:
+  - DJANGO=2.1 DB=postgres
+
+install:
+  - pip install -r requirements.txt
+  - pip install codeclimate-test-reporter
+
+before_script:
+  - psql -c 'create database django_medium;' -U postgres
+
+script: 
+  - python manage.py makemigrations
+  - python manage.py test
+
+after_success:
+  - coveralls
+  - codeclimate-test-reporter
+  
+cache: pip

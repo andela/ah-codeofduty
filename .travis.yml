@@ -1,10 +1,6 @@
 language: python
 python:
 - "3.7"
-<<<<<<< HEAD
-=======
-- "2.7"
->>>>>>> 2cdb5059593e8c1683b33959f47214b8badc5d02
 cache: pip
 services:
 - postgresql

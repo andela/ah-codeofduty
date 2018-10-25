@@ -8,6 +8,13 @@ matrix:
 
 cache: pip
 
+env:
+  - NAME='django_medium'
+  - USER='postgres'
+  - HOST='localhost'
+  - PASSWORD=''
+  - PORT=''
+
 services:
   - postgresql
 
@@ -17,6 +24,9 @@ env:
 install:
   - pip install -r requirements.txt
   - pip install codeclimate-test-reporter
+
+before_script:
+  - psql -c 'create database django_medium;' -U postgres
 
 script: 
   - python manage.py test

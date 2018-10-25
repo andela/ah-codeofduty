@@ -1,0 +1,18 @@
+language: python
+python:
+- "3.7"
+- "2.7"
+cache: pip
+services:
+- postgresql
+install:
+- pip install -r requirements.txt
+- pip install coveralls
+- pip install codeclimate-test-reporter
+before_script:
+- createdb test_db
+script: 
+- python manage.py test
+after_success:
+- coveralls
+- codeclimate-test-reporter

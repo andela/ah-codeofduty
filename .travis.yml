@@ -8,6 +8,13 @@ matrix:
 
 cache: pip
 
+env:
+  - NAME=''
+  - USER=''
+  - HOST=''
+  - PASSWORD=''
+  - PORT=''
+
 services:
   - postgresql
 

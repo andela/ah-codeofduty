@@ -1,3 +1,5 @@
+"""test user authentication"""
+
 from django.test import TestCase
 from rest_framework.test import APIClient
 from rest_framework.views import status
@@ -5,10 +7,7 @@ from django.urls import reverse
 from .base import BaseTest
 
 class ViewTestCase(BaseTest):
-    """
-      Test user login view
-      :param: TestCase: Testing class initializer
-      """
+    """Test user views"""
 
     def test_user_registration_email_exists(self):
         """Test user with that email already exists"""
@@ -44,6 +43,8 @@ class ViewTestCase(BaseTest):
 
 
     def test_user_registration_missing_fields(self):
+        """Test user registers with missing fields"""
+
         response = self.client.post(
             self.SIGN_UP_URL,
             self.user_missing_fields,
@@ -51,6 +52,8 @@ class ViewTestCase(BaseTest):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_user_registration_missing_username_parameter(self):
+        """Test user registers with missing username parameter"""
+
         response = self.client.post(
             self.SIGN_UP_URL,
             self.user_missing_username_parameter,
@@ -58,6 +61,8 @@ class ViewTestCase(BaseTest):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_user_registration_missing_email_parameter(self):
+        """Test user registers with missing email parameter"""
+
         response = self.client.post(
             self.SIGN_UP_URL,
             self.user_missing_email_parameter,
@@ -65,6 +70,7 @@ class ViewTestCase(BaseTest):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_user_registration_short_password(self):
+        """Test user registers with short password"""
         response = self.client.post(
             self.SIGN_UP_URL,
             self.user_inputs_short_password,
@@ -72,6 +78,8 @@ class ViewTestCase(BaseTest):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
     
     def test_user_registration_invalid_email(self):
+        """Test user registers invalid email"""
+
         response = self.client.post(
             self.SIGN_UP_URL,
             self.user_inputs_invalid_email,
@@ -103,7 +111,7 @@ class ViewTestCase(BaseTest):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_login_user_non_existent(self):
-        """Test wrong login credentials."""
+        """Test if user is registered"""
         response = self.client.post(
             self.SIGN_UP_URL,
             self.user_data,

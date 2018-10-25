@@ -1,3 +1,5 @@
+"""test configurations"""
+
 from django.test import TestCase
 from rest_framework.test import APIClient
 from rest_framework.views import status
@@ -6,9 +8,9 @@ from django.urls import reverse
 
 class BaseTest(TestCase):
     """
-      Test user login view
+      Test user views
       :param: TestCase: Testing class initializer
-      """
+    """
 
     def setUp(self):
         """Define the test client"""
@@ -95,12 +97,16 @@ class BaseTest(TestCase):
         }
   
     def register_user(self):
+        """User registration"""
+
         return self.client.post(
             self.SIGN_UP_URL,
             self.user_data,
             format="json")
 
     def login_user(self):
+        """User login"""
+
         return self.client.post(
             self.SIGN_IN_URL,
             self.user_data,

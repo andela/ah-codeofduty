@@ -41,4 +41,8 @@ wrapt==1.10.11
 pytz==2018.6
 six==1.11.0
 typing==3.6.6
+<<<<<<< HEAD
 >>>>>>> [CHORE #161255348] Update requirements.txt
+=======
+whitenoise==4.1
+>>>>>>> [CHORE #161255348] Collectstatic update

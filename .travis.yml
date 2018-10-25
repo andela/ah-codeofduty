@@ -11,6 +11,6 @@ before_script:
   - psql -c 'CREATE DATABASE django_medium;' -U postgres
 script:
   - python manage.py makemigrations
-  - coverage run python manage.py test
+  - python manage.py test
 after_success: coveralls
 cache: pip

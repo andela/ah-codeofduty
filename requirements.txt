@@ -12,3 +12,4 @@ pyparsing==2.2.2
 pytz==2018.6
 six==1.11.0
 typing==3.6.6
+whitenoise==4.1

@@ -10,4 +10,4 @@ omit =
     */site-packages/*
     */authors/apps/articles/__init__.py
     */authors/apps/profiles/__init__.py
-    
+    manage.py

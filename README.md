@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/andela/ah-codeofduty.svg?branch=develop)](https://travis-ci.org/andela/ah-codeofduty)
+
 Authors Haven - A Social platform for the creative at heart.
 =======
 
@@ -6,8 +8,6 @@ Create a community of like minded authors to foster inspiration and innovation
 by leveraging the modern web.
 
 ---
-
-[![Build Status](https://travis-ci.org/andela/ah-codeofduty.svg?branch=develop)](https://travis-ci.org/andela/ah-codeofduty)
 
 ## API Spec
 The preferred JSON object to be returned by the API should be structured as follows:

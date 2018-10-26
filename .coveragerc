@@ -1,0 +1,13 @@
+[report]
+omit =
+    */authors/apps/__init__.py
+    */authors/apps/core/__init__.py
+    */authors/apps/core/exceptions.py
+    */authors/apps/authentication/__init__.py
+    */authors/apps/authentication/migrations/*.py
+    */authors/apps/authentication/tests/*.py
+    */python?.?/*
+    */site-packages/*
+    */authors/apps/articles/__init__.py
+    */authors/apps/profiles/__init__.py
+    

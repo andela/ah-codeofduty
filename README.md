@@ -9,6 +9,10 @@ Create a community of like minded authors to foster inspiration and innovation
 by leveraging the modern web.
 
 ---
+## API Documentation
+
+Click [here](https://ah-codeofduty-staging.herokuapp.com/) to view API Documentation
+
 ## Mockup
 [View UI Mockup](http://github.andela.com/ah-codeofduty/designs/)
 

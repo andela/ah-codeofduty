@@ -97,6 +97,7 @@ class ViewTestCase(BaseTest):
             self.user_data,
             format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("token", response.data)
 
     def test_login_user_wrong_password(self):
         """Test wrong login credentials."""
@@ -109,9 +110,10 @@ class ViewTestCase(BaseTest):
             self.user_wrong_password,
             format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertNotIn("token", response.data)
 
     def test_login_user_non_existent(self):
-        """Test if user is registered"""
+        """Test if user does not exist"""
         response = self.client.post(
             self.SIGN_UP_URL,
             self.user_data,
@@ -121,4 +123,5 @@ class ViewTestCase(BaseTest):
             self.user_does_not_exist,
             format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertNotIn("token", response.data)
         

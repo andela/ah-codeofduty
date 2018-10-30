@@ -12,7 +12,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
     # Ensure passwords are at least 8 characters long, no longer than 128
     # characters, and can not be read by the client.
     password = serializers.RegexField(
-        regex="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$",
+        regex=r"^(?!.*([A-Za-z\d])\1{2})(?=.*[a-z])(?=.*\d)[A-Za-z\d]{8,128}$",
         max_length=128,
         min_length=8,
         write_only=True,
@@ -21,7 +21,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
             'max_length': 'Password cannot be more than 128 characters',
             'min_length': 'Password must contain at least 8 characters',
             'required': 'Password is required',
-            'invalid': 'Password must contain a number and a letter'
+            'invalid': 'Password must contain a number and a letter and that are not repeating more that twice'
         }
     )
 

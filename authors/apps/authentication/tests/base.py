@@ -63,7 +63,7 @@ class BaseTest(TestCase):
         self.user_inputs_invalid_email = {
                 'email': 'zawi.com',
                 'username': 'zawi',
-                'password': 'pass'
+                'password': 'password1234'
             }
 
         self.user_wrong_password= {
@@ -76,6 +76,12 @@ class BaseTest(TestCase):
                 'email': 'zawizawi@gmail.com',
                 'username': 'zawadi',
                 'password': 'password1234'
+            }
+
+        self.missing_password = {
+                'email': 'mathias@gmail.com',
+                'username': 'mathias',
+                'password': ''
             }
   
     def register_user(self):

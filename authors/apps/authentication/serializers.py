@@ -1,6 +1,7 @@
 from django.contrib.auth import authenticate
 
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 
 from .models import User
 
@@ -10,10 +11,33 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
     # Ensure passwords are at least 8 characters long, no longer than 128
     # characters, and can not be read by the client.
-    password = serializers.CharField(
+    password = serializers.RegexField(
+        regex="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$",
         max_length=128,
         min_length=8,
-        write_only=True
+        write_only=True,
+        required=True,
+        error_messages={
+            'max_length': 'Password cannot be more than 128 characters',
+            'min_length': 'Password must contain at least 8 characters',
+            'required': 'Password is required',
+            'invalid': 'Password must contain a number and a letter'
+        }
+    )
+
+    # Ensure email is unique
+    # and is valid
+    email = serializers.EmailField(
+        required=True,
+        validators=[
+            UniqueValidator(
+                queryset=User.objects.all(),
+                message='Sorry this Email exists, kindly register with another email',
+            )
+        ],
+        error_messages={
+            'required': 'Email is required for registration',
+        }
     )
 
     # The client should not be able to send a token along with a registration

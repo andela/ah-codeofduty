@@ -1,5 +1,7 @@
 import jwt 
 
+from datetime import datetime, timedelta
+
 from django.contrib.auth import authenticate
 
 from rest_framework import serializers
@@ -88,6 +90,8 @@ class LoginSerializer(serializers.Serializer):
         #jwt consist of `header`, `payload` and `secret` 
         payload = {
             'email': user.email,
+            'iat': datetime.utcnow(),
+            'exp': datetime.utcnow() + timedelta(days=7)
         }
         jwt_token = {'token': jwt.encode(payload, SECRET_KEY)}
 
@@ -97,7 +101,7 @@ class LoginSerializer(serializers.Serializer):
         return {
             'email': user.email,
             'username': user.username,
-            'token': jwt.encode(payload, SECRET_KEY),
+            'token': jwt.encode(payload, SECRET_KEY).decode('UTF-8'),
         }
 
 

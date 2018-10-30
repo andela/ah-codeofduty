@@ -1,3 +1,6 @@
+"""
+JWT Configuration module
+"""
 import jwt
 import json
 
@@ -24,7 +27,7 @@ class JWTAuthentication(BaseAuthentication):
         auth = get_authorization_header(request).split()
 
         #Check if token and is present
-        if not auth or auth[0].lower() != b'token':
+        if not auth or auth[0].lower() != b'bearer':
             return None
 
         #Check if the correct credemtials were passed in 'request' parameter
@@ -35,39 +38,32 @@ class JWTAuthentication(BaseAuthentication):
         elif len(auth) > 2:
             msg = 'Invalid token header'
             raise exceptions.AuthenticationFailed(msg)
-            
-        #Check if the token has an actual value
-        try:
-            token = auth[1]
-            if token == 'null':
-                msg = 'Null token not allowed'
-                raise exceptions.AuthenticationFailed(msg)
-        except UnicodeError:
-            msg = 'Invalid token header. Token string should not contain invalid characters.'
-            raise exceptions.AuthenticationFailed(msg)
         
         #Decode token sucessfully, else catch some errors;
         #errors can be due to expired signature, in decoding
         #token validity or a user not existing
+
+        token = auth[1]
         try:
             payload = jwt.decode(token, SECRET_KEY)
             email = payload['email']
-            msg = {'Error': "Token mismatch",'status' :"401"}
             
             user = User.objects.get(
                 email=email,
                 is_active=True
             )  
-        except jwt.ExpiredSignature or jwt.DecodeError or jwt.InvalidTokenError:
-            return HttpResponse({'Error': "Token is invalid"}, status="403")
-        except User.DoesNotExist:
-            return HttpResponse({'Error': "Internal server error"}, status="500")
-
+        #Except cuustom errors while using the token
+        except Exception as e:
+            if e.__class__.__name__ == 'DecodeError':
+                raise exceptions.AuthenticationFailed('cannot decode token')
+            if e.__class__.__name__ == 'ExpiredSignatureError':
+                raise exceptions.AuthenticationFailed('Token has expired')
         return (user, token)
 
 
     def authenticate_header(self, request):
         """
-        :param: request: request header object to authenticate
+        Authenticate header prefix
+        :param: request: object request to add prefix
         """
-        pass
+        return 'Bearer'

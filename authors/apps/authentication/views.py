@@ -3,11 +3,13 @@ from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.generics import CreateAPIView
+from django.core.mail import send_mail
 
 from .renderers import UserJSONRenderer
 from .serializers import (
     LoginSerializer, RegistrationSerializer, UserSerializer
 )
+from authors.settings import EMAIL_HOST_USER
 
 
 class RegistrationAPIView(CreateAPIView):
@@ -25,6 +27,14 @@ class RegistrationAPIView(CreateAPIView):
         serializer = self.serializer_class(data=user)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+
+        user_email = serializer.data.get('email', None)
+        send_mail(
+            subject='Email Verification @no-reply',
+            message='Please verify your email to continue',
+            from_email=EMAIL_HOST_USER,
+            recipient_list=[user_email]
+        )
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

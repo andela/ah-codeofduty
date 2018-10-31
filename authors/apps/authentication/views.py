@@ -81,7 +81,7 @@ class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-class UserForgotPassword(APIView):
+class UserForgotPassword(CreateAPIView):
     permission_classes = (AllowAny,)
     serializer_class = EmailSerializer
 
@@ -97,7 +97,7 @@ class UserForgotPassword(APIView):
             return Response(dict(message="Reset link has been successfully sent to your email. Check your spam folder if you don't find it."))
         return Response(serializer.errors)  
 
-class UserResetPassword(APIView):
+class UserResetPassword(RetrieveUpdateAPIView):
     permission_classes = (AllowAny,)
     serializer_class = ResetUserPasswordSerializer
 
@@ -106,5 +106,3 @@ class UserResetPassword(APIView):
         if serializer.is_valid():
             return Response(dict(message="Congratulations! You have successfully changed your password."))
         return Response(serializer.errors)
-        #TODO: Ask error messages not descriptive enough
-

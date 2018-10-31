@@ -121,4 +121,15 @@ class ViewTestCase(BaseTest):
             self.user_does_not_exist,
             format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        
+
+    def test_missing_password(self):
+        """Test missing password on registration."""
+        response = self.client.post(
+            self.SIGN_UP_URL,
+            self.user_data,
+            format="json")
+        response = self.client.post(
+            self.SIGN_IN_URL,
+            self.missing_password,
+            format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

@@ -16,6 +16,7 @@ class BaseTest(TestCase):
         """Define the test client"""
         self.SIGN_IN_URL = '/api/users/login/'
         self.SIGN_UP_URL = '/api/users/'
+        self.USER_URL = '/api/user/'
         self.client = APIClient()
         self.user_data = {
                 'email': 'zawi@gmail.com',

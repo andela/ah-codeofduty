@@ -3,6 +3,7 @@ import jwt
 from datetime import datetime, timedelta
 
 from django.contrib.auth import authenticate
+from django.contrib.auth.tokens import default_token_generator 
 
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
@@ -101,6 +102,9 @@ class LoginSerializer(serializers.Serializer):
                 'A user with this email and password was not found.'
             )
 
+        # payload = jwt_payload_handler(user)
+        # token = jwt.encode(payload, settings.SECRET_KEY)
+
         # Django provides a flag on our `User` model called `is_active`. The
         # purpose of this flag to tell us whether the user has been banned
         # or otherwise deactivated. This will almost never be the case, but
@@ -181,3 +185,43 @@ class UserSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+
+class EmailSerializer(serializers.Serializer):
+    email = serializers.EmailField(max_length=255)
+    token = serializers.CharField(required=False)
+
+    def validate(self, data):
+        email = data.get('email')
+        user = User.objects.get(email=email)
+        if not user:
+            raise serializers.ValidationError('A user with this email was not found.')
+        token = default_token_generator.make_token(user)
+        return dict(email=email, token=token)
+
+class ResetUserPasswordSerializer(serializers.Serializer):
+    email = serializers.CharField(max_length=255, required=False)
+    new_password = serializers.CharField(
+            min_length=8, 
+            max_length=128,
+            write_only=True)
+    confirm_password = serializers.CharField(
+            min_length=8, 
+            max_length=128,
+            write_only=True)
+
+    def validate(self, data):
+        email = self.context.get('email', None)
+        new_password = data.get('new_password', None)
+        confirm_password = data.get('confirm_password', None)
+
+        token = self.context.get('token')
+
+        if new_password != confirm_password:
+            raise serializers.ValidationError('Passwords don\'t match.')
+        user = User.objects.get(email=email)
+        if not (default_token_generator.check_token(user, token)):
+            raise serializers.ValidationError("You either have an invalid token or the token has expired.")
+        user.set_password(new_password)
+        user.save()
+
+        return data

@@ -17,22 +17,17 @@ from .models import User
 
 import os
 
+import os
+
 from .renderers import UserJSONRenderer
 from .serializers import (
     LoginSerializer, RegistrationSerializer, UserSerializer, EmailSerializer, ResetUserPasswordSerializer
 )
-
-from authors.settings import EMAIL_HOST_USER, SECRET_KEY
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
 from django.conf import settings
 
 from django.core.mail import send_mail
-
-from django.contrib.sites.shortcuts import get_current_site
-from django.core.mail import EmailMultiAlternatives
-from django.template.loader import render_to_string
-from django.shortcuts import render
 
 from .models import User
 
@@ -120,56 +115,30 @@ class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-class VerifyAPIView(CreateAPIView):
-    serializer_class = UserSerializer
-    def get(self, request, token):
-        email = jwt.decode(token, SECRET_KEY)['email']
-        user = User.objects.get(email=email)
-        user.is_confirmed = True
-
-        return Response("Email Confirmed Successfully")
-
-class UserForgotPassword(CreateAPIView):
+class UserForgotPassword(APIView):
     permission_classes = (AllowAny,)
     serializer_class = EmailSerializer
 
-    def get(self, request):
-        '''get method renders forgot password form'''
-        return render(request, 'forgot_password_form.html', {})
-
     def post(self, request):
-        '''post method sends a link with a token to email'''
         serializer = self.serializer_class(data=request.data)
-        # check that data from request is valid
         if serializer.is_valid():
             token = serializer.data['token']
             email = serializer.data['email']
-            username = serializer.data['username']
-            
-            time = datetime.now()
-            time = datetime.strftime(time,'%d-%B-%Y %H:%M')
             current_site = get_current_site(request)
-            reset_link = 'http://' + current_site.domain + '/api/users/reset-password/{}/'.format(token)
-            subject, from_email, to = 'Authors Haven Password Reset @no-reply', 'codeofd@gmail.com', email
-            
-            message = EmailMultiAlternatives(subject, '@no-reply', from_email, [to])
-            html_content = render_to_string('reset_email.html', context={"reset_link":reset_link, "username":username, "time": time})
-            # attach html content to email
-            message.attach_alternative(html_content, "text/html")
-            message.send()
-            return Response(dict(message="Reset link has been successfully sent to your email. Check your spam folder if you don't find it.",
-                            token=token))
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
+            reset_link = "http://" + current_site.domain + '/api/users/reset-password/{}/{}'.format(token, email)
+            message_body = "Copy this link into your browser to reset password {}".format(reset_link)
+            send_mail('Author\'s Haven Password Reset @no-reply', message_body, 'njery.ngigi@gmail.com', ['shalon.ngigi@andela.com'], fail_silently=False)
+            return Response(dict(message="Reset link has been successfully sent to your email. Check your spam folder if you don't find it."))
+        return Response(serializer.errors)  
 
-class UserResetPassword(RetrieveUpdateAPIView):
+class UserResetPassword(APIView):
     permission_classes = (AllowAny,)
     serializer_class = ResetUserPasswordSerializer
 
-    def get(self, request, token):
-        return render(request, 'reset_password_form.html', context={"token":token})
-
-    def post(self, request, token):
-        serializer = self.serializer_class(data=request.data, context={"token":token} )
+    def put(self, request, token, email):
+        serializer = self.serializer_class(data=request.data, context={"token":token, "email":email} )
         if serializer.is_valid():
             return Response(dict(message="Congratulations! You have successfully changed your password."))
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors)
+        #TODO: Ask error messages not descriptive enough
+

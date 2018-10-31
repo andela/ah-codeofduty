@@ -188,43 +188,30 @@ class UserSerializer(serializers.ModelSerializer):
         return instance
 
 class EmailSerializer(serializers.Serializer):
-    email = serializers.EmailField(required=True)
+    email = serializers.EmailField(max_length=255)
     token = serializers.CharField(required=False)
-    username = serializers.CharField(required=False)
 
     def validate(self, data):
         email = data.get('email')
-        user = User.objects.filter(email=email).first()
+        user = User.objects.get(email=email)
         if not user:
             raise serializers.ValidationError('A user with this email was not found.')
         token = default_token_generator.make_token(user)
-        payload = {
-            'token': token,
-            'email': email,
-            'iat': datetime.utcnow(),
-            'exp': datetime.utcnow() + timedelta(hours=1)
-        }
-        token = jwt.encode(payload, SECRET_KEY).decode('UTF-8')
-        return dict(email=email, token=token, username=user.username)
+        return dict(email=email, token=token)
 
 class ResetUserPasswordSerializer(serializers.Serializer):
-    new_password = serializers.RegexField(
-        regex=r"^(?!.*([A-Za-z\d])\1{2})(?=.*[a-z])(?=.*\d)[A-Za-z\d]{8,128}$",
-        max_length=128,
-        min_length=8,
-        write_only=True,
-        required=True,
-        error_messages={
-            'max_length': 'Password cannot be more than 128 characters',
-            'min_length': 'Password must contain at least 8 characters',
-            'invalid': 'Password must contain a number and a letter and that are not repeating more that two times'
-        }
-        )
+    email = serializers.CharField(max_length=255, required=False)
+    new_password = serializers.CharField(
+            min_length=8, 
+            max_length=128,
+            write_only=True)
     confirm_password = serializers.CharField(
-            required=True,
+            min_length=8, 
+            max_length=128,
             write_only=True)
 
     def validate(self, data):
+        email = self.context.get('email', None)
         new_password = data.get('new_password', None)
         confirm_password = data.get('confirm_password', None)
 
@@ -232,14 +219,10 @@ class ResetUserPasswordSerializer(serializers.Serializer):
 
         if new_password != confirm_password:
             raise serializers.ValidationError('Passwords don\'t match.')
-
-        payload = jwt.decode(token, SECRET_KEY)
-        email = payload['email']
-        default_token = payload['token']
         user = User.objects.get(email=email)
-        if not (default_token_generator.check_token(user,default_token)):
+        if not (default_token_generator.check_token(user, token)):
             raise serializers.ValidationError("You either have an invalid token or the token has expired.")
         user.set_password(new_password)
         user.save()
-        
+
         return data

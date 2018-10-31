@@ -81,7 +81,7 @@ class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-class UserForgotPassword(APIView):
+class UserForgotPassword(CreateAPIView):
     permission_classes = (AllowAny,)
     serializer_class = EmailSerializer
 
@@ -93,11 +93,11 @@ class UserForgotPassword(APIView):
             current_site = get_current_site(request)
             reset_link = "http://" + current_site.domain + '/api/users/reset-password/{}/{}'.format(token, email)
             message_body = "Copy this link into your browser to reset password {}".format(reset_link)
-            send_mail('Author\'s Haven Password Reset @no-reply', message_body, 'njery.ngigi@gmail.com', ['shalon.ngigi@andela.com'], fail_silently=False)
+            send_mail('Author\'s Haven Password Reset @no-reply', message_body, 'codeofd@gmail.com', [email], fail_silently=False)
             return Response(dict(message="Reset link has been successfully sent to your email. Check your spam folder if you don't find it."))
         return Response(serializer.errors)  
 
-class UserResetPassword(APIView):
+class UserResetPassword(RetrieveUpdateAPIView):
     permission_classes = (AllowAny,)
     serializer_class = ResetUserPasswordSerializer
 
@@ -106,5 +106,3 @@ class UserResetPassword(APIView):
         if serializer.is_valid():
             return Response(dict(message="Congratulations! You have successfully changed your password."))
         return Response(serializer.errors)
-        #TODO: Ask error messages not descriptive enough
-

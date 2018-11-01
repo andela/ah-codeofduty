@@ -74,6 +74,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     # log into the Django admin site. For most users, this flag will always be
     # falsed.
     is_staff = models.BooleanField(default=False)
+    is_confirmed = models.BooleanField(default=False)
 
     # A timestamp representing when this object was created.
     created_at = models.DateTimeField(auto_now_add=True)

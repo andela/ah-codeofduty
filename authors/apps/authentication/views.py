@@ -19,6 +19,7 @@ from django.core.mail import send_mail
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
+from django.shortcuts import render
 
 from .models import User
 
@@ -102,7 +103,7 @@ class UserForgotPassword(CreateAPIView):
             email = serializer.data['email']
             
             current_site = get_current_site(request)
-            reset_link = "http://" + current_site.domain + '/api/users/reset-password/{}/{}'.format(token, email)
+            reset_link = 'http://' + current_site.domain + '/api/users/reset-password/{}/'.format(token)
             subject, from_email, to = 'Author\'s Haven Password Reset', 'codeofd@gmail.com', email
             
             message = EmailMultiAlternatives(subject, '@no-reply', from_email, [to])
@@ -117,11 +118,11 @@ class UserResetPassword(RetrieveUpdateAPIView):
     permission_classes = (AllowAny,)
     serializer_class = ResetUserPasswordSerializer
 
-    def get(self, request, token, email):
-        return render(request, 'reset_password_form.html', {})
+    def get(self, request, token):
+        return render(request, 'reset_password_form.html', context={"token":token})
 
-    def put(self, request, token, email):
-        serializer = self.serializer_class(data=request.data, context={"token":token, "email":email} )
+    def post(self, request, token):
+        serializer = self.serializer_class(data=request.data, context={"token":token} )
         if serializer.is_valid():
             return Response(dict(message="Congratulations! You have successfully changed your password."))
         return Response(serializer.errors)

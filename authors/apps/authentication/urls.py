@@ -8,8 +8,13 @@ urlpatterns = [
     path('user/', UserRetrieveUpdateAPIView.as_view()),
     path('users/', RegistrationAPIView.as_view()),
     path('users/login/', LoginAPIView.as_view()),
+<<<<<<< HEAD
     path('users/verify/<token>/', VerifyAPIView.as_view()),
     path('users/forgot-password/', UserForgotPassword.as_view()),
     path('users/reset-password/<token>/', UserResetPassword.as_view()),
     path('social_auth/', SocialSignInSignOut.as_view()),
+=======
+    path('social_auth/', SocialSignInSignOut.as_view(),
+         name="social_signin_signup"),
+>>>>>>> Feature(social login): add social login tests
 ]

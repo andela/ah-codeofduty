@@ -5,8 +5,8 @@ matrix:
     - python: 3.6
       sudo: true
 
-services:
-  - postgresql
+addons:
+  postgresql: "9.4"
 
 env:
   - DJANGO=2.1 DB=postgres
@@ -18,12 +18,12 @@ install:
 before_script:
   - psql -c 'create database django_medium;' -U postgres
 
-script: 
+script:
   - python manage.py makemigrations
   - coverage run manage.py test
 
 after_success:
   - coveralls
   - codeclimate-test-reporter
-  
+
 cache: pip

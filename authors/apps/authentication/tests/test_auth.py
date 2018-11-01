@@ -111,7 +111,7 @@ class ViewTestCase(BaseTest):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_login_user_non_existent(self):
-        """Test if user is registered"""
+        """Test if user does not exist"""
         response = self.client.post(
             self.SIGN_UP_URL,
             self.user_data,

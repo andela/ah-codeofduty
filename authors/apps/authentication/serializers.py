@@ -1,10 +1,14 @@
+import jwt 
+
+from datetime import datetime, timedelta
+
 from django.contrib.auth import authenticate
 
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
 from .models import User
-
+from authors.settings import SECRET_KEY
 
 class RegistrationSerializer(serializers.ModelSerializer):
     """Serializers registration requests and creates a new user."""
@@ -58,6 +62,7 @@ class LoginSerializer(serializers.Serializer):
     email = serializers.CharField(max_length=255)
     username = serializers.CharField(max_length=255, read_only=True)
     password = serializers.CharField(max_length=128, write_only=True)
+    token = serializers.CharField(read_only=True)
 
 
     def validate(self, data):
@@ -105,13 +110,22 @@ class LoginSerializer(serializers.Serializer):
                 'This user has been deactivated.'
             )
 
+        #Create a token by encoding email
+        #jwt consist of `header`, `payload` and `secret` 
+        payload = {
+            'email': user.email,
+            'iat': datetime.utcnow(),
+            'exp': datetime.utcnow() + timedelta(days=7)
+        }
+        jwt_token = {'token': jwt.encode(payload, SECRET_KEY).decode('UTF-8')}
+
         # The `validate` method should return a dictionary of validated data.
         # This is the data that is passed to the `create` and `update` methods
         # that we will see later on.
         return {
             'email': user.email,
             'username': user.username,
-
+            'token': jwt_token,
         }
 
 

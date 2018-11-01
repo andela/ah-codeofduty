@@ -16,13 +16,10 @@ from django.conf import settings
 
 from django.core.mail import send_mail
 
-<<<<<<< HEAD
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
-=======
->>>>>>> 6332538e9345990fcff3224cd87122ba15603877
 from .models import User
 
 class RegistrationAPIView(CreateAPIView):
@@ -92,7 +89,6 @@ class UserForgotPassword(CreateAPIView):
     permission_classes = (AllowAny,)
     serializer_class = EmailSerializer
 
-<<<<<<< HEAD
     def get(self, request):
         '''get method renders forgot password form'''
         return render(request, 'forgot_password_form.html', {})
@@ -114,17 +110,6 @@ class UserForgotPassword(CreateAPIView):
             # attach html content to email
             message.attach_alternative(html_content, "text/html")
             message.send()
-=======
-    def post(self, request):
-        serializer = self.serializer_class(data=request.data)
-        if serializer.is_valid():
-            token = serializer.data['token']
-            email = serializer.data['email']
-            current_site = get_current_site(request)
-            reset_link = "http://" + current_site.domain + '/api/users/reset-password/{}/{}'.format(token, email)
-            message_body = "Copy this link into your browser to reset password {}".format(reset_link)
-            send_mail('Author\'s Haven Password Reset @no-reply', message_body, 'codeofd@gmail.com', [email], fail_silently=False)
->>>>>>> 6332538e9345990fcff3224cd87122ba15603877
             return Response(dict(message="Reset link has been successfully sent to your email. Check your spam folder if you don't find it."))
         return Response(serializer.errors)  
 
@@ -132,12 +117,9 @@ class UserResetPassword(RetrieveUpdateAPIView):
     permission_classes = (AllowAny,)
     serializer_class = ResetUserPasswordSerializer
 
-<<<<<<< HEAD
     def get(self, request, token, email):
         return render(request, 'reset_password_form.html', {})
 
-=======
->>>>>>> 6332538e9345990fcff3224cd87122ba15603877
     def put(self, request, token, email):
         serializer = self.serializer_class(data=request.data, context={"token":token, "email":email} )
         if serializer.is_valid():

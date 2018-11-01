@@ -1,4 +1,4 @@
-import jwt 
+import jwt
 
 from datetime import datetime, timedelta
 
@@ -9,6 +9,8 @@ from rest_framework.validators import UniqueValidator
 
 from .models import User
 from authors.settings import SECRET_KEY
+from .backends import JWTAuthentication
+
 
 class RegistrationSerializer(serializers.ModelSerializer):
     """Serializers registration requests and creates a new user."""
@@ -64,7 +66,6 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(max_length=128, write_only=True)
     token = serializers.CharField(read_only=True)
 
-
     def validate(self, data):
         # The `validate` method is where we make sure that the current
         # instance of `LoginSerializer` has "valid". In the case of logging a
@@ -110,14 +111,13 @@ class LoginSerializer(serializers.Serializer):
                 'This user has been deactivated.'
             )
 
-        #Create a token by encoding email
-        #jwt consist of `header`, `payload` and `secret` 
-        payload = {
-            'email': user.email,
-            'iat': datetime.utcnow(),
-            'exp': datetime.utcnow() + timedelta(days=7)
-        }
-        jwt_token = {'token': jwt.encode(payload, SECRET_KEY).decode('UTF-8')}
+        # Create a token by encoding email
+        # jwt consist of `header`, `payload` and `secret`
+        # payload = {
+        #     'email': user.email,
+        #     'iat': datetime.utcnow(),
+        #     'exp': datetime.utcnow() + timedelta(days=7)
+        # }
 
         # The `validate` method should return a dictionary of validated data.
         # This is the data that is passed to the `create` and `update` methods
@@ -125,14 +125,14 @@ class LoginSerializer(serializers.Serializer):
         return {
             'email': user.email,
             'username': user.username,
-            'token': jwt_token,
+            'token': JWTAuthentication.encode_token(self, user.email)
         }
 
 
 class UserSerializer(serializers.ModelSerializer):
     """Handles serialization and deserialization of User objects."""
 
-    # Passwords must be at least 8 characters, but no more than 128 
+    # Passwords must be at least 8 characters, but no more than 128
     # characters. These values are the default provided by Django. We could
     # change them, but that would create extra work while introducing no real
     # benefit, so let's just stick with the defaults.
@@ -150,10 +150,9 @@ class UserSerializer(serializers.ModelSerializer):
         # specifying the field with `read_only=True` like we did for password
         # above. The reason we want to use `read_only_fields` here is because
         # we don't need to specify anything else about the field. For the
-        # password field, we needed to specify the `min_length` and 
+        # password field, we needed to specify the `min_length` and
         # `max_length` properties too, but that isn't the case for the token
         # field.
-
 
     def update(self, instance, validated_data):
         """Performs an update on a User."""
@@ -181,3 +180,12 @@ class UserSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+
+
+class SocialSignInSignOutSerializer(serializers.Serializer):
+    """ This classs Jsonifies and validates token from 
+        social providers such as facebook, google and twitter
+    """
+    provider = serializers.CharField(max_length=255, required=True)
+    access_token = serializers.CharField(
+        max_length=1024, required=True, trim_whitespace=True)

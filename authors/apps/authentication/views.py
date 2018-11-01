@@ -1,13 +1,17 @@
 from rest_framework import status
-from rest_framework.generics import RetrieveUpdateAPIView
+from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from social_django.utils import load_backend, load_strategy
+from social_core.exceptions import AuthAlreadyAssociated, MissingBackend
+from social_core.backends.oauth import BaseOAuth1, BaseOAuth2
 from rest_framework.response import Response
 from rest_framework.generics import CreateAPIView
-
+from rest_framework.views import APIView
 from .renderers import UserJSONRenderer
 from .serializers import (
-    LoginSerializer, RegistrationSerializer, UserSerializer
+    LoginSerializer, RegistrationSerializer, UserSerializer, SocialSignInSignOutSerializer
 )
+from .backends import JWTAuthentication
 
 
 class RegistrationAPIView(CreateAPIView):
@@ -73,3 +77,73 @@ class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
+class SocialSignInSignOut(CreateAPIView):
+    """ this class implement the logic to allow users to login or signup using
+    social accounts such as facebook, goole or twitter...."""
+
+    renderer_classes = (UserJSONRenderer,)
+    serializer_class = SocialSignInSignOutSerializer
+    # allow everyone to view without having to be authenticated
+    permission_classes = (AllowAny,)
+
+    def create(self, request, *args, **kwargs):
+        """
+        Override `create` instead of `perform_create` to access request
+        request is necessary for `load_strategy`
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        provider = serializer.data['provider']
+
+        # If this request was made with an authenticated user, try to associate this social
+        # account with it
+        authed_user = request.user if not request.user.is_anonymous else None
+        strategy = load_strategy(request)
+
+        # Get the backend that is associated with the user provider i.e google,twitter and facebook
+        backend = load_backend(
+            strategy=strategy, name=provider, redirect_uri=None)
+
+        if isinstance(backend, BaseOAuth1):
+           # cater for services that use OAuth1, an example is twitter
+            token = {
+                # 'oauth_token': serializer.data['access_token'],
+                'oauth_token': request.data['access_token'],
+                'oauth_token_secret': request.data['access_token_secret'],
+            }
+
+        elif isinstance(backend, BaseOAuth2):
+            # we just need to pass access_token for OAuth2
+            token = serializer.data['access_token']
+        try:
+            print(authed_user)
+            # check if the user exists, if exists,we just login but if not we creates a new user
+            user = backend.do_auth(token, user=authed_user)
+        except AuthAlreadyAssociated:
+            return Response({"error": "The email is already registered, please try another one"},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        if user and user.is_active:
+            serializer = UserSerializer(user)
+            auth_created = user.social_auth.get(provider=provider)
+            if not auth_created.extra_data['access_token']:
+                # Google for example will return the access_token in its response to you.
+                auth_created.extra_data['access_token'] = token
+                auth_created.save()
+                serializer.save()
+            user.save()
+            token = JWTAuthentication.encode_token(
+                self, serializer.data['email'])
+            # a responce dictionary that has email, username and token
+            response = {
+                'email': serializer.data['email'],
+                'username': serializer.data['username'],
+                'token': token
+            }
+            headers = self.get_success_headers(serializer.data)
+            return Response(response, status=status.HTTP_201_CREATED,
+                            headers=headers)
+        else:
+            return Response({"error": "Something went wrong with the authentication, please try again"},
+                            status=status.HTTP_400_BAD_REQUEST)

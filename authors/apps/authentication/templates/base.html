@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Author's Haven</title>
+        <style>
+            .div-style{
+                padding: 5%;
+                margin: 10%;
+                text-align: center;
+            }
+            input{
+                transition: .5s ease;
+                width: 30%;
+                text-align: center;
+                padding: 10px;
+                margin-bottom: 20px;
+            }
+            input:focus{
+                background-color: mintcream;
+            }
+            button{
+                width: 30%;
+                padding: 10px;
+                box-shadow: 1px 1px 1px grey;
+                color:orange;
+                background-color: black; 
+                opacity: .7;
+                border: none;
+                transition: .5s ease;
+            }
+            button:hover{
+                opacity: .6;
+                transition: .5s ease;
+                box-shadow: 1px 2px 2px grey;
+                cursor: pointer;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="div-style">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </body>
+</html>

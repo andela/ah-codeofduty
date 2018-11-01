@@ -9,5 +9,5 @@ urlpatterns = [
     path('users/', RegistrationAPIView.as_view()),
     path('users/login/', LoginAPIView.as_view()),
     path('users/forgot-password/', UserForgotPassword.as_view(), name='password_reset'),
-    path('users/reset-password/<token>/<email>', UserResetPassword.as_view(), name='password_reset_done'),
+    path('users/reset-password/<token>/', UserResetPassword.as_view(), name='password_reset_done'),
 ]

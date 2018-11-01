@@ -197,10 +197,16 @@ class EmailSerializer(serializers.Serializer):
         if not user:
             raise serializers.ValidationError('A user with this email was not found.')
         token = default_token_generator.make_token(user)
+        payload = {
+            'token': token,
+            'email': email,
+            'iat': datetime.utcnow(),
+            'exp': datetime.utcnow() + timedelta(hours=1)
+        }
+        token = jwt.encode(payload, SECRET_KEY).decode('UTF-8')
         return dict(email=email, token=token)
 
 class ResetUserPasswordSerializer(serializers.Serializer):
-    email = serializers.CharField(max_length=255, required=False)
     new_password = serializers.CharField(
             min_length=8, 
             max_length=128,
@@ -211,7 +217,6 @@ class ResetUserPasswordSerializer(serializers.Serializer):
             write_only=True)
 
     def validate(self, data):
-        email = self.context.get('email', None)
         new_password = data.get('new_password', None)
         confirm_password = data.get('confirm_password', None)
 
@@ -219,10 +224,14 @@ class ResetUserPasswordSerializer(serializers.Serializer):
 
         if new_password != confirm_password:
             raise serializers.ValidationError('Passwords don\'t match.')
+
+        payload = jwt.decode(token, SECRET_KEY)
+        email = payload['email']
+        default_token = payload['token']
         user = User.objects.get(email=email)
-        if not (default_token_generator.check_token(user, token)):
+        if not (default_token_generator.check_token(user,default_token)):
             raise serializers.ValidationError("You either have an invalid token or the token has expired.")
         user.set_password(new_password)
         user.save()
-
+        
         return data

@@ -46,7 +46,7 @@ class RegistrationAPIView(CreateAPIView):
         sg = sendgrid.SendGridAPIClient(apikey=os.getenv('SENDGRID_API_KEY'))
         from_email = Email('codeofd@gmail.com')
         to_email = Email(user_email)
-        subject = "Email Verification @no-reply"
+        subject = "Authors Haven Email Verification @no-reply"
 
         current_site = get_current_site(request)
 

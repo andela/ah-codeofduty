@@ -188,12 +188,12 @@ class UserSerializer(serializers.ModelSerializer):
         return instance
 
 class EmailSerializer(serializers.Serializer):
-    email = serializers.EmailField(max_length=255)
+    email = serializers.EmailField(required=True)
     token = serializers.CharField(required=False)
 
     def validate(self, data):
         email = data.get('email')
-        user = User.objects.get(email=email)
+        user = User.objects.filter(email=email).first()
         if not user:
             raise serializers.ValidationError('A user with this email was not found.')
         token = default_token_generator.make_token(user)
@@ -207,13 +207,20 @@ class EmailSerializer(serializers.Serializer):
         return dict(email=email, token=token)
 
 class ResetUserPasswordSerializer(serializers.Serializer):
-    new_password = serializers.CharField(
-            min_length=8, 
-            max_length=128,
-            write_only=True)
+    new_password = serializers.RegexField(
+        regex=r"^(?!.*([A-Za-z\d])\1{2})(?=.*[a-z])(?=.*\d)[A-Za-z\d]{8,128}$",
+        max_length=128,
+        min_length=8,
+        write_only=True,
+        required=True,
+        error_messages={
+            'max_length': 'Password cannot be more than 128 characters',
+            'min_length': 'Password must contain at least 8 characters',
+            'invalid': 'Password must contain a number and a letter and that are not repeating more that two times'
+        }
+        )
     confirm_password = serializers.CharField(
-            min_length=8, 
-            max_length=128,
+            required=True,
             write_only=True)
 
     def validate(self, data):

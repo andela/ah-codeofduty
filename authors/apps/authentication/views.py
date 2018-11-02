@@ -1,5 +1,5 @@
-import jwt
 from datetime import datetime
+
 from rest_framework import status
 from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -130,13 +130,16 @@ class UserForgotPassword(CreateAPIView):
         if serializer.is_valid():
             token = serializer.data['token']
             email = serializer.data['email']
+            username = serializer.data['username']
             
+            time = datetime.now()
+            time = datetime.strftime(time,'%d-%B-%Y %H:%M')
             current_site = get_current_site(request)
             reset_link = 'http://' + current_site.domain + '/api/users/reset-password/{}/'.format(token)
-            subject, from_email, to = 'Author\'s Haven Password Reset', 'codeofd@gmail.com', email
+            subject, from_email, to = 'Authors Haven Password Reset @no-reply', 'codeofd@gmail.com', email
             
             message = EmailMultiAlternatives(subject, '@no-reply', from_email, [to])
-            html_content = render_to_string('reset_email.html', context={"reset_link":reset_link})
+            html_content = render_to_string('reset_email.html', context={"reset_link":reset_link, "username":username, "time": time})
             # attach html content to email
             message.attach_alternative(html_content, "text/html")
             message.send()

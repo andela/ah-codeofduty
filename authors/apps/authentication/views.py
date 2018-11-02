@@ -1,10 +1,19 @@
+import jwt
 from datetime import datetime
-
 from rest_framework import status
 from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.generics import CreateAPIView
+from django.core.mail import send_mail
+from django.template import Context
+from django.template.loader import render_to_string, get_template
+
+import sendgrid
+import os
+from sendgrid.helpers.mail import *
+from django.contrib.sites.shortcuts import get_current_site
+from .models import User
 
 import os
 
@@ -12,6 +21,8 @@ from .renderers import UserJSONRenderer
 from .serializers import (
     LoginSerializer, RegistrationSerializer, UserSerializer, EmailSerializer, ResetUserPasswordSerializer
 )
+
+from authors.settings import EMAIL_HOST_USER, SECRET_KEY
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
 from django.conf import settings
@@ -40,6 +51,27 @@ class RegistrationAPIView(CreateAPIView):
         serializer = self.serializer_class(data=user)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+
+        user_email = serializer.data.get('email', None)
+        user_name = serializer.data.get('username', None)
+
+        payload = {'email': user_email}
+        token = jwt.encode(payload, SECRET_KEY).decode("UTF-8")
+
+        sg = sendgrid.SendGridAPIClient(apikey=os.getenv('SENDGRID_API_KEY'))
+        from_email = Email('codeofd@gmail.com')
+        to_email = Email(user_email)
+        subject = "Authors Haven Email Verification @no-reply"
+
+        current_site = get_current_site(request)
+
+        link = "http://" + current_site.domain + '/api/users/verify/{}/'.format(token)
+        message = render_to_string('email_verification.html', context={"link":link, 'user_name':user_name})
+        content = Content("text/html", message)
+
+        mail = Mail(from_email, subject, to_email, content)
+        response = sg.client.mail.send.post(request_body=mail.get())
+        print(response.status_code)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -87,6 +119,15 @@ class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class VerifyAPIView(CreateAPIView):
+    serializer_class = UserSerializer
+    def get(self, request, token):
+        email = jwt.decode(token, SECRET_KEY)['email']
+        user = User.objects.get(email=email)
+        user.is_confirmed = True
+
+        return Response("Email Confirmed Successfully")
 
 class UserForgotPassword(CreateAPIView):
     permission_classes = (AllowAny,)

@@ -1,12 +1,7 @@
 '''tests/test_reset_password.py'''
 import json
-from django.test import TestCase, override_settings
-from rest_framework.test import APIClient
-from rest_framework.views import status
-# from django.urls import reverse
-from .base import BaseTest
+from .base import *
 
-@override_settings(EMAIL_BACKEND='django.core.mail.backends.console.EmailBackend')
 class ResetPasswordTestCase(BaseTest):
     ''' Class to test resetting password'''
     

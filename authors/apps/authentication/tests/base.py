@@ -1,11 +1,11 @@
 """test configurations"""
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from rest_framework.test import APIClient
 from rest_framework.views import status
 from django.urls import reverse
 
-
+@override_settings(EMAIL_BACKEND='django.core.mail.backends.console.EmailBackend')
 class BaseTest(TestCase):
     """
       Test user views

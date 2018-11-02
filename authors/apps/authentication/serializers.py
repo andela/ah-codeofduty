@@ -38,7 +38,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
         validators=[
             UniqueValidator(
                 queryset=User.objects.all(),
-                message='Sorry this Email exists, kindly register with another email',
+                message='Sorry this Email exists, kindly login',
             )
         ],
         error_messages={

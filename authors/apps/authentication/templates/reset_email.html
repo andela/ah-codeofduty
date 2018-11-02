@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            .div-style{
+                margin: 10%;
+                font-size: 1.2em;
+                font-family: Helvetica, Arial, sans-serif;
+                font-weight: 400;
+            }
+            a{
+                text-decoration: none;
+            }
+            button{
+                color: white;
+                background-color: orange;
+                padding: 10px;
+                border: none;
+                cursor: pointer;
+                font-size: 1em;
+                transition: .5s ease;
+            }
+            button:hover{
+                color: #333;
+                transition: .5s ease;
+            }
+            span{
+                color: orange;
+            }
+            p{
+                color: #333;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="div-style">
+            <h2>Authors Haven Password Reset</h2>
+            <p style="margin-top: 60px;">Hey {{username}},</p>
+            <p style="margin-top: 40px;">Click<a href="{{reset_link}}"> <button>here</button> </a>to reset password.</p>
+            <p style="margin-top: 40px;">If the link doesn't work copy this link into your browser:</p>
+            <p><i>{{reset_link}}</i></p>
+            <p style="margin-top: 40px;"><strong><i>This link expires in one hour from: {{time}}</i></strong></p>
+            <div class="cheers">
+                <p style="margin-top: 40px;">Cheers,</p>
+                <p>Code of Duty Team.</p>
+                <p><strong><i>PS: No need to reply.</i></strong></p>
+            </div>
+            
+        </div>
+    </body>
+</html>

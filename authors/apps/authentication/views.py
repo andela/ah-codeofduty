@@ -1,4 +1,5 @@
 import jwt
+from datetime import datetime
 from rest_framework import status
 from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -14,12 +15,26 @@ from sendgrid.helpers.mail import *
 from django.contrib.sites.shortcuts import get_current_site
 from .models import User
 
+import os
+
 from .renderers import UserJSONRenderer
 from .serializers import (
-    LoginSerializer, RegistrationSerializer, UserSerializer
+    LoginSerializer, RegistrationSerializer, UserSerializer, EmailSerializer, ResetUserPasswordSerializer
 )
-from authors.settings import EMAIL_HOST_USER, SECRET_KEY
 
+from authors.settings import EMAIL_HOST_USER, SECRET_KEY
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.sites.shortcuts import get_current_site
+from django.conf import settings
+
+from django.core.mail import send_mail
+
+from django.contrib.sites.shortcuts import get_current_site
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.shortcuts import render
+
+from .models import User
 
 class RegistrationAPIView(CreateAPIView):
     # Allow any user (authenticated or not) to hit this endpoint.
@@ -113,4 +128,48 @@ class VerifyAPIView(CreateAPIView):
         user.is_confirmed = True
 
         return Response("Email Confirmed Successfully")
-    
+
+class UserForgotPassword(CreateAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = EmailSerializer
+
+    def get(self, request):
+        '''get method renders forgot password form'''
+        return render(request, 'forgot_password_form.html', {})
+
+    def post(self, request):
+        '''post method sends a link with a token to email'''
+        serializer = self.serializer_class(data=request.data)
+        # check that data from request is valid
+        if serializer.is_valid():
+            token = serializer.data['token']
+            email = serializer.data['email']
+            username = serializer.data['username']
+            
+            time = datetime.now()
+            time = datetime.strftime(time,'%d-%B-%Y %H:%M')
+            current_site = get_current_site(request)
+            reset_link = 'http://' + current_site.domain + '/api/users/reset-password/{}/'.format(token)
+            subject, from_email, to = 'Authors Haven Password Reset @no-reply', 'codeofd@gmail.com', email
+            
+            message = EmailMultiAlternatives(subject, '@no-reply', from_email, [to])
+            html_content = render_to_string('reset_email.html', context={"reset_link":reset_link, "username":username, "time": time})
+            # attach html content to email
+            message.attach_alternative(html_content, "text/html")
+            message.send()
+            return Response(dict(message="Reset link has been successfully sent to your email. Check your spam folder if you don't find it.",
+                            token=token))
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
+
+class UserResetPassword(RetrieveUpdateAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = ResetUserPasswordSerializer
+
+    def get(self, request, token):
+        return render(request, 'reset_password_form.html', context={"token":token})
+
+    def post(self, request, token):
+        serializer = self.serializer_class(data=request.data, context={"token":token} )
+        if serializer.is_valid():
+            return Response(dict(message="Congratulations! You have successfully changed your password."))
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

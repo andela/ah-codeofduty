@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Author's Haven</title>
+        <style>
+            .div-style{
+                padding: 5%;
+                margin: 10%;
+                text-align: center;
+            }
+            input[type=password], input[type=email]{
+                transition: .5s ease;
+                width: 30%;
+                text-align: center;
+                padding: 10px;
+                margin-bottom: 20px;
+            }
+            input[type=password]:focus, input[type=email]:focus{
+                background-color: mintcream;
+            }
+            input[type=submit]{
+                width: 30%;
+                padding: 10px;
+                box-shadow: 1px 1px 1px grey;
+                color:orange;
+                background-color: black; 
+                opacity: .7;
+                border: none;
+                transition: .5s ease;
+            }
+            input[type=submit]:hover{
+                opacity: .6;
+                transition: .5s ease;
+                box-shadow: 1px 2px 2px grey;
+                cursor: pointer;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="div-style">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </body>
+</html>

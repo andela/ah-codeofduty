@@ -3,6 +3,7 @@ import jwt
 from datetime import datetime, timedelta
 
 from django.contrib.auth import authenticate
+from django.contrib.auth.tokens import default_token_generator 
 
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
@@ -28,6 +29,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
             'invalid': 'Password must contain a number and a letter and that are not repeating more that twice'
         }
     )
+    # confirm_password = serializers.CharField(reui)
 
     # Ensure email is unique
     # and is valid
@@ -100,6 +102,9 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 'A user with this email and password was not found.'
             )
+
+        # payload = jwt_payload_handler(user)
+        # token = jwt.encode(payload, settings.SECRET_KEY)
 
         # Django provides a flag on our `User` model called `is_active`. The
         # purpose of this flag to tell us whether the user has been banned
@@ -181,3 +186,60 @@ class UserSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+
+class EmailSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+    token = serializers.CharField(required=False)
+    username = serializers.CharField(required=False)
+
+    def validate(self, data):
+        email = data.get('email')
+        user = User.objects.filter(email=email).first()
+        if not user:
+            raise serializers.ValidationError('A user with this email was not found.')
+        token = default_token_generator.make_token(user)
+        payload = {
+            'token': token,
+            'email': email,
+            'iat': datetime.utcnow(),
+            'exp': datetime.utcnow() + timedelta(hours=1)
+        }
+        token = jwt.encode(payload, SECRET_KEY).decode('UTF-8')
+        return dict(email=email, token=token, username=user.username)
+
+class ResetUserPasswordSerializer(serializers.Serializer):
+    new_password = serializers.RegexField(
+        regex=r"^(?!.*([A-Za-z\d])\1{2})(?=.*[a-z])(?=.*\d)[A-Za-z\d]{8,128}$",
+        max_length=128,
+        min_length=8,
+        write_only=True,
+        required=True,
+        error_messages={
+            'max_length': 'Password cannot be more than 128 characters',
+            'min_length': 'Password must contain at least 8 characters',
+            'invalid': 'Password must contain a number and a letter and that are not repeating more that two times'
+        }
+        )
+    confirm_password = serializers.CharField(
+            required=True,
+            write_only=True)
+
+    def validate(self, data):
+        new_password = data.get('new_password', None)
+        confirm_password = data.get('confirm_password', None)
+
+        token = self.context.get('token')
+
+        if new_password != confirm_password:
+            raise serializers.ValidationError('Passwords don\'t match.')
+
+        payload = jwt.decode(token, SECRET_KEY)
+        email = payload['email']
+        default_token = payload['token']
+        user = User.objects.get(email=email)
+        if not (default_token_generator.check_token(user,default_token)):
+            raise serializers.ValidationError("You either have an invalid token or the token has expired.")
+        user.set_password(new_password)
+        user.save()
+        
+        return data

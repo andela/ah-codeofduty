@@ -17,6 +17,17 @@ class BaseTest(TestCase):
         self.SIGN_IN_URL = '/api/users/login/'
         self.SIGN_UP_URL = '/api/users/'
         self.USER_URL = '/api/user/'
+        self.FORGOT_URL = '/api/users/forgot-password/'
+
+        # TODO: reset-password
+        # self.RESET_URL = '/api/users/reset-password/{}'.format(self.reset_token)
+
+        test_user = {"email": "njery.ngigi@gmail.com",
+                     "username": "test_user",
+                     "password": "test1234"}
+
+        self.client.post(self.SIGN_UP_URL, test_user, format="json")
+
         self.client = APIClient()
         self.user_data = {
                 'email': 'zawi@gmail.com',

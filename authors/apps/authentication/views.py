@@ -111,8 +111,9 @@ class UserForgotPassword(CreateAPIView):
             # attach html content to email
             message.attach_alternative(html_content, "text/html")
             message.send()
-            return Response(dict(message="Reset link has been successfully sent to your email. Check your spam folder if you don't find it."))
-        return Response(serializer.errors)  
+            return Response(dict(message="Reset link has been successfully sent to your email. Check your spam folder if you don't find it.",
+                            token=token))
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
 
 class UserResetPassword(RetrieveUpdateAPIView):
     permission_classes = (AllowAny,)
@@ -125,4 +126,4 @@ class UserResetPassword(RetrieveUpdateAPIView):
         serializer = self.serializer_class(data=request.data, context={"token":token} )
         if serializer.is_valid():
             return Response(dict(message="Congratulations! You have successfully changed your password."))
-        return Response(serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

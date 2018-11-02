@@ -29,6 +29,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
             'invalid': 'Password must contain a number and a letter and that are not repeating more that twice'
         }
     )
+    # confirm_password = serializers.CharField(reui)
 
     # Ensure email is unique
     # and is valid
@@ -189,6 +190,7 @@ class UserSerializer(serializers.ModelSerializer):
 class EmailSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
     token = serializers.CharField(required=False)
+    username = serializers.CharField(required=False)
 
     def validate(self, data):
         email = data.get('email')
@@ -203,7 +205,7 @@ class EmailSerializer(serializers.Serializer):
             'exp': datetime.utcnow() + timedelta(hours=1)
         }
         token = jwt.encode(payload, SECRET_KEY).decode('UTF-8')
-        return dict(email=email, token=token)
+        return dict(email=email, token=token, username=user.username)
 
 class ResetUserPasswordSerializer(serializers.Serializer):
     new_password = serializers.RegexField(

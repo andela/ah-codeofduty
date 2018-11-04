@@ -12,15 +12,12 @@ from social_core.backends.oauth import BaseOAuth1, BaseOAuth2
 from rest_framework.response import Response
 from rest_framework.generics import CreateAPIView
 from django.core.mail import EmailMultiAlternatives, send_mail
-<<<<<<< HEAD
 from django.core.mail import send_mail
 from django.template import Context
 from django.template.loader import render_to_string, get_template
-=======
 from django.template import Context
 from django.template.loader import render_to_string, get_template
 from django.contrib.sites.shortcuts import get_current_site
->>>>>>> 54221bc... #161255355 Reset Password  (#16)
 from django.shortcuts import render
 from sendgrid.helpers.mail import *
 
@@ -38,10 +35,7 @@ from .backends import JWTAuthentication
 
 from django.core.mail import send_mail
 
-<<<<<<< HEAD
 
-=======
->>>>>>> 54221bc... #161255355 Reset Password  (#16)
 class RegistrationAPIView(CreateAPIView):
     # Allow any user (authenticated or not) to hit this endpoint.
     permission_classes = (AllowAny,)
@@ -69,7 +63,6 @@ class RegistrationAPIView(CreateAPIView):
 
         current_site = get_current_site(request)
 
-<<<<<<< HEAD
         link = "http://" + current_site.domain + \
             '/api/users/verify/{}/'.format(token)
         message = render_to_string('email_verification.html', context={
@@ -78,14 +71,7 @@ class RegistrationAPIView(CreateAPIView):
         send_mail(subject, '', from_email, to_email, html_message=message)
 
         return Response(dict(email=user_email, username=user_name, verify_token=token), status=status.HTTP_201_CREATED)
-=======
-        link = "http://" + current_site.domain + '/api/users/verify/{}/'.format(token)
-        message = render_to_string('email_verification.html', context={"link":link, 'user_name':user_name})
 
-        send_mail(subject, '', from_email, to_email, html_message=message)
-
-        return Response(dict(email=user_email, username=user_name, token=token), status=status.HTTP_201_CREATED)
->>>>>>> 54221bc... #161255355 Reset Password  (#16)
 
 class LoginAPIView(CreateAPIView):
     permission_classes = (AllowAny,)
@@ -103,6 +89,7 @@ class LoginAPIView(CreateAPIView):
         serializer.is_valid(raise_exception=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -163,7 +150,7 @@ class UserForgotPassword(CreateAPIView):
             time = datetime.now()
             time = datetime.strftime(time, '%d-%B-%Y %H:%M')
             current_site = get_current_site(request)
-<<<<<<< HEAD
+
             reset_link = 'http://' + current_site.domain + \
                 '/api/users/reset-password/{}/'.format(token)
             subject, from_email, to = 'Authors Haven Password Reset @no-reply', 'codeofd@gmail.com', [
@@ -173,14 +160,6 @@ class UserForgotPassword(CreateAPIView):
                                             "reset_link": reset_link, "username": username, "time": time})
             send_mail(subject, '', from_email, to, html_message=html_content)
 
-=======
-            reset_link = 'http://' + current_site.domain + '/api/users/reset-password/{}/'.format(token)
-            subject, from_email, to = 'Authors Haven Password Reset @no-reply', 'codeofd@gmail.com', [email]
-            
-            html_content = render_to_string('reset_email.html', context={"reset_link":reset_link, "username":username, "time": time})
-            send_mail(subject, '', from_email, to, html_message=html_content)
-            
->>>>>>> 54221bc... #161255355 Reset Password  (#16)
             return Response(dict(message="Reset link has been successfully sent to your email. Check your spam folder if you don't find it.",
                                  token=token))
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

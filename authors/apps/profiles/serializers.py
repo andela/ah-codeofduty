@@ -10,9 +10,9 @@ class ProfileSerializer(serializers.ModelSerializer):
     last_name = serializers.CharField(allow_blank=True, required=False, min_length=1, max_length=50)
     avatar = serializers.URLField()
     bio = serializers.CharField(allow_blank=True, required=False, min_length=5, max_length=255)
-
+    following = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
         fields = ['username', 'surname', 'last_name', 'avatar', 'bio', 'created_at',
-                  'modified_at']
+                  'modified_at', 'following']

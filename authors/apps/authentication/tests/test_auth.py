@@ -1,10 +1,5 @@
-"""test user authentication"""
-
-from django.test import TestCase
-from rest_framework.test import APIClient
-from rest_framework.views import status
-from django.urls import reverse
-from .base import BaseTest
+"""tests/test user authentication"""
+from .base import *
 
 class ViewTestCase(BaseTest):
     """Test user views"""
@@ -40,7 +35,6 @@ class ViewTestCase(BaseTest):
             self.user_username_exists,
             format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
 
     def test_user_registration_missing_fields(self):
         """Test user registers with missing fields"""

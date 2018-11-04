@@ -1,35 +1,26 @@
-from datetime import datetime
+import os
+import jwt
+import sendgrid
 
+from datetime import datetime
 from rest_framework import status
 from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.generics import CreateAPIView
-from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives, send_mail
 from django.template import Context
 from django.template.loader import render_to_string, get_template
-
-import sendgrid
-import os
-from sendgrid.helpers.mail import *
 from django.contrib.sites.shortcuts import get_current_site
+from django.shortcuts import render
+from sendgrid.helpers.mail import *
+
+from authors.settings import SECRET_KEY
 from .models import User
-
-import os
-
-import os
-
 from .renderers import UserJSONRenderer
 from .serializers import (
     LoginSerializer, RegistrationSerializer, UserSerializer, EmailSerializer, ResetUserPasswordSerializer
 )
-
-from django.contrib.sites.shortcuts import get_current_site
-from django.core.mail import EmailMultiAlternatives
-from django.template.loader import render_to_string
-from django.shortcuts import render
-
-from .models import User
 
 class RegistrationAPIView(CreateAPIView):
     # Allow any user (authenticated or not) to hit this endpoint.
@@ -53,23 +44,17 @@ class RegistrationAPIView(CreateAPIView):
         payload = {'email': user_email}
         token = jwt.encode(payload, SECRET_KEY).decode("UTF-8")
 
-        sg = sendgrid.SendGridAPIClient(apikey=os.getenv('SENDGRID_API_KEY'))
-        from_email = Email('codeofd@gmail.com')
-        to_email = Email(user_email)
+        from_email, to_email = 'codeofd@gmail.com', [user_email]
         subject = "Authors Haven Email Verification @no-reply"
 
         current_site = get_current_site(request)
 
         link = "http://" + current_site.domain + '/api/users/verify/{}/'.format(token)
         message = render_to_string('email_verification.html', context={"link":link, 'user_name':user_name})
-        content = Content("text/html", message)
 
-        mail = Mail(from_email, subject, to_email, content)
-        response = sg.client.mail.send.post(request_body=mail.get())
-        print(response.status_code)
+        send_mail(subject, '', from_email, to_email, html_message=message)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
 
 class LoginAPIView(CreateAPIView):
     permission_classes = (AllowAny,)
@@ -87,7 +72,6 @@ class LoginAPIView(CreateAPIView):
         serializer.is_valid(raise_exception=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
-
 
 class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -115,6 +99,17 @@ class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+class VerifyAPIView(CreateAPIView):
+    serializer_class = UserSerializer
+    def get(self, request, token):
+        email = jwt.decode(token, SECRET_KEY)['email']
+        user = User.objects.get(email=email)
+        user.is_confirmed = True
+        user.save()
+
+        return Response("Email Confirmed Successfully")
+
+
 class UserForgotPassword(CreateAPIView):
     permission_classes = (AllowAny,)
     serializer_class = EmailSerializer
@@ -136,13 +131,11 @@ class UserForgotPassword(CreateAPIView):
             time = datetime.strftime(time,'%d-%B-%Y %H:%M')
             current_site = get_current_site(request)
             reset_link = 'http://' + current_site.domain + '/api/users/reset-password/{}/'.format(token)
-            subject, from_email, to = 'Authors Haven Password Reset @no-reply', 'codeofd@gmail.com', email
+            subject, from_email, to = 'Authors Haven Password Reset @no-reply', 'codeofd@gmail.com', [email]
             
-            message = EmailMultiAlternatives(subject, '@no-reply', from_email, [to])
             html_content = render_to_string('reset_email.html', context={"reset_link":reset_link, "username":username, "time": time})
-            # attach html content to email
-            message.attach_alternative(html_content, "text/html")
-            message.send()
+            send_mail(subject, '', from_email, to, html_message=html_content)
+            
             return Response(dict(message="Reset link has been successfully sent to your email. Check your spam folder if you don't find it.",
                             token=token))
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  

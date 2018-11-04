@@ -1,5 +1,4 @@
 '''tests/test_reset_password.py'''
-import json
 from .base import *
 
 class ResetPasswordTestCase(BaseTest):

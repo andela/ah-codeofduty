@@ -1,11 +1,7 @@
 """
 Token related tests module
 """
-import json
-
-from rest_framework.views import status
-
-from .base import BaseTest
+from .base import *
 
 class TokenTestcase(BaseTest):
     """Test tokens testcase"""

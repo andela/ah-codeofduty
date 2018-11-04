@@ -21,6 +21,11 @@ from .renderers import UserJSONRenderer
 from .serializers import (
     LoginSerializer, RegistrationSerializer, UserSerializer, EmailSerializer, ResetUserPasswordSerializer
 )
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.sites.shortcuts import get_current_site
+from django.conf import settings
+
+from django.core.mail import send_mail
 
 class RegistrationAPIView(CreateAPIView):
     # Allow any user (authenticated or not) to hit this endpoint.
@@ -108,7 +113,6 @@ class VerifyAPIView(CreateAPIView):
         user.save()
 
         return Response("Email Confirmed Successfully")
-
 
 class UserForgotPassword(CreateAPIView):
     permission_classes = (AllowAny,)

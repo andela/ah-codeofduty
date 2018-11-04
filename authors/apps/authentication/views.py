@@ -59,7 +59,7 @@ class RegistrationAPIView(CreateAPIView):
 
         send_mail(subject, '', from_email, to_email, html_message=message)
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(dict(email=user_email, username=user_name, token=token), status=status.HTTP_201_CREATED)
 
 class LoginAPIView(CreateAPIView):
     permission_classes = (AllowAny,)

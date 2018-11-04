@@ -127,3 +127,16 @@ class ViewTestCase(BaseTest):
             self.missing_password,
             format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_verify_email(self):
+        '''Test verify email'''
+        response = self.client.post(
+            self.SIGN_UP_URL,
+            self.user_data,
+            format="json")
+        content = json.loads(response.content)
+        token = content['user']['token']
+        VERIFY_URL = '/api/users/verify/{}/'.format(token)
+        response = self.client.get(VERIFY_URL)
+        self.assertEqual(json.loads(response.content), 'Email Confirmed Successfully')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)

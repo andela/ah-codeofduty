@@ -84,6 +84,7 @@ celerybeat-schedule
 venv/
 ENV/
 cod_venv/
+designs/
 
 # Spyder project settings
 .spyderproject

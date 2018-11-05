@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from rest_framework.generics import RetrieveUpdateAPIView, ListAPIView
 from rest_framework.views import APIView
 from rest_framework.pagination import LimitOffsetPagination
@@ -5,13 +6,24 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from rest_framework.response import Response
 from rest_framework import status, serializers
+=======
+from rest_framework.generics import RetrieveUpdateAPIView
+from rest_framework.permissions import IsAuthenticated, AllowAny
+
+from rest_framework.response import Response
+from rest_framework import status
+>>>>>>> Feature(User Profile):Users should be able to create their profiles
 
 from django.shortcuts import get_object_or_404
 
 from authors.apps.profiles.renderers import ProfileJSONRenderer
 from authors.apps.profiles.serializers import ProfileSerializer
+<<<<<<< HEAD
 from authors.apps.profiles.models import User, Profile
 from .exceptions import ProfileDoesNotExist
+=======
+from authors.apps.profiles.models import User
+>>>>>>> Feature(User Profile):Users should be able to create their profiles
 
 
 class ProfileRetrieveUpdateAPIView(RetrieveUpdateAPIView):

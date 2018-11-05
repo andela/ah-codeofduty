@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 '''articles/models.py'''
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
@@ -31,3 +32,9 @@ class Article(models.Model):
     def __str__(self):
         '''return string representation of object'''
         return self.title
+=======
+from django.db import models
+
+# Create your models here.
+
+>>>>>>> Feature(Create Articles): Add new app folder

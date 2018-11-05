@@ -10,7 +10,4 @@ urlpatterns = [
     path('<username>/follow', ProfileFollowAPIView.as_view(), name='follow'),
     path('<username>/followers', FollowersAPIView.as_view(), name='followers'),
     path('<username>/following', FollowingAPIView.as_view(), name='following'),
-
-
-
 ]

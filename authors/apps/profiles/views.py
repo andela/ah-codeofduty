@@ -101,8 +101,6 @@ class FollowersAPIView(APIView):
         serializer = self.serializer_class(followers, many = True, context={'request': request})
         return Response({"followers": serializer.data}, status=status.HTTP_200_OK)
 
-
-
 class FollowingAPIView(APIView):
     permission_classes = (IsAuthenticated,)
     renderer_classes = (ProfileJSONRenderer,)

@@ -26,7 +26,7 @@ class ProfileRetrieveUpdateAPIView(RetrieveUpdateAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def update(self, request, username, *args, **kwargs):
-        serializer_data = request.data.get('profiles', {})
+        serializer_data = request.data
         user = get_object_or_404(User, username=username)
 
         serializer_data = {

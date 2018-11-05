@@ -207,21 +207,21 @@ class SocialSignInSignOut(CreateAPIView):
            # cater for services that use OAuth1, an example is twitter
             token = {
                 # 'oauth_token': serializer.data['access_token'],
-                'oauth_token': request.data['access_token'],
-                'oauth_token_secret': request.data['access_token_secret'],
+                'oauth_token': serializer.data['access_token'],
+                'oauth_token_secret': serializer.data['access_token_secret'],
             }
 
         elif isinstance(backend, BaseOAuth2):
             # we just need to pass access_token for OAuth2
             token = serializer.data['access_token']
+
         try:
-            print(authed_user)
             # check if the user exists, if exists,we just login but if not we creates a new user
             user = backend.do_auth(token, user=authed_user)
+
         except AuthAlreadyAssociated:
             return Response({"error": "The email is already registered, please try another one"},
                             status=status.HTTP_400_BAD_REQUEST)
-
         if user and user.is_active:
             serializer = UserSerializer(user)
             auth_created = user.social_auth.get(provider=provider)

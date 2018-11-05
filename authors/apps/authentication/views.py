@@ -222,17 +222,23 @@ class SocialSignInSignOut(CreateAPIView):
                             status=status.HTTP_400_BAD_REQUEST)
         if user and user.is_active:
             serializer = UserSerializer(user)
+            user.is_verified = True
             auth_created = user.social_auth.get(provider=provider)
             if not auth_created.extra_data['access_token']:
                 # Google for example will return the access_token in its response to you.
                 auth_created.extra_data['access_token'] = token
                 auth_created.save()
                 serializer.save()
-            user.save()
-            token = JWTAuthentication.encode_token(
-                self, serializer.data['email'])
+                user.save()
+            # get current user id from the database.
+            user_id = User.objects.values_list('id', flat=True).get(
+                email=serializer.data['email'])
+            serializer.instance = user
+            token = JWTAuthentication.encode_token(self,
+                                                   user_id)
             # a responce dictionary that has email, username and token
             response = {
+                'user_id': user_id,
                 'email': serializer.data['email'],
                 'username': serializer.data['username'],
                 'token': token

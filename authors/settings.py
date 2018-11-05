@@ -138,6 +138,7 @@ SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {
 # google authentication credentials
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.getenv('GOOGLE_KEY')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.getenv('GOOGLE_SECRET')
+SOCIAL_AUTH_GOOGLE_SCOPE = ['email', 'username', 'password']
 
 SOCIAL_AUTH_TWITTER_KEY = os.getenv('TWITTER_KEY')
 SOCIAL_AUTH_TWITTER_SECRET = os.getenv('TWITTER_SECRET')
@@ -201,7 +202,7 @@ REST_FRAMEWORK = {
 }
 
 # Sendgrid settings
-EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.getenv('EMAIL_HOST')
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')

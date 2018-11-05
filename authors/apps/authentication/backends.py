@@ -69,13 +69,13 @@ class JWTAuthentication(BaseAuthentication):
         """
         return 'Bearer'
 
-    def encode_token(self, email):
+    def encode_token(self, user_id):
         """
         This method gerate token by encoding registered user
         email andress
         """
         payload = {
-            'email': email,
+            'id': user_id,
             'iat': datetime.utcnow(),
             'exp': datetime.utcnow() + timedelta(days=7)
         }

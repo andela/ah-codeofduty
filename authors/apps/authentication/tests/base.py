@@ -1,10 +1,9 @@
 """test configurations"""
-
-from django.test import TestCase
+import json
+from django.test import TestCase, override_settings
 from rest_framework.test import APIClient
 from rest_framework.views import status
 from django.urls import reverse
-
 
 class BaseTest(TestCase):
     """
@@ -18,9 +17,6 @@ class BaseTest(TestCase):
         self.SIGN_UP_URL = '/api/users/'
         self.USER_URL = '/api/user/'
         self.FORGOT_URL = '/api/users/forgot-password/'
-
-        # TODO: reset-password
-        # self.RESET_URL = '/api/users/reset-password/{}'.format(self.reset_token)
 
         test_user = {"email": "njery.ngigi@gmail.com",
                      "username": "test_user",
@@ -64,7 +60,6 @@ class BaseTest(TestCase):
                 'username': 'zawi',
                 'password': 'password1234'
             }
-
 
         self.user_inputs_short_password = {
                 'email': 'zawi@gmail.com',

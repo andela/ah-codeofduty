@@ -1,10 +1,5 @@
-"""test user authentication"""
-
-from django.test import TestCase
-from rest_framework.test import APIClient
-from rest_framework.views import status
-from django.urls import reverse
-from .base import BaseTest
+"""tests/test user authentication"""
+from .base import *
 
 class ViewTestCase(BaseTest):
     """Test user views"""
@@ -40,7 +35,6 @@ class ViewTestCase(BaseTest):
             self.user_username_exists,
             format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
 
     def test_user_registration_missing_fields(self):
         """Test user registers with missing fields"""
@@ -133,3 +127,16 @@ class ViewTestCase(BaseTest):
             self.missing_password,
             format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_verify_email(self):
+        '''Test verify email'''
+        response = self.client.post(
+            self.SIGN_UP_URL,
+            self.user_data,
+            format="json")
+        content = json.loads(response.content)
+        token = content['user']['token']
+        VERIFY_URL = '/api/users/verify/{}/'.format(token)
+        response = self.client.get(VERIFY_URL)
+        self.assertEqual(json.loads(response.content), 'Email Confirmed Successfully')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)

@@ -29,10 +29,6 @@ class RegistrationSerializer(serializers.ModelSerializer):
             'invalid': 'Password must contain a number and a letter and that are not repeating more that twice'
         }
     )
-    # confirm_password = serializers.CharField(reui)
-
-    # Ensure email is unique
-    # and is valid
     email = serializers.EmailField(
         required=True,
         validators=[
@@ -94,13 +90,18 @@ class LoginSerializer(serializers.Serializer):
         # for a user that matches this email/password combination. Notice how
         # we pass `email` as the `username` value. Remember that, in our User
         # model, we set `USERNAME_FIELD` as `email`.
+        user = User.objects.filter(email=email).first()
+        if not user:
+            raise serializers.ValidationError(
+                'A user with this email was not found.'
+            )
         user = authenticate(username=email, password=password)
 
         # If no user was found matching this email/password combination then
         # `authenticate` will return `None`. Raise an exception in this case.
         if user is None:
             raise serializers.ValidationError(
-                'A user with this email and password was not found.'
+                'Incorrect password.'
             )
 
         # payload = jwt_payload_handler(user)

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import UserProfile
+from .models import Profile
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -10,10 +10,9 @@ class ProfileSerializer(serializers.ModelSerializer):
     last_name = serializers.CharField(allow_blank=True, required=False, min_length=1, max_length=50)
     avatar = serializers.URLField()
     bio = serializers.CharField(allow_blank=True, required=False, min_length=5, max_length=255)
-    followers = serializers.SerializerMethodField()
-    following = serializers.SerializerMethodField()
+
 
     class Meta:
-        model = UserProfile
+        model = Profile
         fields = ['username', 'surname', 'last_name', 'avatar', 'bio', 'created_at',
-                  'modified_at', 'followers', 'following']
+                  'modified_at']

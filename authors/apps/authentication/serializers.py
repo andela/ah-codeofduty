@@ -12,6 +12,7 @@ from .models import User
 from authors.settings import SECRET_KEY
 from .backends import JWTAuthentication
 
+from authors.apps.profiles.models import Profile
 
 class RegistrationSerializer(serializers.ModelSerializer):
     """Serializers registration requests and creates a new user."""
@@ -55,7 +56,9 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         # Use the `create_user` method we wrote earlier to create a new user.
-        return User.objects.create_user(**validated_data)
+        user = User.objects.create_user(**validated_data)
+        Profile.objects.create(user=user)
+        return user
 
 
 class LoginSerializer(serializers.Serializer):

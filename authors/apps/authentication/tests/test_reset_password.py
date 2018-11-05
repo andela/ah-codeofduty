@@ -22,7 +22,6 @@ class ResetPasswordTestCase(BaseTest):
         '''Test invalid email'''
         response = self.client.post(self.FORGOT_URL, {"email": "qw"}, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(json.loads(response.content)["email"][0], "Enter a valid email address.")
 
     def test_unregistered_user(self):
         '''Test unregister user'''

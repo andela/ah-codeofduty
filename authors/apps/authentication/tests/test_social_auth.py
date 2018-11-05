@@ -1,3 +1,4 @@
+import os
 from rest_framework.test import APITestCase
 from rest_framework import status
 from rest_framework.reverse import reverse as api_reverse
@@ -8,7 +9,7 @@ User = get_user_model()
 
 class SocialAuthSignupSignin(APITestCase):
     def setUp(self):
-        self.access_token = 'EAAe6UMnIZBRoBAG9GEsj3TwlzejSsWf4s2r0RmG8BMpwqJxx3dwCWAremGJHEQHiMJa2ro2Nk68zeqf7Pwy9gtTrqBdHODT5XlYlL2mpfNc3pBamkHoclJZCSty3WZCGh0qvP6kZCO5nse54tbtfh0YACsU3hdGk8XjyrRZBxIcA2Cr5C9nOvRPvnDZA2DURoHuTrvuGda7BAJPXKTfrZCPJ2bPUAqnW836eNWpldIzJLMA8GrBzJLN'
+        self.access_token = os.getenv('GOOGLE_TOKEN')
         self.social_url = api_reverse('authentication:social_signin_signup')
         user_data = User(
             username='testuser',
@@ -31,3 +32,21 @@ class SocialAuthSignupSignin(APITestCase):
         data = {"provider": provider}
         resp1 = self.client.post(self.social_url, data=data)
         self.assertEqual(resp1.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_google_social_login(self):
+        """this method test that social authentication
+        error if no provider token in the field of provider"""
+        provider = "google-oauth2"
+        data = {"provider": provider, "access_token": self.access_token}
+        resp2 = self.client.post(self.social_url, data=data)
+        self.assertEqual(resp2.status_code, status.HTTP_201_CREATED)
+
+    def test_twitter_social_login(self):
+        """this method test that social authentication
+        error if no provider token in the field of provider"""
+        provider = "twitter"
+
+        data = {"provider": provider, "access_token": os.getenv(
+            'TWITTER_ACCESS_TOKEN'), "access_token_secret": os.getenv('TWITTER_TOKEN_SECRET')}
+        resp2 = self.client.post(self.social_url, data=data)
+        self.assertEqual(resp2.status_code, status.HTTP_201_CREATED)

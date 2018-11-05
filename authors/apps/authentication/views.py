@@ -126,6 +126,7 @@ class VerifyAPIView(CreateAPIView):
         email = jwt.decode(token, SECRET_KEY)['email']
         user = User.objects.get(email=email)
         user.is_confirmed = True
+        user.save()
 
         return Response("Email Confirmed Successfully")
 

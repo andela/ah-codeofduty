@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 '''articles/views.py'''
 from django.shortcuts import render
 from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView
@@ -86,11 +87,6 @@ class ArticlesView(viewsets.ModelViewSet):
         return Response(dict(message="Article {} deleted successfully".format(slug)), status=status.HTTP_200_OK)
     def retrieve(self, request, id):
         return Response(dict(msg="Here's a single item"))
-
-    def update(self, request, id):
-        return Response(dict(msg="We've updated the list"))
-=======
->>>>>>> Feauture(Articles): Add CRUD functions for Articles
 
     def update(self, request, slug):
         article = self.check_article_exists(slug)

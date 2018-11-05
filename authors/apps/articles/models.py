@@ -1,5 +1,6 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 '''articles/models.py'''
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
@@ -69,4 +70,4 @@ class Article(models.Model):
 
     def __str__(self):
         return self.title
->>>>>>> Feature(Create Articles): CRUD for Articles
+

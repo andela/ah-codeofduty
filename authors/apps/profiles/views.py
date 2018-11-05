@@ -47,19 +47,10 @@ class ProfileRetrieveUpdateAPIView(RetrieveUpdateAPIView):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    class ProfileList(ListAPIView):
-        """View all created profiles"""
-        permission_classes = (AllowAny,)
-        queryset = Profile.objects.all()
-        serializer_class = ProfileSerializer
-        pagination_class = LimitOffsetPagination
 
-        def list(self, request):
-            serializer_context = {'request': request}
-            page = self.paginate_queryset(self.queryset)
-            serializer = self.serializer_class(
-                page,
-                context=serializer_context,
-                many=True
-            )
-            return self.get_paginated_response(serializer.data)
+class ProfileList(ListAPIView):
+    """View all created profiles"""
+    permission_classes = (AllowAny,)
+    queryset = Profile.objects.all()
+    serializer_class = ProfileSerializer
+

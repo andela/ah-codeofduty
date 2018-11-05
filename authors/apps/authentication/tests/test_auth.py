@@ -135,7 +135,11 @@ class ViewTestCase(BaseTest):
             self.user_data,
             format="json")
         content = json.loads(response.content)
+<<<<<<< HEAD
         token = content['user']['verify_token']
+=======
+        token = content['user']['token']
+>>>>>>> 54221bc... #161255355 Reset Password  (#16)
         VERIFY_URL = '/api/users/verify/{}/'.format(token)
         response = self.client.get(VERIFY_URL)
         self.assertEqual(json.loads(response.content), 'Email Confirmed Successfully')

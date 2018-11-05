@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'authors.apps.core',
     'authors.apps.profiles',
     'social_django',
+    'authors.apps.articles',
 ]
 
 MIDDLEWARE = [

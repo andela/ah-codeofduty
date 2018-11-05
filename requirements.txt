@@ -1,5 +1,5 @@
 astroid==2.0.4
-autopep8==1.4.2
+autopep8==1.4.1
 certifi==2018.10.15
 chardet==3.0.4
 colorclass==2.2.0
@@ -39,13 +39,11 @@ PyJWT==1.6.4
 pylint==2.1.1
 pyparsing==2.2.2
 python-http-client==3.1.0
-pytz==2018.5
-requests==2.20.0
-sendgrid==5.6.0
 python3-openid==3.1.0
 pytz==2018.5
 requests==2.20.0
 requests-oauthlib==1.0.0
+sendgrid==5.6.0
 simplejson==3.16.0
 six==1.11.0
 social-auth-app-django==3.0.0

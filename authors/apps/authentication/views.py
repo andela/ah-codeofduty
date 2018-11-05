@@ -12,9 +12,7 @@ from social_core.backends.oauth import BaseOAuth1, BaseOAuth2
 from rest_framework.response import Response
 from rest_framework.generics import CreateAPIView
 from django.core.mail import EmailMultiAlternatives, send_mail
-from django.template import Context
 from django.template.loader import render_to_string, get_template
-from django.contrib.sites.shortcuts import get_current_site
 from django.shortcuts import render
 from sendgrid.helpers.mail import *
 

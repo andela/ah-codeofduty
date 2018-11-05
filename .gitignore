@@ -94,5 +94,5 @@ cod_venv/
 # SQLite3
 db.sqlite3
 
-# admin
+# Admin
 admin.py

@@ -53,7 +53,7 @@ INSTALLED_APPS = [
     'authors.apps.authentication',
     'authors.apps.core',
     'authors.apps.profiles',
-    'social_django',
+    'authors.apps.articles',
 ]
 
 MIDDLEWARE = [

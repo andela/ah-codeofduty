@@ -8,4 +8,3 @@ urlpatterns = [
     path('<username>', ProfileRetrieveUpdateAPIView.as_view(), name='profile'),
     path('', ListAPIView.as_view(), name='profiles'),
 ]
-

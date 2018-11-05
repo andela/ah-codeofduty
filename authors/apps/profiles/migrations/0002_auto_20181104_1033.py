@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterModelOptions(
-            name='userprofile',
+            name='profile',
             options={},
         ),
     ]

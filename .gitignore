@@ -96,3 +96,5 @@ db.sqlite3
 
 # Admin
 admin.py
+
+*.DS_Store

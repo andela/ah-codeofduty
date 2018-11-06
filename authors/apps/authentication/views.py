@@ -10,8 +10,8 @@ from social_django.utils import load_backend, load_strategy
 from social_core.exceptions import AuthAlreadyAssociated, MissingBackend
 from social_core.backends.oauth import BaseOAuth1, BaseOAuth2
 from rest_framework.response import Response
-from rest_framework.generics import CreateAPIView
 from django.core.mail import EmailMultiAlternatives, send_mail
+from django.template import Context
 from django.template.loader import render_to_string, get_template
 from django.shortcuts import render
 from sendgrid.helpers.mail import *
@@ -65,7 +65,7 @@ class RegistrationAPIView(CreateAPIView):
 
         send_mail(subject, '', from_email, to_email, html_message=message)
 
-        return Response(dict(email=user_email, username=user_name, token=token), status=status.HTTP_201_CREATED)
+        return Response(dict(email=user_email, username=user_name, verify_token=token), status=status.HTTP_201_CREATED)
 
 
 class LoginAPIView(CreateAPIView):

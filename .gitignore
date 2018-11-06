@@ -97,3 +97,5 @@ db.sqlite3
 
 # Admin
 admin.py
+# Ignore articles/renderers for now
+authors/apps/articles/renderers.py

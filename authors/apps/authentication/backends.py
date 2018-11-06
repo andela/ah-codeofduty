@@ -2,17 +2,19 @@
 JWT Configuration module
 """
 import jwt
-import json
+
+from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.http import HttpResponse
 
 from rest_framework import authentication, exceptions
-from rest_framework.authentication import get_authorization_header, BaseAuthentication
+from rest_framework.authentication import (
+    get_authorization_header,
+    BaseAuthentication)
 
 from .models import User
 from authors.settings import SECRET_KEY
-from datetime import datetime, timedelta
 
 
 class JWTAuthentication(BaseAuthentication):
@@ -32,7 +34,7 @@ class JWTAuthentication(BaseAuthentication):
         if not auth or auth[0].lower() != b'bearer':
             return None
 
-        # Check if the correct credemtials were passed in 'request' parameter
+        # Check if the correct credentials were passed in 'request' parameter
         if len(auth) == 1:
             msg = 'Invalid token header. No credentials provided.'
             raise exceptions.AuthenticationFailed(msg)
@@ -41,7 +43,7 @@ class JWTAuthentication(BaseAuthentication):
             msg = 'Invalid token header'
             raise exceptions.AuthenticationFailed(msg)
 
-        # Decode token sucessfully, else catch some errors;
+        # Decode token successfully, else catch some errors;
         # errors can be due to expired signature, in decoding
         # token validity or a user not existing
 
@@ -54,7 +56,7 @@ class JWTAuthentication(BaseAuthentication):
             user = User.objects.get(
                 pk=pk
             )
-        # Except cuustom errors while using the token
+        # Except custom errors while using the token
         except Exception as e:
             if e.__class__.__name__ == 'DecodeError':
                 raise exceptions.AuthenticationFailed('cannot decode token')

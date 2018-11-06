@@ -6,10 +6,7 @@ class ViewTestCase(BaseTest):
 
     def test_user_registration_email_exists(self):
         """Test user with that email already exists"""
-        response = self.client.post(
-            self.SIGN_UP_URL,
-            self.user_data,
-            format="json")
+        response = self.register_user()
         response = self.client.post(
             self.SIGN_UP_URL,
             self.user_email_exists,
@@ -18,18 +15,12 @@ class ViewTestCase(BaseTest):
     
     def test_register_user(self):
         """Test user signup capability."""
-        response = self.client.post(
-            self.SIGN_UP_URL,
-            self.user_data,
-            format="json")
+        response = self.register_user()
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_user_registration_username_exists(self):
         """Test user with that username already exists"""
-        response = self.client.post(
-            self.SIGN_UP_URL,
-            self.user_data,
-            format="json")
+        response = self.register_user()
         response = self.client.post(
             self.SIGN_UP_URL,
             self.user_username_exists,
@@ -82,22 +73,13 @@ class ViewTestCase(BaseTest):
 
     def test_login_user(self):
         """Test the api has user login capability."""
-        response = self.client.post(
-            self.SIGN_UP_URL,
-            self.user_data,
-            format="json")
-        response = self.client.post(
-            self.SIGN_IN_URL,
-            self.user_data,
-            format="json")
+        response = self.register_user()
+        response = self.login_user()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_login_user_wrong_password(self):
         """Test wrong login credentials."""
-        response = self.client.post(
-            self.SIGN_UP_URL,
-            self.user_data,
-            format="json")
+        response = self.register_user()
         response = self.client.post(
             self.SIGN_IN_URL,
             self.user_wrong_password,
@@ -106,10 +88,7 @@ class ViewTestCase(BaseTest):
 
     def test_login_user_non_existent(self):
         """Test if user does not exist"""
-        response = self.client.post(
-            self.SIGN_UP_URL,
-            self.user_data,
-            format="json")
+        response = self.register_user()
         response = self.client.post(
             self.SIGN_IN_URL,
             self.user_does_not_exist,
@@ -118,10 +97,7 @@ class ViewTestCase(BaseTest):
 
     def test_missing_password(self):
         """Test missing password on registration."""
-        response = self.client.post(
-            self.SIGN_UP_URL,
-            self.user_data,
-            format="json")
+        response = self.register_user()
         response = self.client.post(
             self.SIGN_IN_URL,
             self.missing_password,
@@ -130,10 +106,7 @@ class ViewTestCase(BaseTest):
 
     def test_verify_email(self):
         '''Test verify email'''
-        response = self.client.post(
-            self.SIGN_UP_URL,
-            self.user_data,
-            format="json")
+        response = self.register_user()
         content = json.loads(response.content)
         token = content['user']['token']
         VERIFY_URL = '/api/users/verify/{}/'.format(token)

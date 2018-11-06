@@ -27,4 +27,5 @@ urlpatterns = [
                           'authentication'), namespace='authentication')),
     path('api/profile/', include('authors.apps.profiles.urls')),
     path('api/', include('authors.apps.articles.urls')),
+
 ]

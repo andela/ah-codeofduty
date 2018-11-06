@@ -11,3 +11,10 @@ omit =
     */authors/apps/articles/__init__.py
     */authors/apps/profiles/__init__.py
     manage.py
+    */authors/apps/profiles/migrations/*.py
+    */authors/apps/profiles/tests/*.py
+    */authors/apps/profiles/serializers.py
+    */authors/apps/profiles/renderers.py
+
+
+

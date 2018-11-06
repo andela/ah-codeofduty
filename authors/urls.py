@@ -23,5 +23,5 @@ urlpatterns = [
     path('', schema_view),
     path('admin/', admin.site.urls),
     path('api/', include('authors.apps.authentication.urls')),
-    path('profile/', include('authors.apps.profiles.urls')),
+    path('api/profile/', include('authors.apps.profiles.urls')),
 ]

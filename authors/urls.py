@@ -23,7 +23,6 @@ schema_view = get_swagger_view(
 urlpatterns = [
     path('', schema_view),
     path('admin/', admin.site.urls),
-    path('api/', include(('authors.apps.authentication.urls',
-                          'authentication'), namespace='authentication')),
-
+    path('api/', include('authors.apps.authentication.urls')),
+    path('api/', include('authors.apps.articles.urls')),
 ]

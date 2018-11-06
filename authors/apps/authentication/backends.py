@@ -46,13 +46,13 @@ class JWTAuthentication(BaseAuthentication):
         # token validity or a user not existing
 
         token = auth[1]
+        user = None
         try:
             payload = jwt.decode(token, SECRET_KEY)
-            email = payload['email']
+            pk = payload['id']
 
             user = User.objects.get(
-                email=email,
-                is_active=True
+                pk=pk
             )
         # Except cuustom errors while using the token
         except Exception as e:
@@ -72,11 +72,10 @@ class JWTAuthentication(BaseAuthentication):
     def encode_token(self, user_id):
         """
         This method gerate token by encoding registered user
-        email andress
+        email address
         """
         payload = {
             'id': user_id,
-            'iat': datetime.utcnow(),
-            'exp': datetime.utcnow() + timedelta(days=7)
+            'iat': datetime.utcnow()
         }
         return jwt.encode(payload, SECRET_KEY).decode('UTF-8')

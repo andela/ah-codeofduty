@@ -59,6 +59,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
     email = serializers.CharField(max_length=255)
     username = serializers.CharField(max_length=255, read_only=True)
     password = serializers.CharField(max_length=128, write_only=True)
@@ -129,9 +130,10 @@ class LoginSerializer(serializers.Serializer):
         # This is the data that is passed to the `create` and `update` methods
         # that we will see later on.
         return {
+            'id': user.pk,
             'email': user.email,
             'username': user.username,
-            'token': JWTAuthentication.encode_token(self, user.email)
+            'token': JWTAuthentication.encode_token(self, user.pk)
         }
 
 

@@ -121,14 +121,6 @@ class LoginSerializer(serializers.Serializer):
                 'This user has been deactivated.'
             )
 
-        # Create a token by encoding email
-        # jwt consist of `header`, `payload` and `secret`
-        # payload = {
-        #     'email': user.email,
-        #     'iat': datetime.utcnow(),
-        #     'exp': datetime.utcnow() + timedelta(days=7)
-        # }
-
         # The `validate` method should return a dictionary of validated data.
         # This is the data that is passed to the `create` and `update` methods
         # that we will see later on.

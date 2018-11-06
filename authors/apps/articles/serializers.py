@@ -4,6 +4,7 @@ from django.utils.text import slugify
 from authors.apps.authentication.serializers import UserSerializer
 from ..authentication.models import User
 from rest_framework.exceptions import PermissionDenied
+# django.forms.fields.ImageField
 
 from .models import Article
 
@@ -13,6 +14,8 @@ class ArticleSerializer(serializers.ModelSerializer):
     title = serializers.CharField(required=True, max_length=100)
     body = serializers.CharField()
     images = serializers.ListField(child=serializers.CharField(max_length=1000), min_length=None, max_length=None, required=False)
+    title = serializers.CharField(required=True, max_length=100)
+    body = serializers.CharField()
     description = serializers.CharField()
     slug = serializers.CharField(required=False)
     tags = serializers.ListField(child=serializers.CharField(max_length=25), min_length=None, max_length=None, required=False)

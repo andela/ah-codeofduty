@@ -99,3 +99,5 @@ db.sqlite3
 admin.py
 
 .DS_Store
+# Ignore articles/renderers for now
+authors/apps/articles/renderers.py

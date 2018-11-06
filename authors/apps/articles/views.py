@@ -24,6 +24,11 @@ class ArticlesView(viewsets.ModelViewSet):
 
     def list(self, request):
         '''method retrieving all articles(get)'''
+    queryset = Article.objects.all()
+    permission_classes = (AllowAny,) #IsAuthenticatedOrReadOnly,
+    serializer_class = ArticleSerializer
+
+    def list(self, request):
         queryset = Article.objects.all()
         serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -33,6 +38,8 @@ class ArticlesView(viewsets.ModelViewSet):
         article = request.data
         email = request.user
         serializer = self.serializer_class(data=article, context={"email":email})
+        article = request.data
+        serializer = self.serializer_class(data=article)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -61,3 +68,14 @@ class ArticlesView(viewsets.ModelViewSet):
             raise PermissionDenied
         article.delete()
         return Response(dict(message="Article {} deleted successfully".format(slug)), status=status.HTTP_200_OK)
+    def retrieve(self, request, id):
+        return Response(dict(msg="Here's a single item"))
+
+    def update(self, request, id):
+        return Response(dict(msg="We've updated the list"))
+
+    def partial_update(self, request, id):
+        return Response(dict(msg="Partial update?"))
+
+    def destroy(self, request, id):
+        return Response(dict(msg="Deleted the item!"))

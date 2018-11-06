@@ -17,4 +17,11 @@ articles_detail =  ArticlesView.as_view({
 urlpatterns = [
     path('articles/', articles_list),
     path('articles/<slug>/', articles_detail)
+    'patch': 'partial_update',
+    'delete': 'destroy'
+})
+
+urlpatterns = [
+    path('articles/', articles_list),
+    path('articles/<id>', articles_detail)
 ]

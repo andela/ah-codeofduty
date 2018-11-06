@@ -95,9 +95,14 @@ designs/
 # SQLite3
 db.sqlite3
 
+<<<<<<< HEAD
 # Admin
 admin.py
 
 .DS_Store
 # Ignore articles/renderers for now
 authors/apps/articles/renderers.py
+=======
+# Ignore articles/renderers for now
+authors/apps/articles/renderers.py
+>>>>>>> Feature(Create Articles): CRUD for Articles

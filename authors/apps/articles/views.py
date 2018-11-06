@@ -1,16 +1,23 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> Feature(Create Articles): CRUD for Articles
 '''articles/views.py'''
 from django.shortcuts import render
 from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import (AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly,)
 from rest_framework.response import Response
 from rest_framework import status, viewsets
+<<<<<<< HEAD
 from rest_framework.exceptions import NotFound, PermissionDenied
+=======
+>>>>>>> Feature(Create Articles): CRUD for Articles
 
 from .serializers import ArticleSerializer
 from .models import Article
 
 class ArticlesView(viewsets.ModelViewSet):
+<<<<<<< HEAD
 <<<<<<< HEAD
     '''Articles view for post, get, put and delete methods for articles'''
     permission_classes = (IsAuthenticatedOrReadOnly,)
@@ -39,6 +46,11 @@ class ArticlesView(viewsets.ModelViewSet):
             raise NotFound('This article doesn\'t exist')
         
         return article
+=======
+    queryset = Article.objects.all()
+    permission_classes = (AllowAny,) #IsAuthenticatedOrReadOnly,
+    serializer_class = ArticleSerializer
+>>>>>>> Feature(Create Articles): CRUD for Articles
 
     def list(self, request):
         queryset = Article.objects.all()
@@ -46,6 +58,7 @@ class ArticlesView(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def create(self, request):
+<<<<<<< HEAD
         '''method creating a new article(post)'''
         article = request.data
         email = request.user
@@ -53,10 +66,15 @@ class ArticlesView(viewsets.ModelViewSet):
         article = request.data
         email = request.user
         serializer = self.serializer_class(data=article, context={"email":email})
+=======
+        article = request.data
+        serializer = self.serializer_class(data=article)
+>>>>>>> Feature(Create Articles): CRUD for Articles
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+<<<<<<< HEAD
     def retrieve(self, request, slug):
 <<<<<<< HEAD
         '''method retrieving a single article(get)'''
@@ -103,3 +121,16 @@ class ArticlesView(viewsets.ModelViewSet):
             raise PermissionDenied
         article.delete()
         return Response(dict(message="Article {} deleted successfully".format(slug)), status=status.HTTP_200_OK)
+
+    def retrieve(self, request, id):
+        return Response(dict(msg="Here's a single item"))
+
+    def update(self, request, id):
+        return Response(dict(msg="We've updated the list"))
+
+    def partial_update(self, request, id):
+        return Response(dict(msg="Partial update?"))
+
+    def destroy(self, request, id):
+        return Response(dict(msg="Deleted the item!"))
+

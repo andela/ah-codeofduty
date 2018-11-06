@@ -1,9 +1,10 @@
 """test configurations"""
 import json
 from django.test import TestCase, override_settings
-from rest_framework.test import APIClient
+from rest_framework.test import APIClient, APITestCase
 from rest_framework.views import status
 from django.urls import reverse
+from django.conf import settings
 
 class BaseTest(TestCase):
     """
@@ -17,6 +18,7 @@ class BaseTest(TestCase):
         self.SIGN_UP_URL = '/api/users/'
         self.USER_URL = '/api/user/'
         self.FORGOT_URL = '/api/users/forgot-password/'
+        self.PROFILE_URL = '/api/profile/'
 
         test_user = {"email": "njery.ngigi@gmail.com",
                      "username": "test_user",
@@ -28,6 +30,17 @@ class BaseTest(TestCase):
         self.user_data = {
                 'email': 'zawi@gmail.com',
                 'username': 'zawi',
+                'password': 'password1234'
+            }
+        
+        self.user_data1 = {
+                'email': 'gray@gmail.com',
+                'username': 'gray',
+                'password': 'password1234'
+            }
+        self.user_data2 = {
+                'email': 'shalon@gmail.com',
+                'username': 'shalon',
                 'password': 'password1234'
             }
 
@@ -99,6 +112,22 @@ class BaseTest(TestCase):
             self.user_data,
             format="json")
 
+    def register_user1(self):
+        """User registration"""
+
+        return self.client.post(
+            self.SIGN_UP_URL,
+            self.user_data1,
+            format="json")
+
+    def register_user2(self):
+        """User registration"""
+
+        return self.client.post(
+            self.SIGN_UP_URL,
+            self.user_data2,
+            format="json")
+
     def login_user(self):
         """User login"""
 
@@ -106,3 +135,24 @@ class BaseTest(TestCase):
             self.SIGN_IN_URL,
             self.user_data,
             format="json")
+
+    def login_user1(self):
+        """User login"""
+
+        return self.client.post(
+            self.SIGN_IN_URL,
+            self.user_data1,
+            format="json")
+
+    def login_user2(self):
+        """User login"""
+
+        return self.client.post(
+            self.SIGN_IN_URL,
+            self.user_data2,
+            format="json")
+    
+    def get_profile(self, username):
+        return self.client.get(
+            self.PROFILE_URL + str(username)
+            )

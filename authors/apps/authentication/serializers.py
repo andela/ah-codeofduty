@@ -123,7 +123,7 @@ class LoginSerializer(serializers.Serializer):
             'iat': datetime.utcnow(),
             'exp': datetime.utcnow() + timedelta(days=7)
         }
-        jwt_token = {'token': jwt.encode(payload, SECRET_KEY).decode('UTF-8')}
+        jwt_token =  jwt.encode(payload, SECRET_KEY).decode('UTF-8')
 
         # The `validate` method should return a dictionary of validated data.
         # This is the data that is passed to the `create` and `update` methods

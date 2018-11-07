@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_extensions',
     'rest_framework',
+    'social_django',
 
     'authors.apps.authentication',
     'authors.apps.core',

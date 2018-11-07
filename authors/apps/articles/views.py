@@ -10,6 +10,7 @@ from .serializers import ArticleSerializer
 from .models import Article
 
 class ArticlesView(viewsets.ModelViewSet):
+<<<<<<< HEAD
     '''Articles view for post, get, put and delete methods for articles'''
     permission_classes = (IsAuthenticatedOrReadOnly,)
     serializer_class = ArticleSerializer
@@ -26,7 +27,17 @@ class ArticlesView(viewsets.ModelViewSet):
         '''method retrieving all articles(get)'''
     queryset = Article.objects.all()
     permission_classes = (AllowAny,) #IsAuthenticatedOrReadOnly,
+=======
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+>>>>>>> Feauture(Articles): Add CRUD functions for Articles
     serializer_class = ArticleSerializer
+    def check_article_exists(self, slug):
+        try:
+            article = Article.objects.get(slug=slug)
+        except Article.DoesNotExist:
+            raise NotFound('This article doesn\'t exist')
+        
+        return article
 
     def list(self, request):
         queryset = Article.objects.all()
@@ -39,17 +50,22 @@ class ArticlesView(viewsets.ModelViewSet):
         email = request.user
         serializer = self.serializer_class(data=article, context={"email":email})
         article = request.data
-        serializer = self.serializer_class(data=article)
+        email = request.user
+        serializer = self.serializer_class(data=article, context={"email":email})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def retrieve(self, request, slug):
+<<<<<<< HEAD
         '''method retrieving a single article(get)'''
+=======
+>>>>>>> Feauture(Articles): Add CRUD functions for Articles
         article = self.check_article_exists(slug)
         serializer = self.serializer_class(article)
         
         return Response(serializer.data, status=status.HTTP_200_OK)
+<<<<<<< HEAD
 
     def update(self, request, slug):
         '''method updating an article(put)'''
@@ -73,9 +89,21 @@ class ArticlesView(viewsets.ModelViewSet):
 
     def update(self, request, id):
         return Response(dict(msg="We've updated the list"))
+=======
+>>>>>>> Feauture(Articles): Add CRUD functions for Articles
 
-    def partial_update(self, request, id):
-        return Response(dict(msg="Partial update?"))
+    def update(self, request, slug):
+        article = self.check_article_exists(slug)
+        serializer = self.serializer_class(article, data=request.data, context={"email":request.user}, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def destroy(self, request, id):
-        return Response(dict(msg="Deleted the item!"))
+    def destroy(self, request, slug):
+        article = self.check_article_exists(slug)
+        email = request.user
+        if email != article.author:
+            raise PermissionDenied
+        article.delete()
+        return Response(dict(message="Article {} deleted successfully".format(slug)), status=status.HTTP_200_OK)

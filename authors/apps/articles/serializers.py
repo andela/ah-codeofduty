@@ -4,18 +4,26 @@ from django.utils.text import slugify
 from authors.apps.authentication.serializers import UserSerializer
 from ..authentication.models import User
 from rest_framework.exceptions import PermissionDenied
+<<<<<<< HEAD
 # django.forms.fields.ImageField
+=======
+>>>>>>> Feauture(Articles): Add CRUD functions for Articles
 
 from .models import Article
 
 class ArticleSerializer(serializers.ModelSerializer):
+<<<<<<< HEAD
     '''Article model serializer'''
     author = UserSerializer(read_only=True)
     title = serializers.CharField(required=True, max_length=100)
     body = serializers.CharField()
     images = serializers.ListField(child=serializers.CharField(max_length=1000), min_length=None, max_length=None, required=False)
+=======
+    author = UserSerializer(read_only=True)
+>>>>>>> Feauture(Articles): Add CRUD functions for Articles
     title = serializers.CharField(required=True, max_length=100)
     body = serializers.CharField()
+    images = serializers.ListField(child=serializers.CharField(max_length=1000), min_length=None, max_length=None, required=False)
     description = serializers.CharField()
     slug = serializers.CharField(required=False)
     tags = serializers.ListField(child=serializers.CharField(max_length=25), min_length=None, max_length=None, required=False)
@@ -38,7 +46,10 @@ class ArticleSerializer(serializers.ModelSerializer):
         return instance.time_updated.isoformat()
 
     def create(self, validated_data):
+<<<<<<< HEAD
         '''method creating articles'''
+=======
+>>>>>>> Feauture(Articles): Add CRUD functions for Articles
         email = self.context.get('email')
         user = User.objects.get(email=email)
         validated_data["author"] = user
@@ -52,7 +63,10 @@ class ArticleSerializer(serializers.ModelSerializer):
         return Article.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
+<<<<<<< HEAD
         '''method updating articles'''
+=======
+>>>>>>> Feauture(Articles): Add CRUD functions for Articles
         email = self.context.get('email')
         if email != instance.author:
             raise PermissionDenied
@@ -63,4 +77,8 @@ class ArticleSerializer(serializers.ModelSerializer):
         instance.time_to_read = validated_data.get('time_to_read', instance.time_to_read)
         instance.save()
         return instance
+<<<<<<< HEAD
     
+=======
+    
+>>>>>>> Feauture(Articles): Add CRUD functions for Articles

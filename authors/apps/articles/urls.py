@@ -23,5 +23,5 @@ urlpatterns = [
 
 urlpatterns = [
     path('articles/', articles_list),
-    path('articles/<id>', articles_detail)
+    path('articles/<slug>/', articles_detail)
 ]

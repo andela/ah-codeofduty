@@ -13,13 +13,14 @@ class ArticleSerializer(serializers.ModelSerializer):
     time_to_read = serializers.IntegerField(required=False)
     time_created = serializers.SerializerMethodField()
     time_updated = serializers.SerializerMethodField()
+    favorited = serializers.SerializerMethodField()
 
     # TODO: handle images
     
     class Meta:
         model = Article
         fields = ('title', 'body', 'description', 'slug', 'tags',
-                  'time_to_read', 'author', 'time_created', 'time_updated')
+                  'time_to_read', 'author', 'time_created', 'time_updated','favorited')
 
     def get_time_created(self, instance):
         return instance.time_created.isoformat()
@@ -32,3 +33,14 @@ class ArticleSerializer(serializers.ModelSerializer):
     
     def  update(self, instance, validated_data):
         pass
+
+    def get_favorited(self, instance):
+        request = self.context.get('request', None)
+
+        if request is None:
+            return False
+
+        if not request.user.is_authenticated:
+            return False
+
+        return request.user.profile.favorited(instance)

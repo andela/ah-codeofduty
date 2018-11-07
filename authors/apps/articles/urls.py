@@ -30,8 +30,12 @@ urlpatterns = [
 urlpatterns = [
     path('articles/', articles_list),
 <<<<<<< HEAD
+<<<<<<< HEAD
     path('articles/<slug>/', articles_detail)
 =======
     path('articles/<id>', articles_detail)
 >>>>>>> Feature(Create Articles): CRUD for Articles
+=======
+    path('articles/<slug>/', articles_detail)
+>>>>>>> Feauture(Articles): Add CRUD functions for Articles
 ]

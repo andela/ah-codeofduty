@@ -254,3 +254,4 @@ class SocialSignInSignOutSerializer(serializers.Serializer):
         max_length=1024, required=True, trim_whitespace=True)
     access_token_secret = serializers.CharField(
         max_length=300, allow_null=True, default=None, trim_whitespace=True)
+        

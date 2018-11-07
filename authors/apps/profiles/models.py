@@ -45,10 +45,12 @@ class Profile(TimeStamp):
         return profile.follows.all()
 
     def favorite(self, article):
+        ''' favorite an article '''
         self.favorites.add(article)
     
     def unfavorite(self, article):
+        ''' unfavorite an article '''
         self.favorites.remove(article)
     
-    def favorited(self, article):
+    def has_favorited(self, article):
         return self.favorites.filter(pk=article.pk).exists()

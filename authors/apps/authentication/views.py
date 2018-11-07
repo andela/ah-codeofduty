@@ -10,11 +10,8 @@ from social_django.utils import load_backend, load_strategy
 from social_core.exceptions import AuthAlreadyAssociated, MissingBackend
 from social_core.backends.oauth import BaseOAuth1, BaseOAuth2
 from rest_framework.response import Response
-<<<<<<< HEAD
 from rest_framework.generics import CreateAPIView
 from django.core.mail import EmailMultiAlternatives, send_mail
-=======
->>>>>>> c02f14568bf5e4e8935ab46d0933864ffb994a3b
 from django.core.mail import send_mail
 from django.template import Context
 from django.template.loader import render_to_string, get_template
@@ -71,10 +68,6 @@ class RegistrationAPIView(CreateAPIView):
         send_mail(subject, '', from_email, to_email, html_message=message)
 
         return Response(dict(email=user_email, username=user_name, verify_token=token), status=status.HTTP_201_CREATED)
-<<<<<<< HEAD
-
-=======
->>>>>>> c02f14568bf5e4e8935ab46d0933864ffb994a3b
 
 class LoginAPIView(CreateAPIView):
     permission_classes = (AllowAny,)

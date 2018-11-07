@@ -59,8 +59,9 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(serializers.Serializer):
-    email = serializers.CharField(max_length=255)
-    username = serializers.CharField(max_length=255, read_only=True)
+    id = serializers.IntegerField(read_only=True)
+    email = serializers.CharField(max_length=50)
+    username = serializers.CharField(max_length=20, read_only=True)
     password = serializers.CharField(max_length=128, write_only=True)
     token = serializers.CharField(read_only=True)
 
@@ -131,7 +132,7 @@ class LoginSerializer(serializers.Serializer):
         return {
             'email': user.email,
             'username': user.username,
-            'token': JWTAuthentication.encode_token(self, user.email)
+            'token': JWTAuthentication.encode_token(self, user.pk)
         }
 
 

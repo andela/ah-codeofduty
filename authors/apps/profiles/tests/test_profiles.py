@@ -6,7 +6,6 @@ from authors.apps.profiles.tests.base_test import BaseTest
 class ProfilesTest(BaseTest):
 
     def test_list_profiles(self):
-        import pdb; pdb.set_trace()
         response = self.client.get('/profile/', format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 

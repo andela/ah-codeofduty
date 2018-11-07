@@ -23,11 +23,7 @@ schema_view = get_swagger_view(
 urlpatterns = [
     path('', schema_view),
     path('admin/', admin.site.urls),
-<<<<<<< HEAD
     path('api/', include(('authors.apps.authentication.urls',
                           'authentication'), namespace='authentication')),
-=======
-    path('api/', include('authors.apps.authentication.urls')),
->>>>>>> 98bafba... Feature(User Profile):Users should be able to create their profiles
     path('profile/', include('authors.apps.profiles.urls')),
 ]

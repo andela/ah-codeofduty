@@ -1,4 +1,7 @@
 '''articles/serializers'''
+from decimal import Decimal
+
+from  django.db.models import Sum
 from rest_framework import serializers
 from django.utils.text import slugify
 from authors.apps.authentication.serializers import UserSerializer
@@ -6,6 +9,7 @@ from ..authentication.models import User
 from rest_framework.exceptions import PermissionDenied
 
 from .models import Article
+from ..rating.models import Rating
 
 class ArticleSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
@@ -18,11 +22,12 @@ class ArticleSerializer(serializers.ModelSerializer):
     time_to_read = serializers.IntegerField(required=False)
     time_created = serializers.SerializerMethodField()
     time_updated = serializers.SerializerMethodField()
-
+    avaragerating = serializers.SerializerMethodField()
+   
     class Meta:
         model = Article
         fields = ('title', 'body', 'images', 'description', 'slug', 'tags',
-                  'time_to_read', 'author', 'time_created', 'time_updated')
+                  'time_to_read', 'author', 'time_created', 'time_updated', 'avaragerating')
 
     def get_time_created(self, instance):
         return instance.time_created.isoformat()
@@ -43,6 +48,18 @@ class ArticleSerializer(serializers.ModelSerializer):
         validated_data["slug"] = slug
         return Article.objects.create(**validated_data)
 
+    def get_avaragerating(self, obj):
+        avarage = None
+        try:
+            ratings = Rating.objects.filter(article=obj.id)
+            avarage = ratings.aggregate(Sum('rating'))['rating__sum']/len(ratings)
+            avarage = Decimal(avarage)
+            avarage = round(avarage, 2)
+        except Exception as e:
+            print(e)
+        return avarage
+
+
     def update(self, instance, validated_data):
         email = self.context.get('email')
         if email != instance.author:
@@ -54,4 +71,3 @@ class ArticleSerializer(serializers.ModelSerializer):
         instance.time_to_read = validated_data.get('time_to_read', instance.time_to_read)
         instance.save()
         return instance
-    

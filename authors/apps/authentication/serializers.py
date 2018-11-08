@@ -10,6 +10,8 @@ from rest_framework.validators import UniqueValidator
 
 from .models import User
 from authors.settings import SECRET_KEY
+from authors.apps.profiles.models import Profile
+
 from .backends import JWTAuthentication
 
 from authors.apps.profiles.models import Profile
@@ -120,7 +122,6 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 'This user has been deactivated.'
             )
-
         # The `validate` method should return a dictionary of validated data.
         # This is the data that is passed to the `create` and `update` methods
         # that we will see later on.

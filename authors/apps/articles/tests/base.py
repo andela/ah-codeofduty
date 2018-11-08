@@ -33,8 +33,9 @@ class BaseTest(TestCase):
         self.fav_test_user = {
             "email": "njery.ngigi@gmail.com",
             "username": "test_user",
-            "password": "test1234"}
-
+            "password": "test1234"
+        }
+        
         self.test_article_data = {
 	        "title": "test title",
 	        "body": "This is me testing",

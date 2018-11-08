@@ -12,6 +12,7 @@ class Profile(TimeStamp):
                                      symmetrical=False)
     favorites = models.ManyToManyField('articles.Article',
                                        related_name='favorited_by')
+
     surname = models.TextField(blank=True)
     last_name = models.TextField(blank=True)
     avatar = models.URLField(blank=True)

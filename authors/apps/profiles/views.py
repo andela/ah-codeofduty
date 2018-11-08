@@ -37,11 +37,10 @@ class ProfileRetrieveUpdateAPIView(RetrieveUpdateAPIView):
         }
 
         serializer = self.serializer_class(
-            request.user.profile,
+            request.user.profile, context={'request': request},
             data=serializer_data,
             partial=True
         )
-
         serializer.is_valid(raise_exception=True)
         serializer.update(request.user.profile, serializer_data)
         serializer.save()
@@ -52,6 +51,38 @@ class ProfileList(ListAPIView):
     """View all created profiles"""
     permission_classes = (AllowAny,)
     queryset = Profile.objects.all()
+    serializer_class = ProfileSerializer
+
+class ProfileFollowAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+    renderer_classes = (ProfileJSONRenderer,)
+    serializer_class = ProfileSerializer
+    queryset = Profile.objects.all()
+
+    def put(self, request, username=None):
+        follower = self.request.user.profile
+
+        try:
+            followee = Profile.objects.get(user__username=username)
+        except Profile.DoesNotExist:
+            raise ProfileDoesNotExist
+        
+        if follower.pk is followee.pk:
+            raise serializers.ValidationError('You cannot follow yourself')
+
+        if follower.is_following(followee) is False:
+            follower.follow(followee)
+        else:
+            follower.unfollow(followee)
+
+        
+        
+        serializer = self.serializer_class(followee, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class FollowersAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+    renderer_classes = (ProfileJSONRenderer,)
     serializer_class = ProfileSerializer
 
 class ProfileFollowAPIView(APIView):

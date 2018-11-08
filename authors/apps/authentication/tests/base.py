@@ -18,7 +18,7 @@ class BaseTest(TestCase):
         self.SIGN_UP_URL = '/api/users/'
         self.USER_URL = '/api/user/'
         self.FORGOT_URL = '/api/users/forgot-password/'
-        self.PROFILE_URL = '/api/profile/'
+        self.PROFILE_URL = '/api/profiles/'
 
         test_user = {"email": "njery.ngigi@gmail.com",
                      "username": "test_user",

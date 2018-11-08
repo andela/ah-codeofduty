@@ -84,6 +84,7 @@ class ViewTestCase(BaseTest):
             self.SIGN_IN_URL,
             self.user_wrong_password,
             format="json")
+        self.assertEqual(json.loads(response.content)["errors"]["error"], ["Incorrect password."])
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_login_user_non_existent(self):

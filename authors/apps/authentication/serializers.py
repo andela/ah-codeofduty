@@ -122,7 +122,6 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 'This user has been deactivated.'
             )
-
         # The `validate` method should return a dictionary of validated data.
         # This is the data that is passed to the `create` and `update` methods
         # that we will see later on.
@@ -256,3 +255,4 @@ class SocialSignInSignOutSerializer(serializers.Serializer):
         max_length=1024, required=True, trim_whitespace=True)
     access_token_secret = serializers.CharField(
         max_length=300, allow_null=True, default=None, trim_whitespace=True)
+        

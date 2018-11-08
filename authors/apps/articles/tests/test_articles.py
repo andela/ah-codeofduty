@@ -85,3 +85,87 @@ class ArticleTestCase(BaseTest):
         response = self.client.delete(self.ARTICLE.format("test-title1"), HTTP_AUTHORIZATION=self.token, format="json")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(json.loads(response.content)["detail"], "This article doesn't exist")
+
+    def test_favorite_article(self):
+        response = self.client.post(
+            self.SIGN_UP_URL,
+            self.fav_test_user,
+            format='json'
+        )
+        response = self.client.post(
+            self.SIGN_IN_URL,
+            self.fav_test_user,
+            format='json'
+        )
+        token = response.data["token"]
+        response = self.create_article(self.test_article_data, token)
+        response = self.favorite_article('test-title12', token)
+        self.assertTrue(response.data['favorited'])
+        self.assertEquals(response.status_code, status.HTTP_201_CREATED)
+
+    def test_unfavorite_article(self):
+        response = self.client.post(
+            self.SIGN_UP_URL,
+            self.fav_test_user,
+            format='json'
+        )
+        response = self.client.post(
+            self.SIGN_IN_URL,
+            self.fav_test_user,
+            format='json'
+        )
+        token = response.data["token"]
+        response = self.create_article(self.test_article_data, token)
+        response = self.unfavorite_article('test-title12', token)
+        self.assertFalse(response.data['favorited'])
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+    
+    def test_favorite_non_existent_article(self):
+        response = self.client.post(
+            self.SIGN_UP_URL,
+            self.fav_test_user,
+            format='json'
+        )
+        response = self.client.post(
+            self.SIGN_IN_URL,
+            self.fav_test_user,
+            format='json'
+        )
+        token = response.data["token"]
+        response = self.favorite_article('ghost slug', token)
+        self.assertTrue(response.data['detail'],'An article with this slug was not found.')
+        self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_unfavorite_non_existent_article(self):
+        response = self.client.post(
+            self.SIGN_UP_URL,
+            self.fav_test_user,
+            format='json'
+        )
+        response = self.client.post(
+            self.SIGN_IN_URL,
+            self.fav_test_user,
+            format='json'
+        )
+        token = response.data["token"]
+        response = self.unfavorite_article('ghost slug', token)
+        self.assertTrue(response.data['detail'], 'An article with this slug was not found.')
+        self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_unauthenticated_user_favorite_article(self):
+        response = self.client.post(
+            self.SIGN_UP_URL,
+            self.fav_test_user,
+            format='json'
+        )
+        response = self.client.post(
+            self.SIGN_IN_URL,
+            self.fav_test_user,
+            format='json'
+        )
+        token = response.data["token"]
+        response = self.create_article(self.test_article_data, token)
+
+        token = ''
+        response = self.favorite_article('ghost slug', token)
+        self.assertEquals(response.status_code, status.HTTP_401_UNAUTHORIZED)

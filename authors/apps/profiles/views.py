@@ -1,10 +1,10 @@
 from rest_framework.generics import RetrieveUpdateAPIView, ListAPIView
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from rest_framework.response import Response
 from rest_framework import status, serializers
-
 from django.shortcuts import get_object_or_404
 
 from authors.apps.profiles.renderers import ProfileJSONRenderer
@@ -17,7 +17,7 @@ class ProfileRetrieveUpdateAPIView(RetrieveUpdateAPIView):
     """
     Users are able to edit their profile information
     """
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,AllowAny,)
     renderer_classes = (ProfileJSONRenderer,)
     serializer_class = ProfileSerializer
 
@@ -49,8 +49,40 @@ class ProfileRetrieveUpdateAPIView(RetrieveUpdateAPIView):
 
 class ProfileList(ListAPIView):
     """View all created profiles"""
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
     queryset = Profile.objects.all()
+    serializer_class = ProfileSerializer
+
+class ProfileFollowAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+    renderer_classes = (ProfileJSONRenderer,)
+    serializer_class = ProfileSerializer
+    queryset = Profile.objects.all()
+
+    def put(self, request, username=None):
+        follower = self.request.user.profile
+
+        try:
+            followee = Profile.objects.get(user__username=username)
+        except Profile.DoesNotExist:
+            raise ProfileDoesNotExist
+        
+        if follower.pk is followee.pk:
+            raise serializers.ValidationError('You cannot follow yourself')
+
+        if follower.is_following(followee) is False:
+            follower.follow(followee)
+        else:
+            follower.unfollow(followee)
+
+        
+        
+        serializer = self.serializer_class(followee, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class FollowersAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+    renderer_classes = (ProfileJSONRenderer,)
     serializer_class = ProfileSerializer
 
 class ProfileFollowAPIView(APIView):

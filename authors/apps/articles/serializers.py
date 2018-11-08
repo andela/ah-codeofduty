@@ -1,4 +1,7 @@
 '''articles/serializers'''
+from decimal import Decimal
+
+from  django.db.models import Sum
 from rest_framework import serializers
 from django.utils.text import slugify
 from authors.apps.authentication.serializers import UserSerializer
@@ -7,6 +10,7 @@ from rest_framework.exceptions import PermissionDenied
 # django.forms.fields.ImageField
 
 from .models import Article
+from ..rating.models import Rating
 
 class ArticleSerializer(serializers.ModelSerializer):
     '''Article model serializer'''
@@ -24,12 +28,13 @@ class ArticleSerializer(serializers.ModelSerializer):
     time_to_read = serializers.IntegerField(required=False)
     time_created = serializers.SerializerMethodField()
     time_updated = serializers.SerializerMethodField()
-
+    avaragerating = serializers.SerializerMethodField()
+   
     class Meta:
         '''Class defining fields passed to database'''
         model = Article
         fields = ('title', 'body', 'images', 'description', 'slug', 'tags',
-                  'time_to_read', 'author', 'time_created', 'time_updated')
+                  'time_to_read', 'author', 'time_created', 'time_updated', 'avaragerating')
 
     def get_time_created(self, instance):
         '''get time the article was created and return in iso format'''
@@ -52,6 +57,18 @@ class ArticleSerializer(serializers.ModelSerializer):
             num += 1
         validated_data["slug"] = slug
         return Article.objects.create(**validated_data)
+
+    def get_avaragerating(self, obj):
+        avarage = None
+        try:
+            ratings = Rating.objects.filter(article=obj.id)
+            avarage = ratings.aggregate(Sum('rating'))['rating__sum']/len(ratings)
+            avarage = Decimal(avarage)
+            avarage = round(avarage, 2)
+        except Exception as e:
+            print(e)
+        return avarage
+
 
     def update(self, instance, validated_data):
         '''method updating articles'''

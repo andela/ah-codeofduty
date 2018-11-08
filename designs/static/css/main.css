@@ -1,4 +1,7 @@
 /*Custom Home Navbar*/
+html, body {
+    height: 100%;
+}
 navbar{
     padding: 0px!important;
      -webkit-box-shadow: 4px 9px 25px -6px rgba(77,77,77,0.61);
@@ -72,8 +75,10 @@ box-shadow: 4px 9px 25px -6px rgba(77,77,77,0.61);
   
 }
 /*Footer*/
-.footer{
+footer{
     background-image: linear-gradient( #414345,#232526);
+    position:relative;
+	top:225px;
 }
 .context-dark, .bg-gray-dark, .bg-primary {
     color: rgba(255, 255, 255, 0.8);

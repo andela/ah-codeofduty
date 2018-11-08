@@ -133,7 +133,7 @@ class RateArticleTestCase(BaseTest):
 	        "time_to_read": 1,
 	        "tags": ["math", "science"]
         }
-        rating = {"rating": 3}
+        rating = {"rating": 2}
         response = self.client.post(self.ARTICLES, article_data, HTTP_AUTHORIZATION=self.token, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual('new title', json.loads(response.content)["title"])
@@ -141,13 +141,13 @@ class RateArticleTestCase(BaseTest):
         response = self.client.post(self.RATE.format('new-title'), rating, HTTP_AUTHORIZATION=self.non_user_token, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         #rate article again
-        rating["rating"] =  4
-        response = self.client.post(self.RATE.format('new-title'), rating, HTTP_AUTHORIZATION=self.non_user_token, format="json")
+        rating = {"rating": 5}
+        response = self.client.post(self.RATE.format('new-title'), rating, HTTP_AUTHORIZATION=self.another_non_user_token, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         # test successful get of average rating
         response = self.client.get(self.ARTICLE.format('new-title'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(4, json.loads(response.content)["avaragerating"])
+        self.assertEqual(3.5, json.loads(response.content)["average_rating"])
 
     def test_get_average_rating_of_non_existing_article(self):
         """

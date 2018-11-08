@@ -49,11 +49,12 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_extensions',
     'rest_framework',
+    'social_django',
 
     'authors.apps.authentication',
     'authors.apps.core',
     'authors.apps.profiles',
-    'social_django',
+    'authors.apps.articles',
 ]
 
 MIDDLEWARE = [

@@ -8,6 +8,7 @@ from rest_framework.exceptions import PermissionDenied
 from .models import Article
 
 class ArticleSerializer(serializers.ModelSerializer):
+    '''Article model serializer'''
     author = UserSerializer(read_only=True)
     title = serializers.CharField(required=True, max_length=100)
     body = serializers.CharField()
@@ -20,17 +21,21 @@ class ArticleSerializer(serializers.ModelSerializer):
     time_updated = serializers.SerializerMethodField()
 
     class Meta:
+        '''Class defining fields passed to database'''
         model = Article
         fields = ('title', 'body', 'images', 'description', 'slug', 'tags',
                   'time_to_read', 'author', 'time_created', 'time_updated')
 
     def get_time_created(self, instance):
+        '''get time the article was created and return in iso format'''
         return instance.time_created.isoformat()
 
     def get_time_updated(self, instance):
+        '''get time the article was created and return in iso format'''
         return instance.time_updated.isoformat()
 
     def create(self, validated_data):
+        '''method creating articles'''
         email = self.context.get('email')
         user = User.objects.get(email=email)
         validated_data["author"] = user
@@ -44,6 +49,7 @@ class ArticleSerializer(serializers.ModelSerializer):
         return Article.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
+        '''method updating articles'''
         email = self.context.get('email')
         if email != instance.author:
             raise PermissionDenied

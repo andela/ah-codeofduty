@@ -150,7 +150,10 @@ class UserForgotPassword(CreateAPIView):
             time = datetime.now()
             time = datetime.strftime(time, '%d-%B-%Y %H:%M')
             current_site = get_current_site(request)
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
             reset_link = 'http://' + current_site.domain + \
                 '/api/users/reset-password/{}/'.format(token)
             subject, from_email, to = 'Authors Haven Password Reset @no-reply', 'codeofd@gmail.com', [

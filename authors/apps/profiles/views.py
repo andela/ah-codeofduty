@@ -37,11 +37,10 @@ class ProfileRetrieveUpdateAPIView(RetrieveUpdateAPIView):
         }
 
         serializer = self.serializer_class(
-            request.user.profile,
+            request.user.profile, context={'request': request},
             data=serializer_data,
             partial=True
         )
-
         serializer.is_valid(raise_exception=True)
         serializer.update(request.user.profile, serializer_data)
         serializer.save()

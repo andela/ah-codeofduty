@@ -2,8 +2,6 @@
 import json
 from django.test import TestCase
 from rest_framework.test import APIClient
-
-
 class BaseTest(TestCase):
     """
       Test user views
@@ -39,6 +37,7 @@ class BaseTest(TestCase):
 
         }
         self.test_article_data = {
+
             "title": "test title",
             "body": "This is me testing",
             "description": "testing",
@@ -54,6 +53,7 @@ class BaseTest(TestCase):
         self.token = "bearer " + json.loads(response.content)["user"]["token"]
 
         self.client.post(self.SIGN_UP_URL, test_non_author_user, format="json")
+
         response = self.client.post(
             self.SIGN_IN_URL, test_non_author_user, format="json")
         self.non_user_token = "bearer " + \
@@ -63,3 +63,4 @@ class BaseTest(TestCase):
                          HTTP_AUTHORIZATION=self.token, format="json")
         self.client.post(self.ARTICLES, self.test_article_data,
                          HTTP_AUTHORIZATION=self.token, format="json")
+

@@ -72,7 +72,6 @@ class RegistrationAPIView(CreateAPIView):
 
         return Response(dict(email=user_email, username=user_name, verify_token=token), status=status.HTTP_201_CREATED)
 
-
 class LoginAPIView(CreateAPIView):
     permission_classes = (AllowAny,)
     renderer_classes = (UserJSONRenderer,)

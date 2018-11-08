@@ -14,12 +14,12 @@ class ProfileJSONRenderer(JSONRenderer):
             errors = data.get('errors', None)
             if errors is not None:
                 return super().render(data)
-
+              
         if type(data) != ReturnDict:
             return json.dumps({
-                'profiles': data
+                'profile': data
             })
         else:
             return json.dumps({
-                'profiles': data
+                'profile': data
             })

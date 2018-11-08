@@ -5,7 +5,8 @@ from .views import ArticlesView
 from .views import CommentRetrieveUpdateDestroy, CommentsListCreateAPIView
 
 
-articles_list = ArticlesView.as_view({
+# map http methods to defined methods in ArticlesViews
+articles_list =  ArticlesView.as_view({
     'get': 'list',
     'post': 'create',
 
@@ -13,7 +14,6 @@ articles_list = ArticlesView.as_view({
 articles_detail = ArticlesView.as_view({
     'get': 'retrieve',
     'put': 'update',
-    'patch': 'partial_update',
     'delete': 'destroy'
 })
 
@@ -36,4 +36,3 @@ urlpatterns = [
     path('articles/<slug>/comment/<int:id>/',
          comments_list, name='comment_an_article'),
     path('articles/<slug>/comment/', comments_details, name='modify_a_comment')
-]

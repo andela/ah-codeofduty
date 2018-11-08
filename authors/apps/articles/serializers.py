@@ -9,6 +9,8 @@ from .models import Article
 from .models import Comment
 from authors.apps.authentication.serializers import UserSerializer
 from authors.apps.authentication.models import User
+from authors.apps.profiles.serializers import ProfileSerializer
+from authors.apps.profiles.models import Profile
 
 
 class ArticleSerializer(serializers.ModelSerializer):
@@ -64,16 +66,20 @@ class ArticleSerializer(serializers.ModelSerializer):
         return instance
 
 
-# ............................................................................................
 class RecursiveSerializer(serializers.Serializer):
+    """
+    This class deals with a comment within a comment 
+    """
+
     def to_representation(self, value):
         serializer = self.parent.parent.__class__(value, context=self.context)
         return serializer.data
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    """This class creates the comments serializers"""
-
+    """
+    This class creates the comments serializers
+    """
     author = serializers.SerializerMethodField()
     article = serializers.ReadOnlyField(source='article.title')
     thread = RecursiveSerializer(many=True, read_only=True)
@@ -91,11 +97,11 @@ class CommentSerializer(serializers.ModelSerializer):
             'updated_at'
         )
 
-    def update(self, instance, validated_data, **kwargs):
+    def update(self, instance, valid_input, **kwargs):
         """
-        Update and return a comment instance, given the validated_data
+        Update and return a comment instance, given valid_input
         """
-        instance.body = validated_data.get('body', instance.body)
+        instance.body = valid_input.get('body', instance.body)
         instance.save()
         return instance
 
@@ -108,10 +114,10 @@ class CommentSerializer(serializers.ModelSerializer):
         except Exception as e:
             return {}
 
-    def create(self, validated_data):
+    def create(self, valid_input):
         """
-        Create and return a new comment instance, given the validated_data
+        Create and return a new comment instance, given a valid_input
         """
         parent = self.context.get('parent', None)
-        instance = Comment.objects.create(parent=parent, **validated_data)
+        instance = Comment.objects.create(parent=parent, **valid_input)
         return instance

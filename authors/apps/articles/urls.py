@@ -17,11 +17,23 @@ articles_detail = ArticlesView.as_view({
     'delete': 'destroy'
 })
 
+# crud methods
+comments_list = CommentRetrieveUpdateDestroy.as_view({
+    'delete': 'delete_a_comment',
+    'post': 'create_a_reply',
+    'put': 'update_a_comment',
+    'get': 'fetch_a_comment'
+})
+# retrieve all and create a comment
+comments_details = CommentsListCreateAPIView.as_view({
+    'get': 'fetch_all_comments',
+    'post': 'create_a_comment'
+})
+
 urlpatterns = [
     path('articles/', articles_list),
     path('articles/<slug>/', articles_detail),
-    path('articles/<slug>/comment/<id>',
-         CommentRetrieveUpdateDestroy.as_view(), name='a-comment'),
-    path('articles/<slug>/comment',
-         CommentsListCreateAPIView.as_view(), name='comments')
+    path('articles/<slug>/comment/<int:id>/',
+         comments_list, name='comment_an_article'),
+    path('articles/<slug>/comment/', comments_details, name='modify_a_comment')
 ]

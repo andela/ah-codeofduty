@@ -19,8 +19,6 @@ class ArticleTestCase(BaseTest):
         }
         response = self.client.post(
             self.ARTICLES, article_data, HTTP_AUTHORIZATION=self.token, format="json")
-        slug = json.loads(response.content)["slug"]
-        print(slug)
 
     # sample test data
         sample_comment = {"body": "this is a sample comment"}

@@ -6,15 +6,15 @@ from authors.apps.profiles.tests.base_test import BaseTest
 class ProfilesTest(BaseTest):
 
     def test_list_profiles(self):
-        response = self.client.get('/profiles/', format="json")
+        response = self.client.get('/api/profiles/', format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_user_view_their_profile(self):
-        response = self.client.get('/profiles/mathias', format="json")
+        response = self.client.get('/api/profiles/mathias', format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_retrieve_non_existing_profile(self):
-        response = self.client.get('/profiles/angule', format="json")
+        response = self.client.get('/api/profiles/angule', format="json")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_update_profile(self):
@@ -25,6 +25,6 @@ class ProfilesTest(BaseTest):
                     "avatar": "https://pbs.twimg.com/profile_images/670856248678596608/2yr7o6QQ_400x400.jpg",
                     "bio": "codeofdutycodeofdutycodeofduty"
                 }
-        response = self.client.put('/profiles/mathias', data, format="json")
+        response = self.client.put('/api/profiles/mathias', data, format="json")
         self.assertIn("codeofdutycodeofdutycodeofduty", response.data['bio'])
         self.assertEqual(response.status_code, status.HTTP_200_OK)

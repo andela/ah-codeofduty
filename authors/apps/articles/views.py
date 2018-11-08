@@ -39,7 +39,7 @@ class ArticlesView(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def retrieve(self, request, slug):
-      '''method retrieving a single article(get)'''
+        '''method retrieving a single article(get)'''
         serializer_context = {'request': request}
         article = self.check_article_exists(slug)
         serializer = self.serializer_class(article, context=serializer_context)

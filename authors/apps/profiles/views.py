@@ -50,7 +50,7 @@ class ProfileRetrieveUpdateAPIView(RetrieveUpdateAPIView):
 
 class ProfileList(ListAPIView):
     """View all created profiles"""
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
 

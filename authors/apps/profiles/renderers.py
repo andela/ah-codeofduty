@@ -17,9 +17,9 @@ class ProfileJSONRenderer(JSONRenderer):
 
         if type(data) != ReturnDict:
             return json.dumps({
-                'profiles': data
+                'profile': data
             })
         else:
             return json.dumps({
-                'profiles': data
+                'profile': data
             })

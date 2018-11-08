@@ -10,6 +10,8 @@ from rest_framework.validators import UniqueValidator
 
 from .models import User
 from authors.settings import SECRET_KEY
+from authors.apps.profiles.models import Profile
+
 from .backends import JWTAuthentication
 
 from authors.apps.profiles.models import Profile

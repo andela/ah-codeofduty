@@ -12,7 +12,6 @@ class ProfileSerializer(serializers.ModelSerializer):
     bio = serializers.CharField(allow_blank=True, required=False, min_length=5, max_length=255)
     following = serializers.SerializerMethodField()
 
-
     class Meta:
         model = Profile
         fields = ['username', 'surname', 'last_name', 'avatar', 'bio', 'created_at',
@@ -27,4 +26,3 @@ class ProfileSerializer(serializers.ModelSerializer):
         follower = request.user.profile
         followee = instance
         return follower.is_following(followee)
-

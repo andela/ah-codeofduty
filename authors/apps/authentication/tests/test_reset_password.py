@@ -103,4 +103,3 @@ class ResetPasswordTestCase(BaseTest):
         response13 = self.client.post(RESET_URL, {"new_password": "secret123", "confirm_password": "secret123"}, format="json")
         self.assertEqual(response13.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(json.loads(response13.content)["error"][0], "You either have an invalid token or the token has expired.")
-        

@@ -1,7 +1,6 @@
 from rest_framework.generics import RetrieveUpdateAPIView, ListAPIView
 from rest_framework.views import APIView
-from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated
 
 from rest_framework.response import Response
 from rest_framework import status, serializers
@@ -18,7 +17,7 @@ class ProfileRetrieveUpdateAPIView(RetrieveUpdateAPIView):
     """
     Users are able to edit their profile information
     """
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
     renderer_classes = (ProfileJSONRenderer,)
     serializer_class = ProfileSerializer
 
@@ -30,7 +29,6 @@ class ProfileRetrieveUpdateAPIView(RetrieveUpdateAPIView):
     def update(self, request, username, *args, **kwargs):
         serializer_data = request.data
         user = get_object_or_404(User, username=username)
-
         serializer_data = {
             'surname': serializer_data.get('surname', request.user.profile.surname),
             'last_name': serializer_data.get('last_name', request.user.profile.last_name),

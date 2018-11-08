@@ -1,7 +1,7 @@
 '''articles/serializers'''
 from decimal import Decimal
 
-from  django.db.models import Sum
+from  django.db.models import Avg
 from rest_framework import serializers
 from django.utils.text import slugify
 from authors.apps.authentication.serializers import UserSerializer
@@ -28,13 +28,13 @@ class ArticleSerializer(serializers.ModelSerializer):
     time_to_read = serializers.IntegerField(required=False)
     time_created = serializers.SerializerMethodField()
     time_updated = serializers.SerializerMethodField()
-    avaragerating = serializers.SerializerMethodField()
-   
+    average_rating = serializers.SerializerMethodField()
+
     class Meta:
         '''Class defining fields passed to database'''
         model = Article
         fields = ('title', 'body', 'images', 'description', 'slug', 'tags',
-                  'time_to_read', 'author', 'time_created', 'time_updated', 'avaragerating')
+                  'time_to_read', 'author', 'time_created', 'time_updated', 'average_rating')
 
     def get_time_created(self, instance):
         '''get time the article was created and return in iso format'''
@@ -58,13 +58,12 @@ class ArticleSerializer(serializers.ModelSerializer):
         validated_data["slug"] = slug
         return Article.objects.create(**validated_data)
 
-    def get_avaragerating(self, obj):
-        avarage = None
+    def get_average_rating(self, obj):
+        avarage = 0
         try:
             ratings = Rating.objects.filter(article=obj.id)
-            avarage = ratings.aggregate(Sum('rating'))['rating__sum']/len(ratings)
-            avarage = Decimal(avarage)
-            avarage = round(avarage, 2)
+            avarage = ratings.all().aggregate(
+                Avg('rating'))['rating__avg']
         except Exception as e:
             print(e)
         return avarage

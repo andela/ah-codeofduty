@@ -19,7 +19,7 @@ class Rating(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     rater = models.ForeignKey(User, on_delete=models.CASCADE)
 
-    def __repr__(self):
+    def __int__(self):
         """
         special method to return data in human
         readable form

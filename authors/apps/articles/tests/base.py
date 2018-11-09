@@ -29,6 +29,13 @@ class BaseTest(TestCase):
             "password": "test1234"
 
         }
+
+        self.fav_test_user = {
+            "email": "njery.ngigi@gmail.com",
+            "username": "test_user",
+            "password": "test1234"
+        }
+        
         self.test_article_data = {
 	        "title": "test title",
 	        "body": "This is me testing",
@@ -47,4 +54,25 @@ class BaseTest(TestCase):
         
         self.client.post(self.ARTICLES, self.test_article_data, HTTP_AUTHORIZATION=self.token, format="json")
         self.client.post(self.ARTICLES, self.test_article_data, HTTP_AUTHORIZATION=self.token, format="json")
-
+    
+    def favorite_article(self, slug, token):
+        return self.client.post(
+            self.ARTICLES + slug +'/favorite',
+            HTTP_AUTHORIZATION = 'Bearer ' + token,
+            format='json'
+        )
+    
+    def unfavorite_article(self, slug, token):
+        return self.client.delete(
+            self.ARTICLES + slug +'/favorite',
+            HTTP_AUTHORIZATION = 'Bearer ' + token,
+            format='json'
+        )
+    
+    def create_article(self, article, token):
+        return self.client.post(
+            self.ARTICLES,
+            article,
+            HTTP_AUTHORIZATION = 'Bearer ' + token,
+            format='json'
+        )

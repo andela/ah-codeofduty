@@ -1,4 +1,8 @@
 /* Base Styles */
+:root {
+    font-size: 13px;
+}
+
 *,
 *::before,
 *::after {

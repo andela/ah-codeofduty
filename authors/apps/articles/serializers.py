@@ -28,8 +28,9 @@ class ArticleSerializer(serializers.ModelSerializer):
     time_created = serializers.SerializerMethodField()
     time_updated = serializers.SerializerMethodField()
     favorited = serializers.SerializerMethodField()
-    favoritesCount = serializers.SerializerMethodField(method_name='get_favorites_count')
-    
+    favoritesCount = serializers.SerializerMethodField(
+        method_name='get_favorites_count')
+
     class Meta:
         '''Class defining fields passed to database'''
         model = Article
@@ -57,7 +58,6 @@ class ArticleSerializer(serializers.ModelSerializer):
         return Article.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
-
         '''method updating articles'''
         email = self.context.get('email')
         if email != instance.author:
@@ -71,6 +71,20 @@ class ArticleSerializer(serializers.ModelSerializer):
             'time_to_read', instance.time_to_read)
         instance.save()
         return instance
+
+    def get_favorited(self, instance):
+        request = self.context.get('request', None)
+
+        if request is None:
+            return False
+
+        if not request.user.is_authenticated:
+            return False
+
+        return request.user.profile.has_favorited(instance)
+
+    def get_favorites_count(self, instance):
+        return instance.favorited_by.count()
 
 
 class RecursiveSerializer(serializers.Serializer):
@@ -128,17 +142,3 @@ class CommentSerializer(serializers.ModelSerializer):
         parent = self.context.get('parent', None)
         instance = Comment.objects.create(parent=parent, **valid_input)
         return instance
-
-    def get_favorited(self, instance):
-        request = self.context.get('request', None)
-
-        if request is None:
-            return False
-
-        if not request.user.is_authenticated:
-            return False
-
-        return request.user.profile.has_favorited(instance)
-
-    def get_favorites_count(self, instance):
-        return instance.favorited_by.count()

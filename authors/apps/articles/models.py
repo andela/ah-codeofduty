@@ -6,6 +6,7 @@ from django.utils.text import slugify
 from authors.apps.authentication.models import User
 
 class Article(models.Model):
+    '''Model representing articles'''
     title = models.CharField(db_index=True, max_length=255)
     body = models.TextField()
     images = ArrayField(models.TextField(), default=None, blank=True, null=True)
@@ -21,6 +22,7 @@ class Article(models.Model):
     average_rating = models.IntegerField(default=0)
 
     class Meta():
+        '''Meta class defining order'''
         ordering = ('time_created', 'time_updated',)
 
     def save(self, *args, **kwargs):
@@ -28,4 +30,5 @@ class Article(models.Model):
         super(Article, self).save(*args, **kwargs)
 
     def __str__(self):
+        '''return string representation of object'''
         return self.title

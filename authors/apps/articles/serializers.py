@@ -7,11 +7,17 @@ from django.utils.text import slugify
 from authors.apps.authentication.serializers import UserSerializer
 from ..authentication.models import User
 from rest_framework.exceptions import PermissionDenied
+# django.forms.fields.ImageField
 
 from .models import Article
 from ..rating.models import Rating
 
 class ArticleSerializer(serializers.ModelSerializer):
+    '''Article model serializer'''
+    author = UserSerializer(read_only=True)
+    title = serializers.CharField(required=True, max_length=100)
+    body = serializers.CharField()
+    images = serializers.ListField(child=serializers.CharField(max_length=1000), min_length=None, max_length=None, required=False)
     author = UserSerializer(read_only=True)
     title = serializers.CharField(required=True, max_length=100)
     body = serializers.CharField()
@@ -25,6 +31,7 @@ class ArticleSerializer(serializers.ModelSerializer):
     average_rating = serializers.SerializerMethodField()
 
     class Meta:
+        '''Class defining fields passed to database'''
         model = Article
         fields = ('title', 'body', 'images', 'description', 'slug', 'tags',
                   'time_to_read', 'author', 'time_created', 'time_updated', 'average_rating')
@@ -36,6 +43,15 @@ class ArticleSerializer(serializers.ModelSerializer):
         return instance.time_updated.isoformat()
 
     def create(self, validated_data):
+        '''get time the article was created and return in iso format'''
+        return instance.time_created.isoformat()
+
+    def get_time_updated(self, instance):
+        '''get time the article was created and return in iso format'''
+        return instance.time_updated.isoformat()
+
+    def create(self, validated_data):
+        '''method creating articles'''
         email = self.context.get('email')
         user = User.objects.get(email=email)
         validated_data["author"] = user
@@ -60,6 +76,7 @@ class ArticleSerializer(serializers.ModelSerializer):
 
 
     def update(self, instance, validated_data):
+        '''method updating articles'''
         email = self.context.get('email')
         if email != instance.author:
             raise PermissionDenied
@@ -70,3 +87,5 @@ class ArticleSerializer(serializers.ModelSerializer):
         instance.time_to_read = validated_data.get('time_to_read', instance.time_to_read)
         instance.save()
         return instance
+    
+    

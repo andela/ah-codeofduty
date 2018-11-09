@@ -19,6 +19,7 @@ class Article(models.Model):
     # auto_now will update every time you save the model.
     time_updated = models.DateTimeField(auto_now=True, db_index=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
+    average_rating = models.IntegerField(default=0)
 
     class Meta():
         '''Meta class defining order'''

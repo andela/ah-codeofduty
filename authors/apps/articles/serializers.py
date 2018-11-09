@@ -1,14 +1,23 @@
 '''articles/serializers'''
+from decimal import Decimal
+
+from  django.db.models import Avg
 from rest_framework import serializers
 from django.utils.text import slugify
 from authors.apps.authentication.serializers import UserSerializer
 from ..authentication.models import User
 from rest_framework.exceptions import PermissionDenied
+# django.forms.fields.ImageField
 
 from .models import Article
+from ..rating.models import Rating
 
 class ArticleSerializer(serializers.ModelSerializer):
     '''Article model serializer'''
+    author = UserSerializer(read_only=True)
+    title = serializers.CharField(required=True, max_length=100)
+    body = serializers.CharField()
+    images = serializers.ListField(child=serializers.CharField(max_length=1000), min_length=None, max_length=None, required=False)
     author = UserSerializer(read_only=True)
     title = serializers.CharField(required=True, max_length=100)
     body = serializers.CharField()
@@ -21,13 +30,15 @@ class ArticleSerializer(serializers.ModelSerializer):
     time_updated = serializers.SerializerMethodField()
     favorited = serializers.SerializerMethodField()
     favoritesCount = serializers.SerializerMethodField(method_name='get_favorites_count')
-    
+    average_rating = serializers.SerializerMethodField()
+
     class Meta:
         model = Article
         fields = ('title', 'body', 'images', 'description', 'slug', 'tags',
-                  'time_to_read', 'author', 'time_created', 'time_updated', 'favorited', 'favoritesCount')
+                  'time_to_read', 'author', 'time_created', 'time_updated', 'favorited', 'favoritesCount', 'average_rating' )
 
     def get_time_created(self, instance):
+        '''get time the article was created and return in iso format'''
         return instance.time_created.isoformat()
 
     def get_time_updated(self, instance):
@@ -46,6 +57,17 @@ class ArticleSerializer(serializers.ModelSerializer):
             num += 1
         validated_data["slug"] = slug
         return Article.objects.create(**validated_data)
+
+    def get_average_rating(self, obj):
+        avarage = 0
+        try:
+            ratings = Rating.objects.filter(article=obj.id)
+            avarage = ratings.all().aggregate(
+                Avg('rating'))['rating__avg']
+        except Exception as e:
+            print(e)
+        return avarage
+
 
     def update(self, instance, validated_data):
         '''method updating articles'''

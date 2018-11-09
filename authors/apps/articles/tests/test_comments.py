@@ -28,7 +28,6 @@ class ArticleTestCase(BaseTest):
     # test comment can be created to an existing article
         res1 = self.client.post(self.CREATE_A_COMMENT.format(
             "new-title"), sample_comment, HTTP_AUTHORIZATION=self.token, format="json")
-        print(res1)
         self.assertEqual(res1.status_code, status.HTTP_201_CREATED)
 
     # test comment can be fetched for all

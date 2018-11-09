@@ -28,26 +28,20 @@ class ArticleSerializer(serializers.ModelSerializer):
     time_to_read = serializers.IntegerField(required=False)
     time_created = serializers.SerializerMethodField()
     time_updated = serializers.SerializerMethodField()
+    favorited = serializers.SerializerMethodField()
+    favoritesCount = serializers.SerializerMethodField(method_name='get_favorites_count')
     average_rating = serializers.SerializerMethodField()
 
     class Meta:
-        '''Class defining fields passed to database'''
         model = Article
         fields = ('title', 'body', 'images', 'description', 'slug', 'tags',
-                  'time_to_read', 'author', 'time_created', 'time_updated', 'average_rating')
+                  'time_to_read', 'author', 'time_created', 'time_updated', 'favorited', 'favoritesCount', 'average_rating' )
 
     def get_time_created(self, instance):
-        return instance.time_created.isoformat()
-
-    def get_time_updated(self, instance):
-        return instance.time_updated.isoformat()
-
-    def create(self, validated_data):
         '''get time the article was created and return in iso format'''
         return instance.time_created.isoformat()
 
     def get_time_updated(self, instance):
-        '''get time the article was created and return in iso format'''
         return instance.time_updated.isoformat()
 
     def create(self, validated_data):
@@ -87,5 +81,17 @@ class ArticleSerializer(serializers.ModelSerializer):
         instance.time_to_read = validated_data.get('time_to_read', instance.time_to_read)
         instance.save()
         return instance
-    
-    
+
+    def get_favorited(self, instance):
+        request = self.context.get('request', None)
+
+        if request is None:
+            return False
+
+        if not request.user.is_authenticated:
+            return False
+
+        return request.user.profile.has_favorited(instance)
+
+    def get_favorites_count(self, instance):
+        return instance.favorited_by.count()

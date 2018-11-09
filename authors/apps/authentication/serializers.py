@@ -122,16 +122,6 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 'This user has been deactivated.'
             )
-
-        #Create a token by encoding email
-        #jwt consist of `header`, `payload` and `secret` 
-        payload = {
-            'email': user.email,
-            'iat': datetime.utcnow(),
-            'exp': datetime.utcnow() + timedelta(days=7)
-        }
-        jwt_token =  jwt.encode(payload, SECRET_KEY).decode('UTF-8')
-
         # The `validate` method should return a dictionary of validated data.
         # This is the data that is passed to the `create` and `update` methods
         # that we will see later on.
@@ -265,3 +255,4 @@ class SocialSignInSignOutSerializer(serializers.Serializer):
         max_length=1024, required=True, trim_whitespace=True)
     access_token_secret = serializers.CharField(
         max_length=300, allow_null=True, default=None, trim_whitespace=True)
+        

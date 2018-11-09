@@ -1,6 +1,6 @@
 '''articles/urls.py'''
 from django.urls import path
-
+from .views import ArticlesView, ArticlesFavoriteAPIView
 from .views import ArticlesView
 
 # map http methods to defined methods in ArticlesViews
@@ -12,9 +12,12 @@ articles_list =  ArticlesView.as_view({
 articles_detail =  ArticlesView.as_view({
     'get': 'retrieve',
     'put': 'update',
+    'patch': 'partial_update',
     'delete': 'destroy'
 })
+
 urlpatterns = [
     path('articles/', articles_list),
-    path('articles/<slug>/', articles_detail)
+    path('articles/<slug>/', articles_detail),
+    path('articles/<slug>/favorite', ArticlesFavoriteAPIView.as_view())
 ]

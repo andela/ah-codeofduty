@@ -5,6 +5,12 @@ matrix:
     - python: 3.6
       sudo: true
 
+services:
+  - postgresql
+
+addons:
+  postgresql: "9.4"
+
 addons:
   postgresql: "9.4"
 

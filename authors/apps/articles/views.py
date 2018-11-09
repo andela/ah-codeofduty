@@ -10,9 +10,11 @@ from rest_framework.exceptions import NotFound, PermissionDenied
 from .serializers import ArticleSerializer, CommentSerializer
 from .models import Article, Comment
 
+from rest_framework.views import APIView
+
+from .exceptions import ArticleDoesNotExist
 
 class ArticlesView(viewsets.ModelViewSet):
-    '''Articles view for post, get, put and delete methods for articles'''
     permission_classes = (IsAuthenticatedOrReadOnly,)
     serializer_class = ArticleSerializer
     def check_article_exists(self, slug):
@@ -24,9 +26,9 @@ class ArticlesView(viewsets.ModelViewSet):
         return article
 
     def list(self, request):
-        '''method retrieving all articles(get)'''
+        serializer_context = {'request': request}
         queryset = Article.objects.all()
-        serializer = self.serializer_class(queryset, many=True)
+        serializer = self.serializer_class(queryset, context=serializer_context, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def create(self, request):
@@ -40,9 +42,9 @@ class ArticlesView(viewsets.ModelViewSet):
 
     def retrieve(self, request, slug):
         '''method retrieving a single article(get)'''
+        serializer_context = {'request': request}
         article = self.check_article_exists(slug)
-        serializer = self.serializer_class(article)
-        
+        serializer = self.serializer_class(article, context=serializer_context)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def update(self, request, slug):
@@ -62,7 +64,6 @@ class ArticlesView(viewsets.ModelViewSet):
             raise PermissionDenied
         article.delete()
         return Response(dict(message="Article {} deleted successfully".format(slug)), status=status.HTTP_200_OK)
-
 
 class CommentsListCreateAPIView(ArticlesView):
     """Authenticated users can comment on articles"""
@@ -181,4 +182,39 @@ class CommentRetrieveUpdateDestroy(CommentsListCreateAPIView, CreateAPIView):
                             status=status.HTTP_404_NOT_FOUND)
         comment.delete()
         return Response({"message": {"Comment was deleted successfully"}}, status.HTTP_200_OK)
+
+class ArticlesFavoriteAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+    # renderer_classes = (ArticleJSONRenderer,)
+    serializer_class = ArticleSerializer
+
+    def post(self, request, slug=None):
+        profile = self.request.user.profile
+        serializer_context = {'request': request}
+
+        try:
+            article = Article.objects.get(slug=slug)
+        except Article.DoesNotExist:
+            raise ArticleDoesNotExist
+
+        profile.favorite(article)
+
+        serializer = self.serializer_class(article, context=serializer_context)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def delete(self, request, slug=None):
+        profile = self.request.user.profile
+        serializer_context = {'request': request}
+
+        try:
+            article = Article.objects.get(slug=slug)
+        except Article.DoesNotExist:
+            raise ArticleDoesNotExist
+
+        profile.unfavorite(article)
+
+        serializer = self.serializer_class(article, context=serializer_context)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 

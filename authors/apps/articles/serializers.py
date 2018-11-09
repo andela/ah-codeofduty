@@ -27,20 +27,19 @@ class ArticleSerializer(serializers.ModelSerializer):
     time_to_read = serializers.IntegerField(required=False)
     time_created = serializers.SerializerMethodField()
     time_updated = serializers.SerializerMethodField()
-
+    favorited = serializers.SerializerMethodField()
+    favoritesCount = serializers.SerializerMethodField(method_name='get_favorites_count')
+    
     class Meta:
         '''Class defining fields passed to database'''
-
         model = Article
         fields = ('title', 'body', 'images', 'description', 'slug', 'tags',
-                  'time_to_read', 'author', 'time_created', 'time_updated')
+                  'time_to_read', 'author', 'time_created', 'time_updated', 'favorited', 'favoritesCount')
 
     def get_time_created(self, instance):
-        '''get time the article was created and return in iso format'''
         return instance.time_created.isoformat()
 
     def get_time_updated(self, instance):
-        '''get time the article was created and return in iso format'''
         return instance.time_updated.isoformat()
 
     def create(self, validated_data):
@@ -130,3 +129,16 @@ class CommentSerializer(serializers.ModelSerializer):
         instance = Comment.objects.create(parent=parent, **valid_input)
         return instance
 
+    def get_favorited(self, instance):
+        request = self.context.get('request', None)
+
+        if request is None:
+            return False
+
+        if not request.user.is_authenticated:
+            return False
+
+        return request.user.profile.has_favorited(instance)
+
+    def get_favorites_count(self, instance):
+        return instance.favorited_by.count()

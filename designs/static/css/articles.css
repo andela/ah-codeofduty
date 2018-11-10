@@ -116,5 +116,7 @@ textarea{
     text-decoration: none;
 }
 .ave-rating{
-    font-size: 2.5em;
+    font-size: 150%;
+    padding: 2%;
+    margin: 2%;
 }

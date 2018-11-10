@@ -12,12 +12,6 @@
     .side-column{
         padding-top: 4rem;
     }
-    /* .fixed{
-        position: fixed;
-        z-index: -1;
-        overflow: hidden;
-    } */
-
  }
 img.round-image{
     height: 75px;
@@ -59,20 +53,8 @@ i.fas{
     border-width: 2px !important;
     border-radius: 5%;
 }
-.font-pattaya{ font-family: 'Pattaya', sans-serif;}
-.font-lobster{ font-family: 'Lobster', sans-serif; }
-.font-pacifico{ font-family: 'Pacifico', sans-serif; }
-.font-permanent-marker{ font-family: 'Permanent Marker', sans-serif; }
 .font-satisfy{ font-family: 'Satisfy', sans-serif; }
-.font-kodchasan{ font-family: 'Kodchasan', sans-serif; }
-.font-poitret-one{ font-family: 'Poiret One', sans-serif; }
-.font-exo{ font-family: 'Exo', sans-serif}
-.font-barlow{ font-family: 'Barlow'}
-.font-concert-one{ font-family: 'Concert One'}
-.font-fredoka-one{ font-family: 'Fredoka One'}
 .font-raleway{ font-family: 'Raleway'}
-.font-caveat{ font-family: 'Caveat Brush'}
-
 .card-text{
     font-family: 'Raleway', sans-serif;
 }
@@ -124,7 +106,6 @@ textarea{
 .text-orange{
     color: orange;
 }
-/* fonts: #e83e8c orange*/
 .logo{
     border-right: 2px solid orange;
     color: orange;

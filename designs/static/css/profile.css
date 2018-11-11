@@ -9,6 +9,68 @@
     box-sizing: border-box;
 }
 
+.user_data{
+    display: flex;
+    flex-direction: column;
+}
+.user_detail{
+    display: flex;
+    align-items: center;
+}
+.profile-articles {
+    font-family: Athelas,'Times New Roman';
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+
+}
+.row .col.col-md-offset-3 {
+    margin-left: 25%;
+}
+
+.list-inline li {
+    display: inline-block;
+}
+
+.user_info {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.article-info {
+    display: flex;
+    margin-left: 20px;
+    flex-direction: column;
+}
+.article-info-det {
+    display: flex;
+    font-size: 14px;
+}
+
+.spacer {
+    padding-right: 10px;
+    padding-left: 10px;
+}
+
+.card .card-content {
+    padding: 24px;
+    border-radius: 0 0 2px 2px;
+
+}
+
+.card{
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+
+}
+
+.card-title {
+    font-weight: 600;
+}
+
+#prof {
+    width: 66%;
+}
+
 img {
     display: block;
 }
@@ -19,7 +81,11 @@ img {
     padding: 0 2rem;
 }
 
-.btn {
+a {
+    color: black;
+}
+
+/* .btn {
     display: inline-block;
     font: inherit;
     background: none;
@@ -27,7 +93,7 @@ img {
     color: inherit;
     padding: 0;
     cursor: pointer;
-}
+} */
 
 .btn:focus {
     outline: 0.5rem auto #4d90fe;
@@ -47,11 +113,18 @@ img {
     padding: 5rem 0;
 }
 
-.profile::after {
+.profile {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 40px;
+    flex-wrap: wrap;
+}
+
+/* .profile::after {
     content: "";
     display: block;
     clear: both;
-}
+} */
 
 .profile-image {
     float: left;
@@ -79,16 +152,14 @@ img {
 
 .profile-user-name {
     display: inline-block;
-    font-weight: 300;
+    font-weight: 600;
 }
 
 .profile-edit-btn {
-    font-size: 1.4rem;
     line-height: 1.8;
     border: 0.1rem solid #dbdbdb;
     border-radius: 0.3rem;
-    padding: 0 2.4rem;
-    margin-left: 2rem;
+    margin-left: 3rem;
 }
 
 
@@ -117,9 +188,6 @@ img {
 
 .profile-real-name,
 .profile-stat-count,
-.profile-edit-btn {
-    font-weight: 600;
-}
 
 /* Loader */
 
@@ -224,13 +292,13 @@ img {
 }
 
 @supports (display: grid) {
-    .profile {
+    /* .profile {
         display: grid;
         grid-template-columns: 1fr 2fr;
         grid-template-rows: repeat(3, auto);
         grid-column-gap: 3rem;
         align-items: center;
-    }
+    } */
 
     .profile-image {
         grid-row: 1 / -1;
@@ -256,6 +324,9 @@ img {
         .profile {
             grid-template-columns: auto 1fr;
             grid-row-gap: 1.5rem;
+        }
+        .col-sm-6{
+            max-width: 90%;
         }
 
         .profile-image {

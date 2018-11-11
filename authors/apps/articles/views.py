@@ -1,9 +1,9 @@
 '''articles/views.py'''
 from django.shortcuts import render
 from django.shortcuts import render, get_object_or_404
-from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView
+from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView, UpdateAPIView
 from rest_framework.permissions import (
-    AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly,)
+    AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly, )
 from rest_framework.response import Response
 from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound, PermissionDenied
@@ -55,7 +55,7 @@ class ArticlesView(viewsets.ModelViewSet):
         '''method updating an article(put)'''
         article = self.check_article_exists(slug)
         serializer = self.serializer_class(article, data=request.data, context={
-                                           "email": request.user}, partial=True)
+            "email": request.user}, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
@@ -260,3 +260,66 @@ class ArticlesFavoriteAPIView(APIView):
         serializer = self.serializer_class(article, context=serializer_context)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class LikeComments(UpdateAPIView):
+    """Class for comment likes"""
+    serializer_class = CommentSerializer
+
+    def update(self, request, *args, **kwargs):
+        """Method for updating comment likes"""
+        slug = self.kwargs['slug']
+        try:
+            Article.objects.get(slug=slug)
+        except Article.DoesNotExist:
+            return Response({'Error': 'The article does not exist'}, status.HTTP_404_NOT_FOUND)
+        try:
+            pk = self.kwargs.get('pk')
+            comment = Comment.objects.get(pk=pk)
+        except Comment.DoesNotExist:
+            message = {"Error": "A comment with this ID does not exist"}
+            return Response(message, status.HTTP_404_NOT_FOUND)
+        # fetch user
+        user = request.user
+        comment.dislikes.remove(user.id)
+        # Confirmation user already liked the comment
+        confirm = bool(user in comment.likes.all())
+        if confirm is True:
+            comment.likes.remove(user.id)
+            return Response({'Success, You only like a comment once'}, status.HTTP_200_OK)
+        # Adding user like to list of likes
+        comment.likes.add(user.id)
+        message = {"Success": "You liked this comment"}
+        return Response(message, status.HTTP_200_OK)
+
+
+class DislikeComments(UpdateAPIView):
+    """Class for comment dislikes"""
+    serializer_class = CommentSerializer
+
+    def update(self, request, *args, **kwargs):
+        """Method for updating comment dislikes"""
+        slug = self.kwargs['slug']
+        try:
+            Article.objects.get(slug=slug)
+        except Article.DoesNotExist:
+            return Response({'Error': 'The article does not exist'}, status.HTTP_404_NOT_FOUND)
+        try:
+            pk = self.kwargs.get('pk')
+            comment = Comment.objects.get(pk=pk)
+        except Comment.DoesNotExist:
+            message = {"Error": "A comment with this ID does not exist"}
+            return Response(message, status.HTTP_404_NOT_FOUND)
+        # fetch  user
+        user = request.user
+        comment.likes.remove(user.id)
+        # Confirmation user already disliked the comment
+        confirm = bool(user in comment.dislikes.all())
+        if confirm is True:
+            comment.dislikes.remove(user.id)
+            message = {"Success": "You have un-disliked this comment"}
+            return Response(message, status.HTTP_200_OK)
+        # This add the user to dislikes lists
+        comment.dislikes.add(user.id)
+        message = {"success": "You disliked this comment"}
+        return Response(message, status.HTTP_200_OK)

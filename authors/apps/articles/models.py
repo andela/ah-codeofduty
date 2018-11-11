@@ -1,4 +1,4 @@
-'''articles/models.py'''
+"""articles/models.py"""
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.utils.text import slugify
@@ -6,7 +6,7 @@ from authors.apps.authentication.models import User
 
 
 class Article(models.Model):
-    '''Model representing articles'''
+    """Model representing articles"""
     title = models.CharField(db_index=True, max_length=255)
     body = models.TextField()
     images = ArrayField(models.TextField(), default=None,
@@ -24,15 +24,15 @@ class Article(models.Model):
     average_rating = models.IntegerField(default=0)
 
     class Meta():
-        '''Meta class defining order'''
+        """Meta class defining order"""
         ordering = ('time_created', 'time_updated',)
 
     def save(self, *args, **kwargs):
-        '''override save from super'''
+        """override save from super"""
         super(Article, self).save(*args, **kwargs)
 
     def __str__(self):
-        '''return string representation of object'''
+        """return string representation of object"""
         return self.title
 
 
@@ -53,6 +53,8 @@ class Comment(models.Model):
     body = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    likes = models.ManyToManyField(User, related_name='comment_likes', blank=True)
+    dislikes = models.ManyToManyField(User, related_name='comment_dislikes', blank=True)
 
     def __str__(self):
         return self.body

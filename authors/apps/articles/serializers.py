@@ -138,6 +138,8 @@ class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SerializerMethodField()
     article = serializers.ReadOnlyField(source='article.title')
     thread = RecursiveSerializer(many=True, read_only=True)
+    likes = serializers.SerializerMethodField(method_name='count_likes')
+    dislikes = serializers.SerializerMethodField(method_name='count_dislikes')
 
     class Meta:
         model = Comment
@@ -149,7 +151,9 @@ class CommentSerializer(serializers.ModelSerializer):
             'author',
             'thread',
             'created_at',
-            'updated_at'
+            'updated_at',
+            'comment_likes',
+            'comment_dislikes'
         )
 
     def update(self, instance, valid_input, **kwargs):
@@ -176,6 +180,7 @@ class CommentSerializer(serializers.ModelSerializer):
         parent = self.context.get('parent', None)
         instance = Comment.objects.create(parent=parent, **valid_input)
         return instance
+
 
 class CommentHistorySerializer(serializers.ModelSerializer):
     """comment history serializer"""
@@ -226,3 +231,22 @@ class HighlightSerializer(serializers.ModelSerializer):
         instance.highlighted_article_piece = highlight_text
         instance.save()
         return instance
+
+    def count_likes(self, instance):
+        """Returns the total likes of a comment"""
+        request = self.context.get('request')
+        liked_by_me = False
+        if request is not None and request.user.is_authenticated:
+            user_id = request.user.id
+            liked_by_me = instance.likes.all().filter(id=user_id).count() == 1
+        return {'count': instance.likes.count(), 'me': liked_by_me}
+
+    def count_dislikes(self, instance):
+        """Returns  the total dislikes of a a comment"""
+        request = self.context.get('request')
+        disliked_by_me = False
+        if request is not None and request.user.is_authenticated:
+            user_id = request.user.id
+            disliked_by_me = instance.dislikes.all().filter(
+                id=user_id).count() == 1
+        return {'count': instance.dislikes.count(), 'me': disliked_by_me}

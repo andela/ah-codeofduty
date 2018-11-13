@@ -208,7 +208,6 @@ class CommentRetrieveUpdateDestroy(CommentsListCreateAPIView, CreateAPIView):
         if comment == None:
             return Response({"message": "Comment with the specified id for this article does Not Exist"},
                             status=status.HTTP_404_NOT_FOUND)
-        # print(CommentSerializer(comment).data['body'])
 
         old_comment = CommentSerializer(comment).data['body']
         comment_id = CommentSerializer(comment).data['id']
@@ -244,35 +243,8 @@ class CommentRetrieveUpdateDestroy(CommentsListCreateAPIView, CreateAPIView):
         return Response({"message": {"Comment was deleted successfully"}}, status.HTTP_200_OK)
 
 
-# class GetCommentHistory(viewsets.ModelViewSet):
-#     lookup_url_kwarg = 'pk'
-#     serializer_class = CommentHistorySerializer
-#     permission_classes = (IsAuthenticated,)
-
-#     def list(self, request, *args, **kwargs):
-#         """
-#         Overrides the default GET request from ListAPIView
-#         Returns all comment edits for a particular comment
-#         :param request:
-#         :param args:
-#         :param kwargs:
-#         :return: HTTP Code 200
-#         :return: Response
-#         # """
-#         print(">>>>>>>>>>>>>>>>>>>")
-#         try:
-#             comment = Comment.objects.get(pk=kwargs['pk'])
-#         except Comment.DoesNotExist:
-#             return Response(
-#                 {"message": "Comment not found"},
-#                 status=status.HTTP_404_NOT_FOUND)
-
-#         self.queryset = CommentHistory.objects.filter(parent_comment=comment)
-
-#         return generics.ListAPIView.list(self, request, *args, **kwargs)
-
-
 class CommentHistoryAPIView(generics.ListAPIView):
+    """This class has fetchies comment edit history"""
     lookup_url_kwarg = 'pk'
     serializer_class = CommentHistorySerializer
     permission_classes = (IsAuthenticated,)

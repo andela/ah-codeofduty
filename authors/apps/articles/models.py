@@ -59,6 +59,9 @@ class Comment(models.Model):
 
 
 class CommentHistory(models.Model):
+    """
+     implements comment edit history table
+    """
     comment = models.TextField()
     parent_comment = models.ForeignKey(Comment,
                                        on_delete=models.CASCADE,

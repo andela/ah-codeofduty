@@ -163,7 +163,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class CommentHistorySerializer(serializers.ModelSerializer):
-
+    """comment history serializer"""
     class Meta:
         model = CommentHistory
         fields = ('id', 'comment', 'date_created', 'parent_comment')

@@ -3,14 +3,15 @@ from django.shortcuts import render
 from django.shortcuts import render, get_object_or_404
 from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import (
-    AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly,)
+    AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly, IsAdminUser)
 from rest_framework.response import Response
-from rest_framework import status, viewsets
+from rest_framework import status, viewsets, generics
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.views import APIView
 
-from .serializers import ArticleSerializer, CommentSerializer
-from .models import Article, Comment
+from authors.apps.articles.renderers import ReportJSONRenderer
+from .serializers import ArticleSerializer, CommentSerializer, ReportSerializer
+from .models import Article, Comment, Report
 from .exceptions import ArticleDoesNotExist
 
 
@@ -226,37 +227,31 @@ class CommentRetrieveUpdateDestroy(CommentsListCreateAPIView, CreateAPIView):
         return Response({"message": {"Comment was deleted successfully"}}, status.HTTP_200_OK)
 
 
-class ArticlesFavoriteAPIView(APIView):
-    permission_classes = (IsAuthenticated,)
-    # renderer_classes = (ArticleJSONRenderer,)
-    serializer_class = ArticleSerializer
+class ReportCreateAPIView(generics.CreateAPIView):
+    """Facilitate create reports"""
+    slug = 'slug'
 
-    def post(self, request, slug=None):
-        profile = self.request.user.profile
-        serializer_context = {'request': request}
+    queryset = Report.objects.select_related()
+    serializer_class = ReportSerializer
+    renderer_classes = (ReportJSONRenderer,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
+    def filter_queryset(self, queryset):
+        """Handle getting reports on an article."""
+        filters = {self.lookup_field: self.kwargs[self.slug]}
+        return queryset.filter(**filters)
+
+    def create(self, request, **kwargs):
+        """Create reports to an article"""
+        slug = self.kwargs['slug']
         try:
             article = Article.objects.get(slug=slug)
         except Article.DoesNotExist:
-            raise ArticleDoesNotExist
-
-        profile.favorite(article)
-
-        serializer = self.serializer_class(article, context=serializer_context)
+            raise NotFound("An article does not exist")
+        serializer_context = {"author": request.user, "slug": slug}
+        serializer_data = request.data
+        serializer = self.serializer_class(data=serializer_data, context=serializer_context)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    def delete(self, request, slug=None):
-        profile = self.request.user.profile
-        serializer_context = {'request': request}
-
-        try:
-            article = Article.objects.get(slug=slug)
-        except Article.DoesNotExist:
-            raise ArticleDoesNotExist
-
-        profile.unfavorite(article)
-
-        serializer = self.serializer_class(article, context=serializer_context)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)

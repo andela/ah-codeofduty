@@ -47,10 +47,22 @@ class Comment(models.Model):
     parent = models.ForeignKey(
         'self', null=True, blank=False, on_delete=models.CASCADE, related_name='thread')
     article = models.ForeignKey(
-        Article,  blank=True, null=True, on_delete=models.CASCADE, related_name='comments')
+        Article, blank=True, null=True, on_delete=models.CASCADE, related_name='comments')
     author = models.ForeignKey(
         User, blank=True, null=True, on_delete=models.CASCADE, related_name='comments')
     body = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.body
+
+
+class Report(models.Model):
+    """Reporting an article model"""
+    body = models.TextField()
+    author = models.ForeignKey('authentication.User', on_delete=models.CASCADE)
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

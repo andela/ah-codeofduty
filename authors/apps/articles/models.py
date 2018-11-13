@@ -20,12 +20,12 @@ class Article(models.Model):
     time_created = models.DateTimeField(auto_now_add=True, db_index=True)
     # auto_now will update every time you save the model.
     time_updated = models.DateTimeField(auto_now=True, db_index=True)
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="articles")
     average_rating = models.IntegerField(default=0)
 
     class Meta():
         '''Meta class defining order'''
-        ordering = ('time_created', 'time_updated',)
+        ordering = ('time_updated',)
 
     def save(self, *args, **kwargs):
         '''override save from super'''
@@ -56,3 +56,23 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.body
+
+class Highlight(models.Model):
+    """
+    Table representing highlights and comments made on articles
+    """
+    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name="highlights")
+    highlighter = models.ForeignKey(User, on_delete=models.CASCADE, related_name="highlights")
+    index_start = models.IntegerField(default=0)
+    index_stop = models.IntegerField()
+    highlighted_article_piece = models.CharField(blank=True, max_length=200)
+    comment = models.CharField(blank=True, max_length=200)
+    time_created = models.DateTimeField(auto_now_add=True, db_index=True)
+    time_updated = models.DateTimeField(auto_now=True, db_index=True)
+
+    class Meta():
+        '''Meta class defining order'''
+        ordering = ('time_updated',)
+
+    def __str__(self):
+        return self.comment

@@ -9,14 +9,12 @@ from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.views import APIView
 
-from .serializers import ArticleSerializer, CommentSerializer
-from .models import Article, Comment
+from .serializers import ArticleSerializer, CommentSerializer, HighlightSerializer
+from .models import Article, Comment, Highlight
 from .exceptions import ArticleDoesNotExist
 
-
-class ArticlesView(viewsets.ModelViewSet):
+class ArticleMetaData:
     permission_classes = (IsAuthenticatedOrReadOnly,)
-    serializer_class = ArticleSerializer
 
     def check_article_exists(self, slug):
         '''method checking if article exists'''
@@ -27,6 +25,10 @@ class ArticlesView(viewsets.ModelViewSet):
 
         return article
 
+
+class ArticlesView(ArticleMetaData, viewsets.ModelViewSet):
+    serializer_class = ArticleSerializer
+
     def list(self, request):
         serializer_context = {'request': request}
         queryset = Article.objects.all()
@@ -36,10 +38,8 @@ class ArticlesView(viewsets.ModelViewSet):
 
     def create(self, request):
         '''method creating a new article(post)'''
-        article = request.data
-        email = request.user
         serializer = self.serializer_class(
-            data=article, context={"email": email})
+            data=request.data, context={"email": request.user})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -225,38 +225,48 @@ class CommentRetrieveUpdateDestroy(CommentsListCreateAPIView, CreateAPIView):
         comment.delete()
         return Response({"message": {"Comment was deleted successfully"}}, status.HTTP_200_OK)
 
+class HighlightCommentView(ArticleMetaData, viewsets.ModelViewSet):
+    '''view allowing highlighting and commenting on a specific part of an article'''
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    serializer_class = HighlightSerializer
 
-class ArticlesFavoriteAPIView(APIView):
-    permission_classes = (IsAuthenticated,)
-    # renderer_classes = (ArticleJSONRenderer,)
-    serializer_class = ArticleSerializer
+    def list(self, request, slug):
+        '''get all highlights of an article'''
+        article = self.check_article_exists(slug)
+        highlights = article.highlights.values()
 
-    def post(self, request, slug=None):
-        profile = self.request.user.profile
-        serializer_context = {'request': request}
+        return Response(dict(highlights=highlights))
 
-        try:
-            article = Article.objects.get(slug=slug)
-        except Article.DoesNotExist:
-            raise ArticleDoesNotExist
-
-        profile.favorite(article)
-
-        serializer = self.serializer_class(article, context=serializer_context)
-
+    def post(self, request, slug):
+        '''create a new highlight or comment on article'''
+        article = self.check_article_exists(slug)
+        highlighter = request.user
+        serializer = self.serializer_class(data=request.data, context=dict(article=article, highlighter=highlighter))
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def delete(self, request, slug=None):
-        profile = self.request.user.profile
-        serializer_context = {'request': request}
+    def retrieve(self, request, slug, id):
+        '''get a particular text highlight'''
+        highlight = get_object_or_404(Highlight, id=id)
+        serializer = self.serializer_class(highlight, data=request.data, context=dict(user=request.user), partial=True)
+        serializer.is_valid()
+        return Response(serializer.data)
 
-        try:
-            article = Article.objects.get(slug=slug)
-        except Article.DoesNotExist:
-            raise ArticleDoesNotExist
-
-        profile.unfavorite(article)
-
-        serializer = self.serializer_class(article, context=serializer_context)
+    def put(self, request, slug, id):
+        '''update a particular highlight on an article'''
+        highlight = get_object_or_404(Highlight, id=id)
+        serializer = self.serializer_class(highlight, data=request.data, context=dict(user=request.user), partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def delete(self, request, slug, id):
+        '''delete a particular highlight or comment on an article'''
+        self.check_article_exists(slug=slug)
+        highlight = get_object_or_404(Highlight, id=id)
+        if request.user != highlight.highlighter:
+            raise PermissionDenied
+        highlight.delete()
+        return Response(dict(message="Comment deleted"), status=status.HTTP_200_OK)

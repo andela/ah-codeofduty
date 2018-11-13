@@ -11,7 +11,7 @@ from authors.apps.profiles.serializers import ProfileSerializer
 from authors.apps.profiles.models import Profile
 # django.forms.fields.ImageField
 
-from .models import Article, Comment
+from .models import Article, Comment, Highlight
 from ..rating.models import Rating
 
 
@@ -159,4 +159,48 @@ class CommentSerializer(serializers.ModelSerializer):
         """
         parent = self.context.get('parent', None)
         instance = Comment.objects.create(parent=parent, **valid_input)
+        return instance
+
+
+class HighlightSerializer(serializers.ModelSerializer):
+    '''Highlight model serializer'''
+    article = ArticleSerializer(read_only=True)
+    highlighter = UserSerializer(read_only=True)
+    index_start = serializers.IntegerField()
+    index_stop = serializers.IntegerField()
+    highlighted_article_piece = serializers.CharField(
+        required=False, max_length=200)
+    comment = serializers.CharField(required=False, max_length=200)
+
+    class Meta:
+        model = Highlight
+        fields = ('article', 'highlighter', 'index_start',
+                  'index_stop', 'highlighted_article_piece', 'comment')
+
+    def create(self, validated_data):
+        '''method creating a new highlight'''
+        validated_data["highlighter"] = self.context.get('highlighter')
+        validated_data["article"] = self.context.get('article')
+        highlight_text = validated_data["article"].body[validated_data["index_start"]:validated_data["index_stop"]]
+        if not highlight_text:
+            raise serializers.ValidationError("Text doesn't exist on this article")
+        validated_data["highlighted_article_piece"] = highlight_text
+
+        return Highlight.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        '''method updating highlights'''
+        user = self.context.get('user')
+        if user != instance.highlighter:
+            raise PermissionDenied
+        index_start = validated_data.get('index_start', instance.index_start)
+        index_stop = validated_data.get('index_stop', instance.index_stop)
+        highlight_text = instance.article.body[index_start:index_stop]
+        if not highlight_text:
+            raise serializers.ValidationError("Text doesn't exist on this article")
+        instance.comment = validated_data.get('comment', instance.comment)
+        instance.index_start = index_start
+        instance.index_stop = index_stop
+        instance.highlighted_article_piece = highlight_text
+        instance.save()
         return instance

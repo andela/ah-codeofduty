@@ -1,10 +1,10 @@
 '''articles/urls.py'''
 from django.urls import path
+
 from .views import (ArticlesView, ArticlesFavoriteAPIView,
                     CommentRetrieveUpdateDestroy, CommentsListCreateAPIView,
                     ArticlesFeedAPIView, ArticlesSearchListAPIView,
-                    CommentHistoryAPIView, HighlightCommentView)
-
+                    CommentHistoryAPIView, HighlightCommentView, DislikeComments, LikeComments)
 
 # map http methods to defined methods in ArticlesViews
 articles_list = ArticlesView.as_view({
@@ -38,6 +38,10 @@ highlights_detal = HighlightCommentView.as_view({
     'get': 'retrieve',
 })
 
+# like a comment
+like_comment = LikeComments.as_view()
+dislike_comment = DislikeComments.as_view()
+
 urlpatterns = [
     path('articles/', articles_list),
     path('articles/feed/', ArticlesFeedAPIView.as_view()),
@@ -49,5 +53,7 @@ urlpatterns = [
     path('search/articles/', ArticlesSearchListAPIView.as_view(), name='search'),
     path('articles/<slug>/history/<int:id>/', CommentHistoryAPIView.as_view()),
     path('articles/<slug>/highlight/', highlights),
-    path('articles/<slug>/highlight/<id>/', highlights_detal)
+    path('articles/<slug>/highlight/<id>/', highlights_detal),
+    path('articles/<slug>/comment/<int:id>/like/', like_comment, name='like_comment'),
+    path('articles/<slug>/comment/<int:id>/dislike/', dislike_comment, name='dislike_comment'),
 ]

@@ -136,8 +136,8 @@ class CommentSerializer(serializers.ModelSerializer):
             'thread',
             'created_at',
             'updated_at',
-            'comment_likes',
-            'comment_dislikes'
+            'likes',
+            'dislikes'
         )
 
     def update(self, instance, valid_input, **kwargs):

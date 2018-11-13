@@ -26,6 +26,9 @@ class BaseTest(TestCase):
         self.UPDATE_A_COMMENT = '/api/articles/{}/comment/{}/'
         self.DELETE_A_COMMENT = '/api/articles/{}/comment/{}/'
 
+        self.LIKE_COMMENT = '/api/articles/{}/comment/{}/like/'
+        self.DISLIKE_COMMENT = '/api/articles/{}/comment/{}/dislike/'
+
         self.client = APIClient()
         test_user = {
             "email": "njery.ngigi@gmail.com",
@@ -50,6 +53,10 @@ class BaseTest(TestCase):
             "description": "testing",
             "time_to_read": 1,
             "tags": ["TDD"]
+        }
+
+        self.test_comment_data = {
+            "body": "this is a sample comment"
         }
 
         self.client.post(self.SIGN_UP_URL, test_user, format="json")

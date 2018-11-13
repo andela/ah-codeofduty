@@ -10,7 +10,7 @@ from authors.apps.authentication.models import User
 from authors.apps.profiles.serializers import ProfileSerializer
 from authors.apps.profiles.models import Profile
 
-from .models import Article, Comment, CommentHistory, Highlight
+from .models import Article, Comment, CommentHistory, Highlight, Report
 from ..rating.models import Rating
 
 
@@ -239,3 +239,24 @@ class HighlightSerializer(serializers.ModelSerializer):
         instance.highlighted_article_piece = highlight_text
         instance.save()
         return instance
+
+
+class ReportSerializer(serializers.ModelSerializer):
+    """mediates between the reporting an article model and python primitives"""
+    author = UserSerializer(read_only=True)
+
+    class Meta:
+        model = Report
+        fields = (
+            'id',
+            'created_at',
+            'body',
+            'author',
+        )
+
+    def create(self, validated_data):
+        slug = self.context.get('slug')
+        author = self.context.get('author', None)
+        article = Article.objects.get(slug=slug)
+        report = Report.objects.create(article=article, author=author, **validated_data)
+        return report

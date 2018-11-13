@@ -20,12 +20,12 @@ class Article(models.Model):
     time_created = models.DateTimeField(auto_now_add=True, db_index=True)
     # auto_now will update every time you save the model.
     time_updated = models.DateTimeField(auto_now=True, db_index=True)
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="articles")
     average_rating = models.IntegerField(default=0)
 
     class Meta():
         '''Meta class defining order'''
-        ordering = ('time_created', 'time_updated',)
+        ordering = ('time_updated',)
 
     def save(self, *args, **kwargs):
         '''override save from super'''

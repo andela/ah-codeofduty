@@ -9,15 +9,18 @@ from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.views import APIView
 
+<<<<<<< HEAD
 from .serializers import ArticleSerializer, CommentSerializer, CommentHistorySerializer
 from .models import Article, Comment, CommentHistory
+=======
+from .serializers import ArticleSerializer, CommentSerializer, HighlightSerializer
+from .models import Article, Comment, Highlight
+>>>>>>> Feature(Highlight and comment on text): Add CRUD for highlights and comments on text
 from .exceptions import ArticleDoesNotExist
 from rest_framework import generics
 
-
-class ArticlesView(viewsets.ModelViewSet):
+class ArticleMetaData:
     permission_classes = (IsAuthenticatedOrReadOnly,)
-    serializer_class = ArticleSerializer
 
     def check_article_exists(self, slug):
         '''method checking if article exists'''
@@ -28,6 +31,10 @@ class ArticlesView(viewsets.ModelViewSet):
 
         return article
 
+
+class ArticlesView(ArticleMetaData, viewsets.ModelViewSet):
+    serializer_class = ArticleSerializer
+
     def list(self, request):
         serializer_context = {'request': request}
         queryset = Article.objects.all()
@@ -37,10 +44,8 @@ class ArticlesView(viewsets.ModelViewSet):
 
     def create(self, request):
         '''method creating a new article(post)'''
-        article = request.data
-        email = request.user
         serializer = self.serializer_class(
-            data=article, context={"email": email})
+            data=request.data, context={"email": request.user})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -242,6 +247,10 @@ class CommentRetrieveUpdateDestroy(CommentsListCreateAPIView, CreateAPIView):
         comment.delete()
         return Response({"message": {"Comment was deleted successfully"}}, status.HTTP_200_OK)
 
+class HighlightCommentView(ArticleMetaData, viewsets.ModelViewSet):
+    '''view allowing highlighting and commenting on a specific part of an article'''
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    serializer_class = HighlightSerializer
 
 class CommentHistoryAPIView(generics.ListAPIView):
     """This class has fetchies comment edit history"""

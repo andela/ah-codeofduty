@@ -56,3 +56,11 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.body
+
+
+class CommentHistory(models.Model):
+    comment = models.TextField()
+    parent_comment = models.ForeignKey(Comment,
+                                       on_delete=models.CASCADE,
+                                       db_column='parent_comment')
+    date_created = models.DateTimeField(auto_now=True)

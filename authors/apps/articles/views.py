@@ -9,9 +9,10 @@ from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.views import APIView
 
-from .serializers import ArticleSerializer, CommentSerializer
-from .models import Article, Comment
+from .serializers import ArticleSerializer, CommentSerializer, CommentHistorySerializer
+from .models import Article, Comment, CommentHistory
 from .exceptions import ArticleDoesNotExist
+from rest_framework import generics
 
 
 class ArticlesView(viewsets.ModelViewSet):
@@ -152,11 +153,12 @@ class CommentsListCreateAPIView(ArticlesView):
 class CommentRetrieveUpdateDestroy(CommentsListCreateAPIView, CreateAPIView):
     """
     Class to retrieve, create, update and delete a comment
-    this 
+    this
     """
     queryset = Article.objects.all()
     permission_classes = (IsAuthenticatedOrReadOnly, IsAuthenticated)
     serializer_class = CommentSerializer
+    serializer_history = CommentHistorySerializer
 
     def fetch_comment_obj(self):
         """
@@ -206,11 +208,27 @@ class CommentRetrieveUpdateDestroy(CommentsListCreateAPIView, CreateAPIView):
         if comment == None:
             return Response({"message": "Comment with the specified id for this article does Not Exist"},
                             status=status.HTTP_404_NOT_FOUND)
+        # print(CommentSerializer(comment).data['body'])
+
+        old_comment = CommentSerializer(comment).data['body']
+        comment_id = CommentSerializer(comment).data['id']
+        parent_comment_obj = Comment.objects.only('id').get(id=comment_id)
         data = request.data
+        new_comment = data['body']
+
+        if new_comment == old_comment:
+            return Response(
+                {"message": "New comment same as the old existing one. "
+                            "Editing rejected"},
+                status=status.HTTP_400_BAD_REQUEST)
         serializer = self.serializer_class(
             comment, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        edited_comment = CommentHistory.objects.create(
+            comment=old_comment,
+            parent_comment=parent_comment_obj)
+        edited_comment.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete_a_comment(self, request, slug=None, pk=None, **kwargs):
@@ -226,37 +244,56 @@ class CommentRetrieveUpdateDestroy(CommentsListCreateAPIView, CreateAPIView):
         return Response({"message": {"Comment was deleted successfully"}}, status.HTTP_200_OK)
 
 
-class ArticlesFavoriteAPIView(APIView):
+# class GetCommentHistory(viewsets.ModelViewSet):
+#     lookup_url_kwarg = 'pk'
+#     serializer_class = CommentHistorySerializer
+#     permission_classes = (IsAuthenticated,)
+
+#     def list(self, request, *args, **kwargs):
+#         """
+#         Overrides the default GET request from ListAPIView
+#         Returns all comment edits for a particular comment
+#         :param request:
+#         :param args:
+#         :param kwargs:
+#         :return: HTTP Code 200
+#         :return: Response
+#         # """
+#         print(">>>>>>>>>>>>>>>>>>>")
+#         try:
+#             comment = Comment.objects.get(pk=kwargs['pk'])
+#         except Comment.DoesNotExist:
+#             return Response(
+#                 {"message": "Comment not found"},
+#                 status=status.HTTP_404_NOT_FOUND)
+
+#         self.queryset = CommentHistory.objects.filter(parent_comment=comment)
+
+#         return generics.ListAPIView.list(self, request, *args, **kwargs)
+
+
+class CommentHistoryAPIView(generics.ListAPIView):
+    lookup_url_kwarg = 'pk'
+    serializer_class = CommentHistorySerializer
     permission_classes = (IsAuthenticated,)
-    # renderer_classes = (ArticleJSONRenderer,)
-    serializer_class = ArticleSerializer
 
-    def post(self, request, slug=None):
-        profile = self.request.user.profile
-        serializer_context = {'request': request}
-
-        try:
-            article = Article.objects.get(slug=slug)
-        except Article.DoesNotExist:
-            raise ArticleDoesNotExist
-
-        profile.favorite(article)
-
-        serializer = self.serializer_class(article, context=serializer_context)
-
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    def delete(self, request, slug=None):
-        profile = self.request.user.profile
-        serializer_context = {'request': request}
+    def get(self, request, *args, **kwargs):
+        """
+        Overrides the default GET request from ListAPIView
+        Returns all comment edits for a particular comment
+        :param request:
+        :param args:
+        :param kwargs:
+        :return: HTTP Code 200
+        :return: Response
+        # """
 
         try:
-            article = Article.objects.get(slug=slug)
-        except Article.DoesNotExist:
-            raise ArticleDoesNotExist
+            comment = Comment.objects.get(pk=kwargs['id'])
+        except Comment.DoesNotExist:
+            return Response(
+                {"message": "Comment not found"},
+                status=status.HTTP_404_NOT_FOUND)
+        self.queryset = CommentHistory.objects.filter(parent_comment=comment)
 
-        profile.unfavorite(article)
-
-        serializer = self.serializer_class(article, context=serializer_context)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return generics.ListAPIView.list(self, request, *args, **kwargs)

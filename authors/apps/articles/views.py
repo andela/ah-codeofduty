@@ -3,9 +3,9 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import render
 from django.shortcuts import render, get_object_or_404
 from rest_framework.filters import SearchFilter
-from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView, ListAPIView
+from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView, ListAPIView, UpdateAPIView
 from rest_framework.permissions import (
-    AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly, )
+    IsAuthenticated, IsAuthenticatedOrReadOnly, )
 from rest_framework.response import Response
 from rest_framework import status, viewsets, generics
 from rest_framework.exceptions import NotFound, PermissionDenied
@@ -60,7 +60,7 @@ class ArticlesView(ArticleMetaData, viewsets.ModelViewSet):
     def list(self, request):
         ''' method to fetch all articles'''
         serializer_context = {'request': request}
-        
+
         page = self.paginate_queryset(self.get_queryset())
         serializer = self.serializer_class(
             page, context=serializer_context, many=True)
@@ -333,7 +333,7 @@ class ArticleFilterAPIView(filters.FilterSet):
             ArrayField: {
                 'filter_class': django_filters.CharFilter,
                 'extra': lambda f: {
-                    'lookup_expr': 'icontains',},
+                    'lookup_expr': 'icontains', },
             },
         }
 
@@ -387,6 +387,7 @@ class CommentHistoryAPIView(generics.ListAPIView):
         self.queryset = CommentHistory.objects.filter(parent_comment=comment)
 
         return generics.ListAPIView.list(self, request, *args, **kwargs)
+
 
 class HighlightCommentView(ArticleMetaData, viewsets.ModelViewSet):
     """
@@ -443,6 +444,7 @@ class HighlightCommentView(ArticleMetaData, viewsets.ModelViewSet):
         return Response(dict(message="Comment deleted"),
                         status=status.HTTP_200_OK)
 
+
 class LikeComments(UpdateAPIView):
     """Class for comment likes"""
     serializer_class = CommentSerializer
@@ -462,45 +464,12 @@ class LikeComments(UpdateAPIView):
             return Response(message, status.HTTP_404_NOT_FOUND)
         # fetch user
         user = request.user
-        comment.dislikes.remove(user.id)
         # Confirmation user already liked the comment
         confirm = bool(user in comment.likes.all())
         if confirm is True:
             comment.likes.remove(user.id)
-            return Response({'Success, You only like a comment once'}, status.HTTP_200_OK)
+            return Response({"Success": "You un-liked this comment"}, status.HTTP_200_OK)
         # Adding user like to list of likes
         comment.likes.add(user.id)
         message = {"Success": "You liked this comment"}
-        return Response(message, status.HTTP_200_OK)
-
-
-class DislikeComments(UpdateAPIView):
-    """Class for comment dislikes"""
-    serializer_class = CommentSerializer
-
-    def update(self, request, *args, **kwargs):
-        """Method for updating comment dislikes"""
-        slug = self.kwargs['slug']
-        try:
-            Article.objects.get(slug=slug)
-        except Article.DoesNotExist:
-            return Response({'Error': 'The article does not exist'}, status.HTTP_404_NOT_FOUND)
-        try:
-            pk = self.kwargs.get('id')
-            comment = Comment.objects.get(id=pk)
-        except Comment.DoesNotExist:
-            message = {"Error": "A comment with this ID does not exist"}
-            return Response(message, status.HTTP_404_NOT_FOUND)
-        # fetch  user
-        user = request.user
-        comment.likes.remove(user.id)
-        # Confirmation user already disliked the comment
-        confirm = bool(user in comment.dislikes.all())
-        if confirm is True:
-            comment.dislikes.remove(user.id)
-            message = {"Success": "You have un-disliked this comment"}
-            return Response(message, status.HTTP_200_OK)
-        # This add the user to dislikes lists
-        comment.dislikes.add(user.id)
-        message = {"success": "You disliked this comment"}
         return Response(message, status.HTTP_200_OK)

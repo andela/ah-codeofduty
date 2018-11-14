@@ -1,11 +1,12 @@
 '''articles/serializers'''
+
 import math
 from decimal import Decimal
+
 from django.db.models import Avg
 from rest_framework import serializers
 from django.utils.text import slugify
 from authors.apps.authentication.serializers import UserSerializer
-from ..authentication.models import User
 from rest_framework.exceptions import PermissionDenied
 from authors.apps.authentication.models import User
 from authors.apps.profiles.serializers import ProfileSerializer
@@ -139,7 +140,6 @@ class CommentSerializer(serializers.ModelSerializer):
     article = serializers.ReadOnlyField(source='article.title')
     thread = RecursiveSerializer(many=True, read_only=True)
     likes = serializers.SerializerMethodField(method_name='count_likes')
-    dislikes = serializers.SerializerMethodField(method_name='count_dislikes')
 
     class Meta:
         model = Comment
@@ -153,7 +153,6 @@ class CommentSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at',
             'likes',
-            'dislikes'
         )
 
     def update(self, instance, valid_input, **kwargs):

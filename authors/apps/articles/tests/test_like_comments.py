@@ -55,33 +55,6 @@ class CommentsLikeDislikeTestCase(BaseTest):
                                    HTTP_AUTHORIZATION=self.token, format='json')
         self.assertEquals(status.HTTP_200_OK, response.status_code)
 
-    def test_dislike_comment(self):
-        """Test test the liking of a comment"""
-        token = self.get_token()
-        article_data = {
-            "title": "test title",
-            "body": "This is me testing",
-            "description": "testing",
-            "time_to_read": 1,
-            "tags": ["TDD"]
-        }
-
-        response = self.create_article(token, article_data)
-
-        self.assertEquals(status.HTTP_201_CREATED, response.status_code)
-        slug = response.data['slug']
-        test_comment_data = {
-            "body": "this is a sample comment"
-        }
-
-        response = self.create_comment(token, slug, test_comment_data)
-        comment_id = response.data["id"]
-        self.assertEquals(status.HTTP_201_CREATED, response.status_code)
-
-        response = self.client.put('/api/articles/test-title12/comment/' + str(comment_id) + '/dislike/',
-                                   HTTP_AUTHORIZATION=self.token, format='json')
-        self.assertEquals(status.HTTP_200_OK, response.status_code)
-
     def test_unlike_comment(self):
         """Test test the liking of a comment"""
         token = self.get_token()
@@ -105,32 +78,6 @@ class CommentsLikeDislikeTestCase(BaseTest):
         self.assertEquals(status.HTTP_201_CREATED, response.status_code)
 
         response = self.client.put('/api/articles/test-title12/comment/' + str(comment_id) + '/like/',
-                                   HTTP_AUTHORIZATION=self.token, format='json')
-        self.assertEquals(status.HTTP_200_OK, response.status_code)
-
-    def test_undislike_comment(self):
-        """Test test the liking of a comment"""
-        token = self.get_token()
-        article_data = {
-            "title": "test title",
-            "body": "This is me testing",
-            "description": "testing",
-            "time_to_read": 1,
-            "tags": ["TDD"]
-        }
-
-        response = self.create_article(token, article_data)
-        self.assertEquals(status.HTTP_201_CREATED, response.status_code)
-        slug = response.data['slug']
-        test_comment_data = {
-            "body": "this is a sample comment"
-        }
-
-        response = self.create_comment(token, slug, test_comment_data)
-        comment_id = response.data["id"]
-        self.assertEquals(status.HTTP_201_CREATED, response.status_code)
-
-        response = self.client.put('/api/articles/test-title12/comment/' + str(comment_id) + '/dislike/',
                                    HTTP_AUTHORIZATION=self.token, format='json')
         self.assertEquals(status.HTTP_200_OK, response.status_code)
 

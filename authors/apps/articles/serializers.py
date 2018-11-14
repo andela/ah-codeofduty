@@ -1,4 +1,5 @@
 '''articles/serializers'''
+import math
 from decimal import Decimal
 from django.db.models import Avg
 from rest_framework import serializers
@@ -49,13 +50,25 @@ class ArticleSerializer(serializers.ModelSerializer):
         return instance.time_created.isoformat()
 
     def get_time_updated(self, instance):
+        '''get time the article was updated and return in iso format'''
         return instance.time_updated.isoformat()
+
+    def get_time_to_read(self, text, images):
+        '''method calculating time it takes to read'''
+        # time to read is calculated using words per minute
+        # the reading speed of an average person is about 150-250 wpm
+        # it takes 12 seconds to view an inline image
+        average_image_view_time = 0
+        if images:
+            average_image_view_time = (len(images) * 0.2)
+        return math.ceil(((len(text.split()) / 200) + average_image_view_time)) 
 
     def create(self, validated_data):
         '''method creating articles'''
         email = self.context.get('email')
         user = User.objects.get(email=email)
         validated_data["author"] = user
+        images = validated_data.get("images", None)
 
         slug = slugify(validated_data["title"])
         num = 1
@@ -63,6 +76,8 @@ class ArticleSerializer(serializers.ModelSerializer):
             slug = slug + "{}".format(num)
             num += 1
         validated_data["slug"] = slug
+        validated_data["time_to_read"] = self.get_time_to_read(validated_data["body"], images)
+
         return Article.objects.create(**validated_data)
 
     def get_average_rating(self, obj):
@@ -85,8 +100,8 @@ class ArticleSerializer(serializers.ModelSerializer):
         instance.description = validated_data.get(
             'description', instance.description)
         instance.tags = validated_data.get('tags', instance.tags)
-        instance.time_to_read = validated_data.get(
-            'time_to_read', instance.time_to_read)
+        instance.images = validated_data.get('images', instance.images)
+        instance.time_to_read = self.get_time_to_read(instance.body, instance.images)
         instance.save()
         return instance
 

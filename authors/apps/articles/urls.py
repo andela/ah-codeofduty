@@ -1,6 +1,6 @@
 '''articles/urls.py'''
 from django.urls import path
-from .views import ArticlesView, ArticlesFavoriteAPIView
+from .views import ArticlesView, ArticlesFavoriteAPIView, LikeArticles, DislikeArticles
 from .views import ArticlesView
 from .views import CommentRetrieveUpdateDestroy, CommentsListCreateAPIView
 
@@ -30,6 +30,10 @@ comments_details = CommentsListCreateAPIView.as_view({
     'post': 'create_a_comment'
 })
 
+# like a comment
+like_article = LikeArticles.as_view()
+dislike_article = DislikeArticles.as_view()
+
 urlpatterns = [
     path('articles/', articles_list),
     path('articles/<slug>/', articles_detail),
@@ -37,4 +41,6 @@ urlpatterns = [
     path('articles/<slug>/comment/<int:id>/',
          comments_list, name='comment_an_article'),
     path('articles/<slug>/comment/', comments_details, name='modify_a_comment'),
+    path('articles/<slug>/like/', like_article, name='like_article'),
+    path('articles/<slug>/dislike/', dislike_article, name='dislike_article'),
 ]

@@ -22,6 +22,8 @@ class Article(models.Model):
     time_updated = models.DateTimeField(auto_now=True, db_index=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     average_rating = models.IntegerField(default=0)
+    likes = models.ManyToManyField(User, related_name='comment_likes', blank=True)
+    dislikes = models.ManyToManyField(User, related_name='comment_dislikes', blank=True)
 
     class Meta():
         '''Meta class defining order'''

@@ -248,7 +248,9 @@ class CommentRetrieveUpdateDestroy(CommentsListCreateAPIView, CreateAPIView):
         return Response({"message": {"Comment was deleted successfully"}}, status.HTTP_200_OK)
 
 class HighlightCommentView(ArticleMetaData, viewsets.ModelViewSet):
-    '''view allowing highlighting and commenting on a specific part of an article'''
+    """
+    view allowing highlighting and commenting on a specific part of an article
+    """
     permission_classes = (IsAuthenticatedOrReadOnly,)
     serializer_class = HighlightSerializer
 

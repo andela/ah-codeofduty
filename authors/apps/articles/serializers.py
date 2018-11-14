@@ -172,6 +172,7 @@ class ReportSerializer(serializers.ModelSerializer):
             'id',
             'created_at',
             'body',
+            'article_id',
             'reporter',
         )
 

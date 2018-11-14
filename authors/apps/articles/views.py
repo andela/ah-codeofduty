@@ -23,10 +23,10 @@ from rest_framework import generics
 class ArticlesView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     serializer_class = ArticleSerializer
-    queryset = Article.objects.all()
 
     def get_queryset(self):
-        queryset = self.queryset
+        ''' method to filter by author, title, and tag '''
+        queryset = Article.objects.all()
 
         author = self.request.query_params.get('author', None)
         if author is not None:
@@ -51,6 +51,7 @@ class ArticlesView(viewsets.ModelViewSet):
         return article
 
     def list(self, request):
+        ''' method to fetch all articles'''
         serializer_context = {'request': request}
         queryset = self.get_queryset()
         serializer = self.serializer_class(
@@ -95,11 +96,17 @@ class ArticlesView(viewsets.ModelViewSet):
 
 
 class ArticlesFavoriteAPIView(APIView):
+    """ 
+    Implements favoriting and unfavoriting articles
+    """
     permission_classes = (IsAuthenticated,)
     # renderer_classes = (ArticleJSONRenderer,)
     serializer_class = ArticleSerializer
 
     def post(self, request, slug=None):
+        """
+        method to favorite an article
+        """
         profile = self.request.user.profile
         serializer_context = {'request': request}
 
@@ -115,6 +122,9 @@ class ArticlesFavoriteAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request, slug=None):
+        """
+        method to unfavorite an article
+        """
         profile = self.request.user.profile
         serializer_context = {'request': request}
 
@@ -266,7 +276,9 @@ class CommentRetrieveUpdateDestroy(CommentsListCreateAPIView, CreateAPIView):
 
 
 class ArticlesFeedAPIView(ListAPIView):
-    ''' Returns multiple articles created by followed users, ordered by most recent first.'''
+    """
+    Returns multiple articles created by followed users, ordered by most recent first.
+    """
     permission_classes = (IsAuthenticated,)
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
@@ -292,7 +304,7 @@ class ArticlesFeedAPIView(ListAPIView):
 
 class ArticleFilterAPIView(filters.FilterSet):
     """
-    creates a custom filter class for articles,
+    creates a custom filter class for articles
     
     """
     title = filters.CharFilter(field_name='title', lookup_expr='icontains')
@@ -321,6 +333,9 @@ class ArticleFilterAPIView(filters.FilterSet):
 
 
 class ArticlesSearchListAPIView(ListAPIView):
+    """
+    Implements search functionality
+    """
     permission_classes = (IsAuthenticatedOrReadOnly,)
     search_list = ['title', 'body', 'description', 'tags', 'author__username']
     filter_list = ['title', 'tags', 'author__username']
@@ -365,4 +380,3 @@ class CommentHistoryAPIView(generics.ListAPIView):
         self.queryset = CommentHistory.objects.filter(parent_comment=comment)
 
         return generics.ListAPIView.list(self, request, *args, **kwargs)
-

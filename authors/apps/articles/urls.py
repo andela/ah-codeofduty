@@ -58,5 +58,5 @@ urlpatterns = [
     path('articles/<slug>/highlight/', highlights),
     path('articles/<slug>/highlight/<id>/', highlights_detal),
     path('articles/<slug>/comment/<int:id>/like/', like_comment, name='like_comment'),
-    path('articles/<slug>/report', ReportCreateAPIView.as_view()),
+    path('articles/<slug>/report/', ReportCreateAPIView.as_view()),
 ]

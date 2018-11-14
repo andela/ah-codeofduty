@@ -243,7 +243,7 @@ class HighlightSerializer(serializers.ModelSerializer):
 
 class ReportSerializer(serializers.ModelSerializer):
     """mediates between the reporting an article model and python primitives"""
-    author = UserSerializer(read_only=True)
+    reporter = UserSerializer(read_only=True)
 
     class Meta:
         model = Report
@@ -251,12 +251,12 @@ class ReportSerializer(serializers.ModelSerializer):
             'id',
             'created_at',
             'body',
-            'author',
+            'reporter',
         )
 
     def create(self, validated_data):
         slug = self.context.get('slug')
-        author = self.context.get('author', None)
+        reporter = self.context.get('reporter', None)
         article = Article.objects.get(slug=slug)
-        report = Report.objects.create(article=article, author=author, **validated_data)
+        report = Report.objects.create(article=article, reporter=reporter, **validated_data)
         return report

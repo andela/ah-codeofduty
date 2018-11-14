@@ -248,7 +248,7 @@ class ReportCreateAPIView(generics.CreateAPIView):
             article = Article.objects.get(slug=slug)
         except Article.DoesNotExist:
             raise NotFound("An article does not exist")
-        serializer_context = {"author": request.user, "slug": slug}
+        serializer_context = {"reporter": request.user, "slug": slug}
         serializer_data = request.data
         serializer = self.serializer_class(data=serializer_data, context=serializer_context)
         serializer.is_valid(raise_exception=True)

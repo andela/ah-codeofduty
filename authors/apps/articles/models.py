@@ -61,7 +61,7 @@ class Comment(models.Model):
 class Report(models.Model):
     """Reporting an article model"""
     body = models.TextField()
-    author = models.ForeignKey('authentication.User', on_delete=models.CASCADE)
+    reporter = models.ForeignKey('authentication.User', on_delete=models.CASCADE)
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -37,5 +37,5 @@ urlpatterns = [
     path('articles/<slug>/comment/<int:id>/',
          comments_list, name='comment_an_article'),
     path('articles/<slug>/comment/', comments_details, name='modify_a_comment'),
-    path('articles/<slug>/report', ReportCreateAPIView.as_view()),
+    path('articles/<slug>/report/', ReportCreateAPIView.as_view()),
 ]

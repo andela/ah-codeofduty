@@ -1,15 +1,12 @@
 '''articles/serializers'''
-from decimal import Decimal
 from django.db.models import Avg
 from rest_framework import serializers
 from django.utils.text import slugify
 from authors.apps.authentication.serializers import UserSerializer
-from ..authentication.models import User
 from rest_framework.exceptions import PermissionDenied
 from authors.apps.authentication.models import User
 from authors.apps.profiles.serializers import ProfileSerializer
 from authors.apps.profiles.models import Profile
-# django.forms.fields.ImageField
 
 from .models import Article, Comment
 from ..rating.models import Rating
@@ -123,7 +120,6 @@ class CommentSerializer(serializers.ModelSerializer):
     article = serializers.ReadOnlyField(source='article.title')
     thread = RecursiveSerializer(many=True, read_only=True)
     likes = serializers.SerializerMethodField(method_name='count_likes')
-    dislikes = serializers.SerializerMethodField(method_name='count_dislikes')
 
     class Meta:
         model = Comment
@@ -137,7 +133,6 @@ class CommentSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at',
             'likes',
-            'dislikes'
         )
 
     def update(self, instance, valid_input, **kwargs):
@@ -173,14 +168,3 @@ class CommentSerializer(serializers.ModelSerializer):
             user_id = request.user.id
             liked_by_me = instance.likes.all().filter(id=user_id).count() == 1
         return {'count': instance.likes.count(), 'me': liked_by_me}
-
-    def count_dislikes(self, instance):
-        """Returns  the total dislikes of a a comment"""
-        request = self.context.get('request')
-        disliked_by_me = False
-        if request is not None and request.user.is_authenticated:
-            user_id = request.user.id
-            disliked_by_me = instance.dislikes.all().filter(
-                id=user_id).count() == 1
-        return {'count': instance.dislikes.count(), 'me': disliked_by_me}
-

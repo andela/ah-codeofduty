@@ -1,7 +1,6 @@
 """articles/models.py"""
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
-from django.utils.text import slugify
 from authors.apps.authentication.models import User
 
 
@@ -54,7 +53,6 @@ class Comment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     likes = models.ManyToManyField(User, related_name='comment_likes', blank=True)
-    dislikes = models.ManyToManyField(User, related_name='comment_dislikes', blank=True)
 
     def __str__(self):
         return self.body

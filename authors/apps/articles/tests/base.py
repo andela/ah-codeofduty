@@ -12,6 +12,7 @@ class BaseTest(TestCase):
 
     def setUp(self):
         """Define the test client"""
+        # define constant urls used throughout tests
         self.SIGN_IN_URL = '/api/users/login/'
         self.SIGN_UP_URL = '/api/users/'
         self.ARTICLES = '/api/articles/'
@@ -26,16 +27,25 @@ class BaseTest(TestCase):
         self.UPDATE_A_COMMENT = '/api/articles/{}/comment/{}/'
         self.DELETE_A_COMMENT = '/api/articles/{}/comment/{}/'
 
+        self.HIGHLIGHT = '/api/articles/test-title/highlight/'
+        self.HIGHLIGHT_2 = '/api/articles/test-title1/highlight/'
+        self.HIGHLIGHT_ID = '/api/articles/test-title/highlight/{}/'
+        self.HIGHLIGHT_ID_2 = '/api/articles/test-title1/highlight/{}/'
+
+        # define test client
         self.client = APIClient()
+
+        # define user data for signup
         test_user = {
             "email": "njery.ngigi@gmail.com",
             "username": "test_user",
-            "password": "test1234"}
+            "password": "test1234"
+            }
+
         test_non_author_user = {
             "email": "njeringigi59@gmail.com",
             "username": "non_user",
             "password": "test1234"
-
         }
 
         self.fav_test_user = {
@@ -44,14 +54,28 @@ class BaseTest(TestCase):
             "password": "test1234"
         }
 
+        # define article data for create an article
         self.test_article_data = {
             "title": "test title",
-            "body": "This is me testing",
+            "body": "This is me testing. This line should be long enough to pass as a story.",
             "description": "testing",
             "time_to_read": 1,
             "tags": ["TDD"]
         }
 
+        # define highlight data
+        self.highlight_data = {
+            "index_start": 1,
+            "index_stop": 10,
+            "comment": "goodie"
+        }
+        self.out_of_index_highlight_data = {
+            "index_start": 100,
+            "index_stop": 200,
+            "comment": "goodie"
+        }
+
+        # signup and login 2 test users (author and non-article-author) to obtain 2 tokens for tesing
         self.client.post(self.SIGN_UP_URL, test_user, format="json")
         response = self.client.post(self.SIGN_IN_URL, test_user, format="json")
         self.token = "bearer " + json.loads(response.content)["user"]["token"]
@@ -62,6 +86,7 @@ class BaseTest(TestCase):
         self.non_user_token = "bearer " + \
             json.loads(response.content)["user"]["token"]
 
+        # create 2 articles
         self.client.post(self.ARTICLES, self.test_article_data,
                          HTTP_AUTHORIZATION=self.token, format="json")
         self.client.post(self.ARTICLES, self.test_article_data,

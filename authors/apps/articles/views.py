@@ -14,15 +14,15 @@ import django_filters
 from django_filters import rest_framework as filters
 from django.contrib.postgres.fields import ArrayField
 
-from .serializers import ArticleSerializer, CommentSerializer, CommentHistorySerializer
-from .models import Article, Comment, CommentHistory
+from .serializers import (ArticleSerializer, CommentSerializer,
+                          CommentHistorySerializer, HighlightSerializer)
+from .models import Article, Comment, CommentHistory, Highlight
+
 from .exceptions import ArticleDoesNotExist
 from rest_framework import generics
 
-
-class ArticlesView(viewsets.ModelViewSet):
+class ArticleMetaData:
     permission_classes = (IsAuthenticatedOrReadOnly,)
-    serializer_class = ArticleSerializer
 
     def get_queryset(self):
         ''' method to filter by author, title, and tag '''
@@ -50,6 +50,10 @@ class ArticlesView(viewsets.ModelViewSet):
 
         return article
 
+
+class ArticlesView(ArticleMetaData, viewsets.ModelViewSet):
+    serializer_class = ArticleSerializer
+
     def list(self, request):
         ''' method to fetch all articles'''
         serializer_context = {'request': request}
@@ -60,10 +64,8 @@ class ArticlesView(viewsets.ModelViewSet):
 
     def create(self, request):
         '''method creating a new article(post)'''
-        article = request.data
-        email = request.user
         serializer = self.serializer_class(
-            data=article, context={"email": email})
+            data=request.data, context={"email": request.user})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -354,6 +356,7 @@ class ArticlesSearchListAPIView(ListAPIView):
     search_fields = search_list
     filterset_class = ArticleFilterAPIView
 
+
 class CommentHistoryAPIView(generics.ListAPIView):
     """This class has fetchies comment edit history"""
     lookup_url_kwarg = 'pk'
@@ -380,3 +383,58 @@ class CommentHistoryAPIView(generics.ListAPIView):
         self.queryset = CommentHistory.objects.filter(parent_comment=comment)
 
         return generics.ListAPIView.list(self, request, *args, **kwargs)
+
+class HighlightCommentView(ArticleMetaData, viewsets.ModelViewSet):
+    """
+    view allowing highlighting and commenting on a specific part of an article
+    """
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    serializer_class = HighlightSerializer
+
+    def list(self, request, slug):
+        '''get all highlights of an article'''
+        article = self.check_article_exists(slug)
+        highlights = article.highlights.values()
+
+        return Response(dict(highlights=highlights))
+
+    def post(self, request, slug):
+        '''create a new highlight or comment on article'''
+        article = self.check_article_exists(slug)
+        highlighter = request.user
+        serializer = self.serializer_class(data=request.data, context=dict(
+            article=article,
+            highlighter=highlighter))
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def retrieve(self, request, slug, id):
+        '''get a particular text highlight'''
+        highlight = get_object_or_404(Highlight, id=id)
+        serializer = self.serializer_class(highlight, data=request.data,
+                                           context=dict(user=request.user),
+                                           partial=True)
+        serializer.is_valid()
+        return Response(serializer.data)
+
+    def put(self, request, slug, id):
+        '''update a particular highlight on an article'''
+        highlight = get_object_or_404(Highlight, id=id)
+        serializer = self.serializer_class(highlight, data=request.data,
+                                           context=dict(user=request.user),
+                                           partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def delete(self, request, slug, id):
+        '''delete a particular highlight or comment on an article'''
+        self.check_article_exists(slug=slug)
+        highlight = get_object_or_404(Highlight, id=id)
+        if request.user != highlight.highlighter:
+            raise PermissionDenied
+        highlight.delete()
+        return Response(dict(message="Comment deleted"),
+                        status=status.HTTP_200_OK)

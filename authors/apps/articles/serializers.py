@@ -37,12 +37,14 @@ class ArticleSerializer(serializers.ModelSerializer):
     favoritesCount = serializers.SerializerMethodField(
         method_name='get_favorites_count')
     average_rating = serializers.SerializerMethodField()
+    likes = serializers.SerializerMethodField(method_name='count_likes')
+    dislikes = serializers.SerializerMethodField(method_name='count_dislikes')
 
     class Meta:
         model = Article
         fields = ('title', 'body', 'images', 'description', 'slug', 'tags',
-                  'time_to_read', 'author', 'time_created', 'time_updated',
-                  'favorited', 'favoritesCount', 'average_rating')
+                  'time_to_read', 'author', 'time_created', 'time_updated', 'favorited',
+                  'favoritesCount', 'average_rating', 'likes', 'dislikes')
 
     def get_time_created(self, instance):
         '''get time the article was created and return in iso format'''
@@ -118,6 +120,25 @@ class ArticleSerializer(serializers.ModelSerializer):
 
     def get_favorites_count(self, instance):
         return instance.favorited_by.count()
+
+    def count_likes(self, instance):
+        """Returns the total likes of an article"""
+        request = self.context.get('request')
+        liked_by_me = False
+        if request is not None and request.user.is_authenticated:
+            user_id = request.user.id
+            liked_by_me = instance.likes.all().filter(id=user_id).count() == 1
+        return {'count': instance.likes.count(), 'me': liked_by_me}
+
+    def count_dislikes(self, instance):
+        """Returns  the total dislikes of an article"""
+        request = self.context.get('request')
+        disliked_by_me = False
+        if request is not None and request.user.is_authenticated:
+            user_id = request.user.id
+            disliked_by_me = instance.dislikes.all().filter(
+                id=user_id).count() == 1
+        return {'count': instance.dislikes.count(), 'me': disliked_by_me}
 
 
 class RecursiveSerializer(serializers.Serializer):

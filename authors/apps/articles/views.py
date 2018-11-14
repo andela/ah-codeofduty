@@ -5,7 +5,6 @@ from django.shortcuts import render
 from django.shortcuts import render, get_object_or_404
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView, ListAPIView, UpdateAPIView
-
 from rest_framework.permissions import (
     IsAuthenticated, IsAuthenticatedOrReadOnly, )
 from rest_framework.response import Response
@@ -506,3 +505,54 @@ class ReportCreateAPIView(generics.CreateAPIView):
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class LikeArticles(UpdateAPIView):
+    """Class for comment likes"""
+    serializer_class = ArticleSerializer
+
+    def update(self, request, *args, **kwargs):
+        """Method for updating comment likes"""
+        slug = self.kwargs['slug']
+        try:
+            article = Article.objects.get(slug=slug)
+        except Article.DoesNotExist:
+            return Response({'Error': 'The article does not exist'}, status.HTTP_404_NOT_FOUND)
+
+        user = request.user
+        article.dislikes.remove(user.id)
+        # Confirmation user already liked the comment
+        confirm = bool(user in article.likes.all())
+        if confirm is True:
+            article.likes.remove(user.id)
+            return Response({"Success": "You have un-liked this article"}, status.HTTP_200_OK)
+        # Adding user like to list of likes
+        article.likes.add(user.id)
+        message = {"Success": "You liked this article"}
+        return Response(message, status.HTTP_200_OK)
+
+
+class DislikeArticles(UpdateAPIView):
+    """Class for comment dislikes"""
+    serializer_class = ArticleSerializer
+
+    def update(self, request, *args, **kwargs):
+        """Method for updating comment dislikes"""
+        slug = self.kwargs['slug']
+        try:
+            article = Article.objects.get(slug=slug)
+        except Article.DoesNotExist:
+            return Response({'Error': 'The article does not exist'}, status.HTTP_404_NOT_FOUND)
+        # fetch  user
+        user = request.user
+        article.likes.remove(user.id)
+        # Confirmation user already disliked the comment
+        confirm = bool(user in article.dislikes.all())
+        if confirm is True:
+            article.dislikes.remove(user.id)
+            message = {"Success": "You have un-disliked this article"}
+            return Response(message, status.HTTP_200_OK)
+        # This add the user to dislikes lists
+        article.dislikes.add(user.id)
+        message = {"success": "You disliked this article"}
+        return Response(message, status.HTTP_200_OK)

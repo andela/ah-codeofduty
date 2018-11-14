@@ -11,7 +11,7 @@ from authors.apps.profiles.serializers import ProfileSerializer
 from authors.apps.profiles.models import Profile
 # django.forms.fields.ImageField
 
-from .models import Article, Comment
+from .models import Article, Comment, CommentHistory
 from ..rating.models import Rating
 
 
@@ -160,3 +160,10 @@ class CommentSerializer(serializers.ModelSerializer):
         parent = self.context.get('parent', None)
         instance = Comment.objects.create(parent=parent, **valid_input)
         return instance
+
+
+class CommentHistorySerializer(serializers.ModelSerializer):
+    """comment history serializer"""
+    class Meta:
+        model = CommentHistory
+        fields = ('id', 'comment', 'date_created', 'parent_comment')

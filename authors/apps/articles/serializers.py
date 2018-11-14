@@ -1,4 +1,5 @@
 '''articles/serializers'''
+import math
 from decimal import Decimal
 from django.db.models import Avg
 from rest_framework import serializers
@@ -9,9 +10,8 @@ from rest_framework.exceptions import PermissionDenied
 from authors.apps.authentication.models import User
 from authors.apps.profiles.serializers import ProfileSerializer
 from authors.apps.profiles.models import Profile
-# django.forms.fields.ImageField
 
-from .models import Article, Comment, CommentHistory
+from .models import Article, Comment, CommentHistory, Highlight
 from ..rating.models import Rating
 
 
@@ -42,20 +42,33 @@ class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
         fields = ('title', 'body', 'images', 'description', 'slug', 'tags',
-                  'time_to_read', 'author', 'time_created', 'time_updated', 'favorited', 'favoritesCount', 'average_rating')
+                  'time_to_read', 'author', 'time_created', 'time_updated',
+                  'favorited', 'favoritesCount', 'average_rating')
 
     def get_time_created(self, instance):
         '''get time the article was created and return in iso format'''
         return instance.time_created.isoformat()
 
     def get_time_updated(self, instance):
+        '''get time the article was updated and return in iso format'''
         return instance.time_updated.isoformat()
+
+    def get_time_to_read(self, text, images):
+        '''method calculating time it takes to read'''
+        # time to read is calculated using words per minute
+        # the reading speed of an average person is about 150-250 wpm
+        # it takes 12 seconds to view an inline image
+        average_image_view_time = 0
+        if images:
+            average_image_view_time = (len(images) * 0.2)
+        return math.ceil(((len(text.split()) / 200) + average_image_view_time))
 
     def create(self, validated_data):
         '''method creating articles'''
         email = self.context.get('email')
         user = User.objects.get(email=email)
         validated_data["author"] = user
+        images = validated_data.get("images", None)
 
         slug = slugify(validated_data["title"])
         num = 1
@@ -63,6 +76,9 @@ class ArticleSerializer(serializers.ModelSerializer):
             slug = slug + "{}".format(num)
             num += 1
         validated_data["slug"] = slug
+        validated_data["time_to_read"] = self.get_time_to_read(
+            validated_data["body"], images)
+
         return Article.objects.create(**validated_data)
 
     def get_average_rating(self, obj):
@@ -85,8 +101,8 @@ class ArticleSerializer(serializers.ModelSerializer):
         instance.description = validated_data.get(
             'description', instance.description)
         instance.tags = validated_data.get('tags', instance.tags)
-        instance.time_to_read = validated_data.get(
-            'time_to_read', instance.time_to_read)
+        instance.images = validated_data.get('images', instance.images)
+        instance.time_to_read = self.get_time_to_read(instance.body, instance.images)
         instance.save()
         return instance
 
@@ -161,9 +177,52 @@ class CommentSerializer(serializers.ModelSerializer):
         instance = Comment.objects.create(parent=parent, **valid_input)
         return instance
 
-
 class CommentHistorySerializer(serializers.ModelSerializer):
     """comment history serializer"""
     class Meta:
         model = CommentHistory
         fields = ('id', 'comment', 'date_created', 'parent_comment')
+
+class HighlightSerializer(serializers.ModelSerializer):
+    '''Highlight model serializer'''
+    article = ArticleSerializer(read_only=True)
+    highlighter = UserSerializer(read_only=True)
+    index_start = serializers.IntegerField()
+    index_stop = serializers.IntegerField()
+    highlighted_article_piece = serializers.CharField(
+        required=False, max_length=200)
+    comment = serializers.CharField(required=False, max_length=200)
+
+    class Meta:
+        model = Highlight
+        fields = ('article', 'highlighter', 'index_start',
+                  'index_stop', 'highlighted_article_piece', 'comment')
+
+    def create(self, validated_data):
+        '''method creating a new highlight'''
+        validated_data["highlighter"] = self.context.get('highlighter')
+        validated_data["article"] = self.context.get('article')
+        highlight_text = validated_data["article"].body[
+            validated_data["index_start"]:validated_data["index_stop"]]
+        if not highlight_text:
+            raise serializers.ValidationError("Text doesn't exist on this article")
+        validated_data["highlighted_article_piece"] = highlight_text
+
+        return Highlight.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        '''method updating highlights'''
+        user = self.context.get('user')
+        if user != instance.highlighter:
+            raise PermissionDenied
+        index_start = validated_data.get('index_start', instance.index_start)
+        index_stop = validated_data.get('index_stop', instance.index_stop)
+        highlight_text = instance.article.body[index_start:index_stop]
+        if not highlight_text:
+            raise serializers.ValidationError("Text doesn't exist on this article")
+        instance.comment = validated_data.get('comment', instance.comment)
+        instance.index_start = index_start
+        instance.index_stop = index_stop
+        instance.highlighted_article_piece = highlight_text
+        instance.save()
+        return instance

@@ -54,12 +54,18 @@ class ProfileList(ListAPIView):
     serializer_class = ProfileSerializer
 
 class ProfileFollowAPIView(APIView):
+    """
+    implements functionality to follow and unfollow a user
+    """
     permission_classes = (IsAuthenticated,)
     renderer_classes = (ProfileJSONRenderer,)
     serializer_class = ProfileSerializer
     queryset = Profile.objects.all()
 
     def put(self, request, username=None):
+        """
+        method to follow and unfollow a user
+        """
         follower = self.request.user.profile
 
         try:
@@ -74,51 +80,23 @@ class ProfileFollowAPIView(APIView):
             follower.follow(followee)
         else:
             follower.unfollow(followee)
-
-        
-        
+       
         serializer = self.serializer_class(followee, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class FollowersAPIView(APIView):
-    permission_classes = (IsAuthenticated,)
-    renderer_classes = (ProfileJSONRenderer,)
-    serializer_class = ProfileSerializer
-
-class ProfileFollowAPIView(APIView):
-    permission_classes = (IsAuthenticated,)
-    renderer_classes = (ProfileJSONRenderer,)
-    serializer_class = ProfileSerializer
-    queryset = Profile.objects.all()
-
-    def put(self, request, username=None):
-        follower = self.request.user.profile
-
-        try:
-            followee = Profile.objects.get(user__username=username)
-        except Profile.DoesNotExist:
-            raise ProfileDoesNotExist
-        
-        if follower.pk is followee.pk:
-            raise serializers.ValidationError('You cannot follow yourself')
-
-        if follower.is_following(followee) is False:
-            follower.follow(followee)
-        else:
-            follower.unfollow(followee)
-
-        
-        
-        serializer = self.serializer_class(followee, context={'request': request})
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-class FollowersAPIView(APIView):
+    """
+    implements functionality to get followers of a user
+    """
     permission_classes = (IsAuthenticated,)
     renderer_classes = (ProfileJSONRenderer,)
     serializer_class = ProfileSerializer
     queryset = Profile.objects.all()
 
     def get(self, request, username):
+        """
+        method to get a user's followers
+        """
         user = self.request.user.profile
 
         try:
@@ -131,12 +109,18 @@ class FollowersAPIView(APIView):
         return Response({"followers": serializer.data}, status=status.HTTP_200_OK)
 
 class FollowingAPIView(APIView):
+    """
+    implements functionality to get profiles a user is following
+    """
     permission_classes = (IsAuthenticated,)
     renderer_classes = (ProfileJSONRenderer,)
     serializer_class = ProfileSerializer
     queryset = Profile.objects.all()
 
     def get(self, request, username):
+        """
+        method to get profiles a user is following
+        """
         user = self.request.user.profile
 
         try:

@@ -43,7 +43,8 @@ class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
         fields = ('title', 'body', 'images', 'description', 'slug', 'tags',
-                  'time_to_read', 'author', 'time_created', 'time_updated', 'favorited', 'favoritesCount', 'average_rating')
+                  'time_to_read', 'author', 'time_created', 'time_updated',
+                  'favorited', 'favoritesCount', 'average_rating')
 
     def get_time_created(self, instance):
         '''get time the article was created and return in iso format'''
@@ -61,7 +62,7 @@ class ArticleSerializer(serializers.ModelSerializer):
         average_image_view_time = 0
         if images:
             average_image_view_time = (len(images) * 0.2)
-        return math.ceil(((len(text.split()) / 200) + average_image_view_time)) 
+        return math.ceil(((len(text.split()) / 200) + average_image_view_time))
 
     def create(self, validated_data):
         '''method creating articles'''
@@ -76,7 +77,8 @@ class ArticleSerializer(serializers.ModelSerializer):
             slug = slug + "{}".format(num)
             num += 1
         validated_data["slug"] = slug
-        validated_data["time_to_read"] = self.get_time_to_read(validated_data["body"], images)
+        validated_data["time_to_read"] = self.get_time_to_read(
+            validated_data["body"], images)
 
         return Article.objects.create(**validated_data)
 

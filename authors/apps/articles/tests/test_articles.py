@@ -172,24 +172,30 @@ class ArticleTestCase(BaseTest):
         self.assertEquals(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_time_to_read(self):
+        '''test time to read articles method'''
         text = "Beneath the unstable acquaintance strikes the fleet thumb.\
-        A height peers outside whatever answer. Behind the automatic tragedy \
-        speculates an amended girl. The closing brush coasts. Does a mum club skip?\
-        How can the agony cope?How can the elite sneak hope over the dip? A half memory staggers.\
-        A populace spins the line. A sacrifice produces a polar whale. My misuse misguides the cyclist.\
-        The rival gutters a celebrated hospital.A part universal takes the alien. The champion tool shouts.\
-        The relative crowds the sentient. Why can't the secretary parade past the integrate scotch?\
-        Beneath the unstable acquaintance strikes the fleet thumb. A height peers outside whatever answer.\
-        Behind the automatic tragedy speculates an amended girl. The closing brush coasts. \
-        Does a mum club skip? How can the agony cope?How can the elite sneak hope over the dip?\
-        A half memory staggers. A populace spins the line. A sacrifice produces a polar whale.\
-        My misuse misguides the cyclist. The rival gutters a celebrated hospital.\
-        A part universal takes the alien. The champion tool shouts. The relative crowds the sentient.\
-        Why can't the secretary parade past the integrate scotch?Beneath the unstable acquaintance strikes\
-        the fleet thumb. A height peers outside whatever answer. Behind the automatic tragedy \
-        speculates an amended girl. The closing brush coasts. Does a mum club skip?"
+        A height peers outside whatever answer. Behind the automatic tragedy\
+        speculates an amended girl. The closing brush coasts. Does a mum club\
+        skip? How can the agony cope? How can the elite sneak hope over the\
+        dip? A half memory staggers. A populace spins the line. A sacrifice\
+        produces a polar whale. My misuse misguides the cyclist.\
+        The rival gutters a celebrated hospital.A part universal takes\
+        the alien. The champion tool shouts. The relative crowds the sentient.\
+        Why can't the secretary parade past the integrate scotch?\
+        Beneath the unstable acquaintance strikes the fleet thumb. A height\
+        peers outside whatever answer. Behind the automatic tragedy speculates\
+        an amended girl. The closing brush coasts. Does a mum club skip? How\
+        can the agony cope?How can the elite sneak hope over the dip?\
+        A half memory staggers. A populace spins the line. A sacrifice\
+        produces a polar whale. My misuse misguides the cyclist. The rival\
+        gutters a celebrated hospital. A part universal takes the alien.\
+        The champion tool shouts. The relative crowds the sentient.\
+        Why can't the secretary parade past the integrate scotch?Beneath the\
+        unstable acquaintance strikes the fleet thumb. A height peers outside\
+        whatever answer. Behind the automatic tragedy speculates an amended\
+        girl. The closing brush coasts. Does a mum club skip?"
 
-        images = ["test_image_url.jpg","test_image_url_2.jpg"]
+        images = ["test_image_url.jpg", "test_image_url_2.jpg"]
 
         serializer = ArticleSerializer()
         self.assertEqual(serializer.get_time_to_read(text, images), 2)

@@ -2,6 +2,7 @@
 from django.shortcuts import render
 from django.shortcuts import render, get_object_or_404
 from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import (
     AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly,)
 from rest_framework.response import Response
@@ -18,6 +19,8 @@ from rest_framework import generics
 class ArticlesView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     serializer_class = ArticleSerializer
+    queryset = Article.objects.all()
+    pagination_class = LimitOffsetPagination
 
     def check_article_exists(self, slug):
         '''method checking if article exists'''
@@ -30,10 +33,10 @@ class ArticlesView(viewsets.ModelViewSet):
 
     def list(self, request):
         serializer_context = {'request': request}
-        queryset = Article.objects.all()
+        page = self.paginate_queryset(self.queryset)
         serializer = self.serializer_class(
-            queryset, context=serializer_context, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+            page, context=serializer_context, many=True)
+        return self.get_paginated_response(serializer.data)
 
     def create(self, request):
         '''method creating a new article(post)'''

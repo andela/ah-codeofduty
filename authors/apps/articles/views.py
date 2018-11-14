@@ -14,9 +14,10 @@ import django_filters
 from django_filters import rest_framework as filters
 from django.contrib.postgres.fields import ArrayField
 
-from .serializers import ArticleSerializer, CommentSerializer
-from .models import Article, Comment
+from .serializers import ArticleSerializer, CommentSerializer, CommentHistorySerializer
+from .models import Article, Comment, CommentHistory
 from .exceptions import ArticleDoesNotExist
+from rest_framework import generics
 
 
 class ArticlesView(viewsets.ModelViewSet):
@@ -174,11 +175,12 @@ class CommentsListCreateAPIView(ArticlesView):
 class CommentRetrieveUpdateDestroy(CommentsListCreateAPIView, CreateAPIView):
     """
     Class to retrieve, create, update and delete a comment
-    this 
+    this
     """
     queryset = Article.objects.all()
     permission_classes = (IsAuthenticatedOrReadOnly, IsAuthenticated)
     serializer_class = CommentSerializer
+    serializer_history = CommentHistorySerializer
 
     def fetch_comment_obj(self):
         """
@@ -228,11 +230,26 @@ class CommentRetrieveUpdateDestroy(CommentsListCreateAPIView, CreateAPIView):
         if comment == None:
             return Response({"message": "Comment with the specified id for this article does Not Exist"},
                             status=status.HTTP_404_NOT_FOUND)
+
+        old_comment = CommentSerializer(comment).data['body']
+        comment_id = CommentSerializer(comment).data['id']
+        parent_comment_obj = Comment.objects.only('id').get(id=comment_id)
         data = request.data
+        new_comment = data['body']
+
+        if new_comment == old_comment:
+            return Response(
+                {"message": "New comment same as the old existing one. "
+                            "Editing rejected"},
+                status=status.HTTP_400_BAD_REQUEST)
         serializer = self.serializer_class(
             comment, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        edited_comment = CommentHistory.objects.create(
+            comment=old_comment,
+            parent_comment=parent_comment_obj)
+        edited_comment.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete_a_comment(self, request, slug=None, pk=None, **kwargs):
@@ -321,3 +338,31 @@ class ArticlesSearchListAPIView(ListAPIView):
     filter_fields = filter_list
     search_fields = search_list
     filterset_class = ArticleFilterAPIView
+
+class CommentHistoryAPIView(generics.ListAPIView):
+    """This class has fetchies comment edit history"""
+    lookup_url_kwarg = 'pk'
+    serializer_class = CommentHistorySerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, *args, **kwargs):
+        """
+        Overrides the default GET request from ListAPIView
+        Returns all comment edits for a particular comment
+        :param request:
+        :param args:
+        :param kwargs:
+        :return: HTTP Code 200
+        :return: Response
+        # """
+
+        try:
+            comment = Comment.objects.get(pk=kwargs['id'])
+        except Comment.DoesNotExist:
+            return Response(
+                {"message": "Comment not found"},
+                status=status.HTTP_404_NOT_FOUND)
+        self.queryset = CommentHistory.objects.filter(parent_comment=comment)
+
+        return generics.ListAPIView.list(self, request, *args, **kwargs)
+

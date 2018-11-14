@@ -1,13 +1,18 @@
 '''articles/views.py'''
+from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import render
 from django.shortcuts import render, get_object_or_404
-from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView
+from rest_framework.filters import SearchFilter
+from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView, ListAPIView
 from rest_framework.permissions import (
     AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly,)
 from rest_framework.response import Response
-from rest_framework import status, viewsets
+from rest_framework import status, viewsets, mixins
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.views import APIView
+import django_filters
+from django_filters import rest_framework as filters
+from django.contrib.postgres.fields import ArrayField
 
 from .serializers import (ArticleSerializer, CommentSerializer,
                           CommentHistorySerializer, HighlightSerializer)
@@ -18,6 +23,23 @@ from rest_framework import generics
 
 class ArticleMetaData:
     permission_classes = (IsAuthenticatedOrReadOnly,)
+
+    def get_queryset(self):
+        ''' method to filter by author, title, and tag '''
+        queryset = Article.objects.all()
+
+        author = self.request.query_params.get('author', None)
+        if author is not None:
+            queryset = queryset.filter(author__username=author)
+
+        title = self.request.query_params.get('title', None)
+        if title is not None:
+            queryset = queryset.filter(title=title)
+
+        tag = self.request.query_params.get('tag', None)
+        if tag is not None:
+            queryset = filter(lambda x: x if tag in x.tags else None, queryset)
+        return queryset
 
     def check_article_exists(self, slug):
         '''method checking if article exists'''
@@ -33,8 +55,9 @@ class ArticlesView(ArticleMetaData, viewsets.ModelViewSet):
     serializer_class = ArticleSerializer
 
     def list(self, request):
+        ''' method to fetch all articles'''
         serializer_context = {'request': request}
-        queryset = Article.objects.all()
+        queryset = self.get_queryset()
         serializer = self.serializer_class(
             queryset, context=serializer_context, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -75,11 +98,17 @@ class ArticlesView(ArticleMetaData, viewsets.ModelViewSet):
 
 
 class ArticlesFavoriteAPIView(APIView):
+    """ 
+    Implements favoriting and unfavoriting articles
+    """
     permission_classes = (IsAuthenticated,)
     # renderer_classes = (ArticleJSONRenderer,)
     serializer_class = ArticleSerializer
 
     def post(self, request, slug=None):
+        """
+        method to favorite an article
+        """
         profile = self.request.user.profile
         serializer_context = {'request': request}
 
@@ -95,6 +124,9 @@ class ArticlesFavoriteAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request, slug=None):
+        """
+        method to unfavorite an article
+        """
         profile = self.request.user.profile
         serializer_context = {'request': request}
 
@@ -243,6 +275,87 @@ class CommentRetrieveUpdateDestroy(CommentsListCreateAPIView, CreateAPIView):
                             status=status.HTTP_404_NOT_FOUND)
         comment.delete()
         return Response({"message": {"Comment was deleted successfully"}}, status.HTTP_200_OK)
+
+
+class ArticlesFeedAPIView(ListAPIView):
+    """
+    Returns multiple articles created by followed users, ordered by most recent first.
+    """
+    permission_classes = (IsAuthenticated,)
+    queryset = Article.objects.all()
+    serializer_class = ArticleSerializer
+
+    def get_queryset(self):
+        following = list(self.request.user.profile.follows.all())
+        user = [profile.user for profile in following]
+
+        return Article.objects.filter(
+            author__in=user
+        )
+
+    def list(self, request):
+        queryset = self.get_queryset()
+
+        serializer_context = {'request': request}
+        serializer = self.serializer_class(
+            queryset, context=serializer_context, many=True
+        )
+
+        return Response(serializer.data)
+
+
+class ArticleFilterAPIView(filters.FilterSet):
+    """
+    creates a custom filter class for articles
+    
+    """
+    title = filters.CharFilter(field_name='title', lookup_expr='icontains')
+    description = filters.CharFilter(
+        field_name='description', lookup_expr='icontains')
+    body = filters.CharFilter(field_name='body', lookup_expr='icontains')
+    author__username = filters.CharFilter(
+        field_name='author__username', lookup_expr='icontains')
+
+    class Meta:
+        """
+        This class describes the fields to be used in the search.
+        Overrides the ArrayField
+        """
+        model = Article
+        fields = [
+            'title', 'description', 'body', 'tags', 'author__username'
+        ]
+        filter_overrides = {
+            ArrayField: {
+                'filter_class': django_filters.CharFilter,
+                'extra': lambda f: {
+                    'lookup_expr': 'icontains',},
+            },
+        }
+
+
+class ArticlesSearchListAPIView(ListAPIView):
+    """
+    Implements search functionality
+    """
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    search_list = ['title', 'body', 'description', 'tags', 'author__username']
+    filter_list = ['title', 'tags', 'author__username']
+    queryset = Article.objects.all()
+    serializer_class = ArticleSerializer
+
+    # DjangoFilterBackend class, allows you to easily create filters across relationships, 
+    # or create multiple filter lookup types for a given field.
+    # SearchFilter class supports simple single query parameter based searching
+    # It will only be applied if the view has a search_fields attribute set. 
+    # The search_fields attribute should be a list of names of text type fields on the model, 
+    # such as CharField or TextField.
+
+    filter_backends = (DjangoFilterBackend, SearchFilter)
+    filter_fields = filter_list
+    search_fields = search_list
+    filterset_class = ArticleFilterAPIView
+
 
 class CommentHistoryAPIView(generics.ListAPIView):
     """This class has fetchies comment edit history"""

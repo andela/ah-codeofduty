@@ -30,18 +30,39 @@ class CommentsLikeDislikeTestCase(BaseTest):
         response = self.create_article(token, article_data)
         self.assertEquals(status.HTTP_201_CREATED, response.status_code)
         slug = response.data['slug']
+
         # like an article
         response = self.client.put('/api/articles/' + str(slug) + '/like/',
                                    HTTP_AUTHORIZATION=self.token, format='json')
         self.assertEquals(status.HTTP_200_OK, response.status_code)
+
+        # un-like an article
+        response = self.client.put('/api/articles/' + str(slug) + '/like/',
+                                   HTTP_AUTHORIZATION=self.token, format='json')
+        self.assertEquals(status.HTTP_200_OK, response.status_code)
+
         # dislike an article
         response = self.client.put('/api/articles/' + str(slug) + '/dislike/',
                                    HTTP_AUTHORIZATION=self.token, format='json')
         self.assertEquals(status.HTTP_200_OK, response.status_code)
 
+        # un-dislike an article
+        response = self.client.put('/api/articles/' + str(slug) + '/dislike/',
+                                   HTTP_AUTHORIZATION=self.token, format='json')
+        self.assertEquals(status.HTTP_200_OK, response.status_code)
+
         # like missing article
-        response = self.client.put('/api/articles/like/',
+        response = self.client.put('/api/articles/me/like/',
                                    HTTP_AUTHORIZATION='Bearer ' + token,
                                    format='json'
                                    )
         self.assertEquals(status.HTTP_404_NOT_FOUND, response.status_code)
+        self.assertEquals(response.data['Error'], 'The article does not exist')
+
+        # dislike missing article
+        response = self.client.put('/api/articles/me/dislike/',
+                                   HTTP_AUTHORIZATION='Bearer ' + token,
+                                   format='json'
+                                   )
+        self.assertEquals(status.HTTP_404_NOT_FOUND, response.status_code)
+        self.assertEquals(response.data['Error'], 'The article does not exist')

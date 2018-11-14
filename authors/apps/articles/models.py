@@ -55,7 +55,6 @@ class Comment(models.Model):
     def __str__(self):
         return self.body
 
-
 class CommentHistory(models.Model):
     """
      implements comment edit history table
@@ -65,3 +64,24 @@ class CommentHistory(models.Model):
                                        on_delete=models.CASCADE,
                                        db_column='parent_comment')
     date_created = models.DateTimeField(auto_now=True)
+class Highlight(models.Model):
+    """
+    Table representing highlights and comments made on articles
+    """
+    article = models.ForeignKey(Article, on_delete=models.CASCADE,
+                                related_name="highlights")
+    highlighter = models.ForeignKey(User, on_delete=models.CASCADE,
+                                    related_name="highlights")
+    index_start = models.IntegerField(default=0)
+    index_stop = models.IntegerField()
+    highlighted_article_piece = models.CharField(blank=True, max_length=200)
+    comment = models.CharField(blank=True, max_length=200)
+    time_created = models.DateTimeField(auto_now_add=True, db_index=True)
+    time_updated = models.DateTimeField(auto_now=True, db_index=True)
+
+    class Meta():
+        '''Meta class defining order'''
+        ordering = ('time_updated',)
+
+    def __str__(self):
+        return self.comment

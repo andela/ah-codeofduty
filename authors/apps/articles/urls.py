@@ -1,14 +1,9 @@
 '''articles/urls.py'''
 from django.urls import path
-<<<<<<< HEAD
-from .views import ArticlesView, ArticlesFavoriteAPIView
-from .views import ArticlesView
-from .views import CommentRetrieveUpdateDestroy, CommentsListCreateAPIView, CommentHistoryAPIView
-=======
-from .views import (ArticlesView, ArticlesFavoriteAPIView, HighlightCommentView,
-                    CommentRetrieveUpdateDestroy, CommentsListCreateAPIView, HighlightCommentView)
+from .views import (ArticlesView, ArticlesFavoriteAPIView,
+                    CommentRetrieveUpdateDestroy, CommentsListCreateAPIView,
+                    CommentHistoryAPIView, HighlightCommentView)
 
->>>>>>> Feature(Highlight and comment on text): Add CRUD for highlights and comments on text
 
 # map http methods to defined methods in ArticlesViews
 articles_list = ArticlesView.as_view({
@@ -42,7 +37,6 @@ highlights_detal = HighlightCommentView.as_view({
     'get': 'retrieve',
 })
 
-
 urlpatterns = [
     path('articles/', articles_list),
     path('articles/<slug>/', articles_detail),
@@ -51,4 +45,6 @@ urlpatterns = [
          comments_list, name='comment_an_article'),
     path('articles/<slug>/comment/', comments_details, name='modify_a_comment'),
     path('articles/<slug>/history/<int:id>/', CommentHistoryAPIView.as_view()),
+    path('articles/<slug>/highlight/', highlights),
+    path('articles/<slug>/highlight/<id>/', highlights_detal),
 ]

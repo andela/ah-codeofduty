@@ -9,9 +9,8 @@ from rest_framework.exceptions import PermissionDenied
 from authors.apps.authentication.models import User
 from authors.apps.profiles.serializers import ProfileSerializer
 from authors.apps.profiles.models import Profile
-# django.forms.fields.ImageField
 
-from .models import Article, Comment, CommentHistory
+from .models import Article, Comment, CommentHistory, Highlight
 from ..rating.models import Rating
 
 
@@ -161,14 +160,12 @@ class CommentSerializer(serializers.ModelSerializer):
         instance = Comment.objects.create(parent=parent, **valid_input)
         return instance
 
-
-<<<<<<< HEAD
 class CommentHistorySerializer(serializers.ModelSerializer):
     """comment history serializer"""
     class Meta:
         model = CommentHistory
         fields = ('id', 'comment', 'date_created', 'parent_comment')
-=======
+
 class HighlightSerializer(serializers.ModelSerializer):
     '''Highlight model serializer'''
     article = ArticleSerializer(read_only=True)
@@ -188,7 +185,8 @@ class HighlightSerializer(serializers.ModelSerializer):
         '''method creating a new highlight'''
         validated_data["highlighter"] = self.context.get('highlighter')
         validated_data["article"] = self.context.get('article')
-        highlight_text = validated_data["article"].body[validated_data["index_start"]:validated_data["index_stop"]]
+        highlight_text = validated_data["article"].body[
+            validated_data["index_start"]:validated_data["index_stop"]]
         if not highlight_text:
             raise serializers.ValidationError("Text doesn't exist on this article")
         validated_data["highlighted_article_piece"] = highlight_text
@@ -211,4 +209,3 @@ class HighlightSerializer(serializers.ModelSerializer):
         instance.highlighted_article_piece = highlight_text
         instance.save()
         return instance
->>>>>>> Feature(Highlight and comment on text): Add CRUD for highlights and comments on text

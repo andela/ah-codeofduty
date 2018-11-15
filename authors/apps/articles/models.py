@@ -1,7 +1,13 @@
 """articles/models.py"""
 from django.db import models
+
+from django.db.models.signals import post_save
+from notifications.signals import notify
+
 from django.contrib.postgres.fields import ArrayField
 from authors.apps.authentication.models import User
+
+from authors.apps.profiles.models import Profile
 
 
 class Article(models.Model):
@@ -102,3 +108,55 @@ class Report(models.Model):
 
     def __str__(self):
         return self.body
+
+
+def article_handler(sender, instance, created, **kwargs):
+    """
+    Notifications handler to notify all the followers
+    of an author that he has published a new article
+     :params: sender: the actor (author) who is doing the action of
+       posting an article
+    :params: instance: the author instance
+    :params: created: timestamp when the action happened
+    """
+    try:
+        author = instance.author
+        #get all users following the user
+        my_followers = author.profile.get_my_followers()
+        #notify each follower that the user has published an article
+        for followers in my_followers:
+            followers = User.objects.filter(username=followers)
+            notify.send(
+                instance,
+                recipient=followers,
+                verb='{} published a new article'.format(author.username))
+    except Exception:
+        "author not found"
+
+def comment_handler(sender, instance, created, **kwargs):
+    """
+    Comment handler to notify the author of any comments they get
+    on my article
+    :params: sender: the actor (commenter) who is doing the action of
+       posting commenting on my article
+    :params: instance: the comment
+    :params: created: timestamp when the action happened
+    """
+    # initialize the author of the comment
+    author = None
+    # initialize the author of the article
+    try:
+        # initialize the author of the comment
+        author = instance.author
+        # initialize the author of the article
+        article_author = instance.article.author
+        # send a notification to the author of the article
+        notify.send(
+            instance,
+            recipient=article_author,
+            verb='{} commented on your article'.format(author.username))
+    except Exception:
+        "author not found"
+
+post_save.connect(article_handler, sender=Article)
+post_save.connect(comment_handler, sender=Comment)

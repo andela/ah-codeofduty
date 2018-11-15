@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from rest_framework import status, viewsets, generics
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.views import APIView
+<<<<<<< HEAD
 from django_filters import rest_framework as filters
 from django.contrib.postgres.fields import ArrayField
 
@@ -20,7 +21,19 @@ from .serializers import (ArticleSerializer, CommentSerializer,
                           CommentHistorySerializer, HighlightSerializer, ReportSerializer)
 from authors.apps.core.pagination import LimitOffsetPagination
 from .models import Article, Comment, CommentHistory, Highlight, Report
+=======
+
+from django.core.mail import send_mail
+from django.template import Context
+from django.template.loader import render_to_string, get_template
+from django.contrib.sites.shortcuts import get_current_site
+
+from .serializers import ArticleSerializer, CommentSerializer
+from .models import Article, Comment
+>>>>>>> feature(User notifications): Users should be able to receive notifications
 from .exceptions import ArticleDoesNotExist
+from authors.apps.authentication.models import User
+from authors.apps.authentication.backends import decode_token, JWTAuthentication
 
 
 class ArticleMetaData:
@@ -75,6 +88,45 @@ class ArticlesView(ArticleMetaData, viewsets.ModelViewSet):
             data=request.data, context={"email": request.user})
         serializer.is_valid(raise_exception=True)
         serializer.save()
+
+        profile = self.request.user.profile
+        to = []
+        my_followers = profile.get_my_followers()
+
+
+        for follower in my_followers:
+            subscribed = User.objects.filter(username=follower).values()[0]['is_subscribed']
+            if subscribed:
+                follower = User.objects.filter(username=follower).values()[0]['email']
+                to.append(follower)
+
+        for recipient in to:
+            pk = User.objects.filter(email=recipient).values()[0]['id']
+            token = JWTAuthentication.encode_token(self, pk)
+
+            current_site = get_current_site(request)
+
+            # Setup the content to be sent
+            # the url to send with the mail
+            link = "http://" + current_site.domain + \
+            '/api/notifications/subscription/'+token+'/'
+            article_link = "http://" + current_site.domain + \
+            '/api/articles/{}/'.format(serializer.data['slug'])
+
+            from_email = 'codeofd@gmail.com'
+            #username = request.user.username
+            template='index.html'
+            subject='"{}" added a new article "{}"'.format(request.user.username, request.data['title'])
+
+            username = User.objects.filter(email=recipient).values()[0]['username']
+            html_content = render_to_string(template, context={
+                                                "username": username,
+                                                "author": request.user.username,
+                                                "unsubscribe_url":link,
+                                                "article_link": article_link,
+                                                "article_title":request.data['title']})
+            send_mail(subject, '', from_email, [recipient], html_message=html_content)
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def retrieve(self, request, slug):
@@ -128,6 +180,37 @@ class ArticlesFavoriteAPIView(APIView):
 
         serializer = self.serializer_class(article, context=serializer_context)
 
+        article_author_id = Article.objects.filter(slug=self.kwargs["slug"]).values()[0]['author_id']
+        article_username = User.objects.filter(id=article_author_id).values()[0]['username']
+        article_username_pk = User.objects.filter(id=article_author_id).values()[0]['id']
+        article_author = User.objects.filter(id=article_author_id).values()[0]['email']
+        article_title = Article.objects.filter(slug=self.kwargs["slug"]).values()[0]['title']
+        author_notification_subscription = User.objects.filter(id=article_author_id).values()[0]['is_subscribed']
+        article_slug = Article.objects.filter(slug=self.kwargs["slug"]).values()[0]['slug']
+        favouriter = request.user.username
+        is_favorited = serializer.data['favorited']
+        token = JWTAuthentication.encode_token(self, article_username_pk)
+
+        if author_notification_subscription:
+            current_site = get_current_site(request)
+            link = "http://" + current_site.domain + \
+            '/api/notifications/subscription/'+token+'/'
+            article_link = "http://" + current_site.domain + \
+            '/api/articles/{}/'.format(article_slug)
+
+            from_email = 'codeofd@gmail.com'
+            template='favorite.html'
+            to = [article_author]
+            subject='"{}" favourited your article, "{}"'.format(favouriter, article_title)
+            html_content = render_to_string(template, context={
+                                            "username": article_username,
+                                            "favouriter": favouriter,
+                                            'article_title': article_title,
+                                            'article_link': article_link,
+                                            "unsubscribe_url":link})
+            #send Email
+            send_mail(subject, '', from_email, to, html_message=html_content)
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request, slug=None):
@@ -165,6 +248,36 @@ class CommentsListCreateAPIView(ArticlesView):
         serializer = self.serializer_class(data=data)
         if serializer.is_valid():
             serializer.save(author=self.request.user, article=article)
+
+            article_author_id = Article.objects.filter(slug=self.kwargs["slug"]).values()[0]['author_id']
+            article_username = User.objects.filter(id=article_author_id).values()[0]['username']
+            article_username_pk = User.objects.filter(id=article_author_id).values()[0]['id']
+            article_author = User.objects.filter(id=article_author_id).values()[0]['email']
+            article_title = Article.objects.filter(slug=self.kwargs["slug"]).values()[0]['title']
+            author_notification_subscription = User.objects.filter(id=article_author_id).values()[0]['is_subscribed']
+            article_slug = Article.objects.filter(slug=self.kwargs["slug"]).values()[0]['slug']
+            commenter = request.user.username
+            token = JWTAuthentication.encode_token(self, article_username_pk)
+
+            if author_notification_subscription:
+                current_site = get_current_site(request)
+                link = "http://" + current_site.domain + \
+                '/api/notifications/subscription/'+token+'/'
+                article_link = "http://" + current_site.domain + \
+                '/api/articles/{}/'.format(article_slug)
+
+                from_email = 'codeofd@gmail.com'
+                template='comments.html'
+                to = [article_author]
+                subject='New comment notification'
+                html_content = render_to_string(template, context={
+                                                "username": article_username,
+                                                "commenter": commenter,
+                                                'article_title': article_title,
+                                                'article_link': article_link,
+                                                "unsubscribe_url":link})
+                #send Email
+                send_mail(subject, '', from_email, to, html_message=html_content)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -284,6 +397,7 @@ class CommentRetrieveUpdateDestroy(CommentsListCreateAPIView, CreateAPIView):
         return Response({"message": {"Comment was deleted successfully"}}, status.HTTP_200_OK)
 
 
+<<<<<<< HEAD
 class ArticlesFeedAPIView(ListAPIView):
     """
     Returns multiple articles created by followed users, ordered by most recent first.
@@ -416,6 +530,27 @@ class HighlightCommentView(ArticleMetaData, viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+=======
+# class ArticlesFavoriteAPIView(APIView):
+#     permission_classes = (IsAuthenticated,)
+#     # renderer_classes = (ArticleJSONRenderer,)
+#     serializer_class = ArticleSerializer
+
+#     def post(self, request, slug=None):
+#         profile = self.request.user.profile
+#         serializer_context = {'request': request}
+
+#         try:
+#             article = Article.objects.get(slug=slug)
+#         except Article.DoesNotExist:
+#             raise ArticleDoesNotExist
+
+#         profile.favorite(article)
+
+#         serializer = self.serializer_class(article, context=serializer_context)
+
+#         return Response(serializer.data, status=status.HTTP_201_CREATED)
+>>>>>>> feature(User notifications): Users should be able to receive notifications
 
     def retrieve(self, request, slug, id):
         '''get a particular text highlight'''

@@ -180,12 +180,23 @@ class CommentSerializer(serializers.ModelSerializer):
         instance = Comment.objects.create(parent=parent, **valid_input)
         return instance
 
+    def count_likes(self, instance):
+        """Returns the total likes of a comment"""
+        request = self.context.get('request')
+        liked_by_me = False
+        if request is not None and request.user.is_authenticated:
+            user_id = request.user.id
+            liked_by_me = instance.likes.all().filter(id=user_id).count() == 1
+        return {'count': instance.likes.count(), 'me': liked_by_me}
+
 
 class CommentHistorySerializer(serializers.ModelSerializer):
     """comment history serializer"""
+
     class Meta:
         model = CommentHistory
         fields = ('id', 'comment', 'date_created', 'parent_comment')
+
 
 class HighlightSerializer(serializers.ModelSerializer):
     '''Highlight model serializer'''
@@ -207,7 +218,7 @@ class HighlightSerializer(serializers.ModelSerializer):
         validated_data["highlighter"] = self.context.get('highlighter')
         validated_data["article"] = self.context.get('article')
         highlight_text = validated_data["article"].body[
-            validated_data["index_start"]:validated_data["index_stop"]]
+                         validated_data["index_start"]:validated_data["index_stop"]]
         if not highlight_text:
             raise serializers.ValidationError("Text doesn't exist on this article")
         validated_data["highlighted_article_piece"] = highlight_text
@@ -230,22 +241,3 @@ class HighlightSerializer(serializers.ModelSerializer):
         instance.highlighted_article_piece = highlight_text
         instance.save()
         return instance
-
-    def count_likes(self, instance):
-        """Returns the total likes of a comment"""
-        request = self.context.get('request')
-        liked_by_me = False
-        if request is not None and request.user.is_authenticated:
-            user_id = request.user.id
-            liked_by_me = instance.likes.all().filter(id=user_id).count() == 1
-        return {'count': instance.likes.count(), 'me': liked_by_me}
-
-    def count_dislikes(self, instance):
-        """Returns  the total dislikes of a a comment"""
-        request = self.context.get('request')
-        disliked_by_me = False
-        if request is not None and request.user.is_authenticated:
-            user_id = request.user.id
-            disliked_by_me = instance.dislikes.all().filter(
-                id=user_id).count() == 1
-        return {'count': instance.dislikes.count(), 'me': disliked_by_me}

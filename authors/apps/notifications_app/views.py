@@ -1,4 +1,8 @@
-import jwt 
+"""
+Notification views serializer
+"""
+
+import jwt
 
 from rest_framework.generics import ListAPIView, RetrieveUpdateAPIView
 from rest_framework.views import APIView
@@ -7,17 +11,15 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 
-# from django.template.loader import render_to_string
-# from django.core.mail import EmailMultiAlternatives
-# from django.utils.html import strip_tags
-
 from django.core.mail import send_mail
 from django.template import Context
 from django.template.loader import render_to_string, get_template
 from django.contrib.sites.shortcuts import get_current_site
 
 from notifications.models import Notification
+
 from .serializers import NotificationSerializer
+
 from authors.apps.authentication.models import User
 from authors.apps.authentication.serializers import UserSerializer
 from authors.apps.authentication.renderers import UserJSONRenderer
@@ -36,9 +38,9 @@ class UserAllNotificationsView(ListAPIView):
     def get(self, request):
         """
         Get all user notifications method
-        :return: a list of all user notifications if 
-          user is subscribed to notifications, else a 
-          message to notify the user they arent 
+        :return: a list of all user notifications if
+          user is subscribed to notifications, else a
+          message to notify the user they aren't
           subscribed
         """
         serializer_context = {'request': request}
@@ -48,7 +50,9 @@ class UserAllNotificationsView(ListAPIView):
             serializer = self.serializer_class(
                 queryset, context=serializer_context, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response({'message': 'you are not subscribed to notifications'}, status=status.HTTP_200_OK)
+        return Response(
+            {'message': 'you are not subscribed to notifications'},
+            status=status.HTTP_200_OK)
 
 class ReadNotifications(APIView):
     """
@@ -63,15 +67,19 @@ class ReadNotifications(APIView):
         :param: request: user request
         :pk: the id of the notification to be read
         :return: a message to notify a user has read
-          a notification, else a message to 
-          notify the user they arent subscribed
+          a notification, else a message to
+          notify the user they aren't subscribed
         """
         user = request.user
         if user.is_subscribed:
             notification = Notification.objects.get(id=pk)
             notification.mark_as_read()
-            return Response({'message': 'Notification has been read'}, status=status.HTTP_200_OK)
-        return Response({'message': 'you are not subscribed to notifications'}, status=status.HTTP_200_OK)
+            return Response(
+                {'message': 'Notification has been read'},
+                status=status.HTTP_200_OK)
+        return Response(
+            {'message': 'you are not subscribed to notifications'},
+            status=status.HTTP_200_OK)
 
 
 class UserReadNotifications(ListAPIView):
@@ -84,9 +92,9 @@ class UserReadNotifications(ListAPIView):
     def get(self, request):
         """
         Get all read notifications method
-        :return: a list of all read notifications if 
-          user is subscribed to notifications, else a 
-          message to notify the user they arent 
+        :return: a list of all read notifications if
+          user is subscribed to notifications, else a
+          message to notify the user they aren't
           subscribed
         """
         serializer_context = {'request': request}
@@ -96,7 +104,9 @@ class UserReadNotifications(ListAPIView):
             serializer = self.serializer_class(
                 queryset, context=serializer_context, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response({'message': 'you are not subscribed to notifications'}, status=status.HTTP_200_OK)
+        return Response(
+            {'message': 'you are not subscribed to notifications'},
+            status=status.HTTP_200_OK)
 
 class UserUnReadNotifications(ListAPIView):
     """
@@ -108,9 +118,9 @@ class UserUnReadNotifications(ListAPIView):
     def get(self, request):
         """
         Get all unread notifications method
-        :return: a list of all unread notifications if 
-          user is subscribed to notifications, else a 
-          message to notify the user they arent 
+        :return: a list of all unread notifications if
+          user is subscribed to notifications, else a
+          message to notify the user they aren't
           subscribed
         """
         serializer_context = {'request': request}
@@ -120,11 +130,13 @@ class UserUnReadNotifications(ListAPIView):
             serializer = self.serializer_class(
                 queryset, context=serializer_context, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response({'message': 'you are not subscribed to notifications'}, status=status.HTTP_200_OK)
+        return Response(
+            {'message': 'you are not subscribed to notifications'},
+            status=status.HTTP_200_OK)
 
 class Subscription(APIView):
     """
-    Inapp and Email subscription class
+    In-app and Email subscription class
     """
     permission_classes = (IsAuthenticatedOrReadOnly,)
     renderer_class = (UserJSONRenderer)
@@ -142,7 +154,8 @@ class Subscription(APIView):
         if user.is_subscribed:
             user.is_subscribed = False
             user.save()
-            note_response = {'message': 'You have successfully unsubscribed from notifications'}
+            note_response = {
+                'message': 'You have successfully unsubscribed from notifications'}
 
             # Setup the content to be sent
             # the url to send with the mail
@@ -165,7 +178,8 @@ class Subscription(APIView):
         if not user.is_subscribed:
             user.is_subscribed = True
             user.save()
-            note_response = {'message': 'You have successfully subscribed to notifications'}
+            note_response = {
+                'message': 'You have successfully subscribed to notifications'}
 
             # Setup the content to be sent
             # the url to send with the mail
@@ -196,7 +210,7 @@ class SubscriptionEmailAPIView(APIView):
         """
         Email subscription confirmation method
         :param: request: user request
-        :param: token: user token to be deceded to a 
+        :param: token: user token to be deceded to a
           user object in order for the user to be  confirmed
           to exist and is active, hence set their subscription
           status
@@ -205,8 +219,11 @@ class SubscriptionEmailAPIView(APIView):
         if not user.is_subscribed:
             user.is_subscribed = True
             user.save()
-            return Response({"message": "Successfully Subscribed to email notifications"},status=status.HTTP_200_OK)
+            return Response(
+                {"message": "Successfully Subscribed to email notifications"},
+                status=status.HTTP_200_OK)
         user.is_subscribed = False
         user.save()
-        return Response({"message": "Successfully Unsubscribed from email notifications"},status=status.HTTP_200_OK)
-
+        return Response(
+            {"message": "Successfully Unsubscribed from email notifications"},
+            status=status.HTTP_200_OK)

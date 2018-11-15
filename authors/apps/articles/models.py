@@ -153,7 +153,6 @@ def favorite_comment_handler(sender, instance, created, **kwargs):
         article_slug = instance.article.slug
         articles_instance = Article.objects.get(slug=article_slug)
         favouriters = articles_instance.favorited_by.values()
-    
         for user_id in articles_instance.favorited_by.values():
             favouriters_name = User.objects.get(id=user_id['user_id'])
             # notify each favouriter of an article

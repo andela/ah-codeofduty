@@ -18,7 +18,6 @@ from .serializers import (ArticleSerializer, CommentSerializer,
                           CommentHistorySerializer, HighlightSerializer)
 from authors.apps.core.pagination import LimitOffsetPagination
 from .models import Article, Comment, CommentHistory, Highlight
-from .renderers import ArticleJSONRenderer
 from .exceptions import ArticleDoesNotExist
 
 
@@ -38,7 +37,6 @@ class ArticlesView(ArticleMetaData, viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     serializer_class = ArticleSerializer
     pagination_class = LimitOffsetPagination
-    renderer_class = ArticleJSONRenderer
     # queryset = Article.objects.all()
 
     def get_queryset(self):

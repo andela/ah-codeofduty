@@ -30,14 +30,15 @@ class ArticleMetaData:
         try:
             article = Article.objects.get(slug=slug)
         except Article.DoesNotExist:
-            raise ArticleDoesNotExist
+            raise NotFound('This article doesn\'t exist')
+
         return article
+
 
 class ArticlesView(ArticleMetaData, viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     serializer_class = ArticleSerializer
     pagination_class = LimitOffsetPagination
-    # queryset = Article.objects.all()
 
     def get_queryset(self):
         ''' method to filter by author, title, and tag '''

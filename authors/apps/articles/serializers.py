@@ -5,7 +5,6 @@ from django.db.models import Avg
 from rest_framework import serializers
 from django.utils.text import slugify
 from authors.apps.authentication.serializers import UserSerializer
-from ..authentication.models import User
 from rest_framework.exceptions import PermissionDenied
 from authors.apps.authentication.models import User
 from authors.apps.profiles.serializers import ProfileSerializer
@@ -138,6 +137,7 @@ class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SerializerMethodField()
     article = serializers.ReadOnlyField(source='article.title')
     thread = RecursiveSerializer(many=True, read_only=True)
+    likes = serializers.SerializerMethodField(method_name='count_likes')
 
     class Meta:
         model = Comment
@@ -149,7 +149,8 @@ class CommentSerializer(serializers.ModelSerializer):
             'author',
             'thread',
             'created_at',
-            'updated_at'
+            'updated_at',
+            'likes',
         )
 
     def update(self, instance, valid_input, **kwargs):
@@ -177,11 +178,23 @@ class CommentSerializer(serializers.ModelSerializer):
         instance = Comment.objects.create(parent=parent, **valid_input)
         return instance
 
+    def count_likes(self, instance):
+        """Returns the total likes of a comment"""
+        request = self.context.get('request')
+        liked_by_me = False
+        if request is not None and request.user.is_authenticated:
+            user_id = request.user.id
+            liked_by_me = instance.likes.all().filter(id=user_id).count() == 1
+        return {'count': instance.likes.count(), 'me': liked_by_me}
+
+
 class CommentHistorySerializer(serializers.ModelSerializer):
     """comment history serializer"""
+
     class Meta:
         model = CommentHistory
         fields = ('id', 'comment', 'date_created', 'parent_comment')
+
 
 class HighlightSerializer(serializers.ModelSerializer):
     '''Highlight model serializer'''
@@ -203,7 +216,7 @@ class HighlightSerializer(serializers.ModelSerializer):
         validated_data["highlighter"] = self.context.get('highlighter')
         validated_data["article"] = self.context.get('article')
         highlight_text = validated_data["article"].body[
-            validated_data["index_start"]:validated_data["index_stop"]]
+                         validated_data["index_start"]:validated_data["index_stop"]]
         if not highlight_text:
             raise serializers.ValidationError("Text doesn't exist on this article")
         validated_data["highlighted_article_piece"] = highlight_text

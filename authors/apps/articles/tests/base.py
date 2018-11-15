@@ -32,7 +32,9 @@ class BaseTest(TestCase):
         self.HIGHLIGHT_ID = '/api/articles/test-title/highlight/{}/'
         self.HIGHLIGHT_ID_2 = '/api/articles/test-title1/highlight/{}/'
 
-        # define test client
+        self.LIKE_COMMENT = '/api/articles/{}/comment/{}/like/'
+        self.DISLIKE_COMMENT = '/api/articles/{}/comment/{}/dislike/'
+
         self.client = APIClient()
 
         # define user data for signup
@@ -76,6 +78,10 @@ class BaseTest(TestCase):
         }
 
         # signup and login 2 test users (author and non-article-author) to obtain 2 tokens for tesing
+        self.test_comment_data = {
+            "body": "this is a sample comment"
+        }
+
         self.client.post(self.SIGN_UP_URL, test_user, format="json")
         response = self.client.post(self.SIGN_IN_URL, test_user, format="json")
         self.token = "bearer " + json.loads(response.content)["user"]["token"]

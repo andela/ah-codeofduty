@@ -1,68 +1,135 @@
-from .base import BaseTest
+"""articles/test_like_or_dislike_articles.py"""
 from rest_framework.views import status
 
+from .base import BaseTest
 
-class CommentsLikeDislikeTestCase(BaseTest):
-    """test class for liking and disliking comments """
 
-    def get_token(self):
-        response = self.client.post(self.SIGN_UP_URL, self.fav_test_user, format='json')
-        response = self.client.post(self.SIGN_IN_URL, self.fav_test_user, format='json')
-        token = response.data['token']
-        return token
+class TestLikeDislikeArticles(BaseTest):
+    """class testing articles likes and dislikes"""
 
-    def create_article(self, token, article):
-        """ Method to create an article"""
-        return self.client.post(self.ARTICLES, self.test_article_data,
-                                HTTP_AUTHORIZATION='Bearer ' + token, format='json')
+    def create_like(self):
+        return self.client.post(
+            self.ARTICLE_LIKES.format(
+                "new-title"),
+            self.likes,
+            HTTP_AUTHORIZATION=self.token2,
+            format='json'
+        )
 
-    def test_articles(self):
-        """Test test the liking of an article"""
-        token = self.get_token()
+    def create_dislike(self):
+        return self.client.post(
+            self.ARTICLE_LIKES.format(
+                "new-title"),
+            self.dislikes,
+            HTTP_AUTHORIZATION=self.token2,
+            format='json'
+        )
+
+    def test_like_dislike_articles(self):
+        """test creating article"""
         article_data = {
-            "title": "test title",
-            "body": "This is me testing",
-            "description": "testing",
+            "title": "new title",
+            "body": "mama mia is never going to England1",
+            "description": "happy feet",
             "time_to_read": 1,
-            "tags": ["TDD"]
+            "tags": ["math", "science"]
         }
-        # article created
-        response = self.create_article(token, article_data)
-        self.assertEquals(status.HTTP_201_CREATED, response.status_code)
-        slug = response.data['slug']
+        response = self.client.post(
+            self.ARTICLES, article_data, HTTP_AUTHORIZATION=self.token,
+            format="json")
 
-        # like an article
-        response = self.client.put('/api/articles/' + str(slug) + '/like/',
-                                   HTTP_AUTHORIZATION=self.token, format='json')
-        self.assertEquals(status.HTTP_200_OK, response.status_code)
+        # test cannot like own article
+        response1 = self.client.post(self.ARTICLE_LIKES.format(
+            "new-title"), self.likes, HTTP_AUTHORIZATION=self.token,
+            format="json")
+        self.assertEqual(response1.status_code, status.HTTP_400_BAD_REQUEST)
 
-        # un-like an article
-        response = self.client.put('/api/articles/' + str(slug) + '/like/',
-                                   HTTP_AUTHORIZATION=self.token, format='json')
-        self.assertEquals(status.HTTP_200_OK, response.status_code)
+        # test cannot dislike own article
+        response2 = self.client.post(self.ARTICLE_LIKES.format(
+            "new-title"), self.dislikes, HTTP_AUTHORIZATION=self.token,
+            format="json")
+        self.assertEqual(response2.status_code, status.HTTP_400_BAD_REQUEST)
 
-        # dislike an article
-        response = self.client.put('/api/articles/' + str(slug) + '/dislike/',
-                                   HTTP_AUTHORIZATION=self.token, format='json')
-        self.assertEquals(status.HTTP_200_OK, response.status_code)
+        # test another user can like an article
+        response3 = self.client.post(self.ARTICLE_LIKES.format(
+            "new-title"), self.likes, HTTP_AUTHORIZATION=self.token2,
+            format="json")
+        self.assertEqual(response3.status_code, status.HTTP_201_CREATED)
 
-        # un-dislike an article
-        response = self.client.put('/api/articles/' + str(slug) + '/dislike/',
-                                   HTTP_AUTHORIZATION=self.token, format='json')
-        self.assertEquals(status.HTTP_200_OK, response.status_code)
+        # test another user can dislike an article
+        response4 = self.client.post(self.ARTICLE_LIKES.format(
+            "new-title"), self.dislikes, HTTP_AUTHORIZATION=self.token2,
+            format="json")
+        self.assertEqual(response4.status_code, status.HTTP_200_OK)
 
-        # like missing article
-        response = self.client.put('/api/articles/me/like/',
-                                   HTTP_AUTHORIZATION='Bearer ' + token,
-                                   format='json'
-                                   )
-        self.assertEquals(status.HTTP_404_NOT_FOUND, response.status_code)
-        self.assertEquals(response.data['Error'], 'The article does not exist')
+        # test another user cannot like an article twice
+        self.create_like()
+        response5 = self.create_like()
+        self.assertEqual(response5.status_code, status.HTTP_400_BAD_REQUEST)
 
-        # dislike missing article
-        response = self.client.put('/api/articles/me/dislike/',
-                                   HTTP_AUTHORIZATION='Bearer ' + token,
-                                   format='json'
-                                   )
-        self.assertEquals(status.HTTP_404_NOT_FOUND, response.status_code)
-        self.assertEquals(response.data['Error'], 'The article does not exist')
+        # Test article likes count
+        response6 = self.client.get(self.ARTICLE.format(
+            "new-title"), format='json')
+        likes_count = response6.data['likes']['count']
+        old_count = 0
+        self.create_like()
+        self.assertNotEqual(likes_count, old_count)
+
+        # test another user cannot dislike an article twice
+        self.create_dislike()
+        response7 = self.create_dislike()
+        self.assertEqual(response7.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # test article dislike count
+        response = self.client.get(self.ARTICLE.format(
+            "new-title"), format='json')
+        dislikes_count = response.data['dislikes']['count']
+        old_count = 0
+        self.create_dislike()
+        self.assertNotEqual(dislikes_count, old_count)
+
+        # Test disliking after liking
+        self.create_like()
+        response = self.create_dislike()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Test liking after disliking
+        self.create_dislike()
+        response = self.create_like()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Test unauthenticated user cannot like an article
+        self.client.credentials(HTTP_AUTHORIZATION='')
+        response = self.client.post(self.ARTICLE_LIKES,
+                                    self.likes,
+                                    format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_delete_likes(self):
+        """Test deletion like """
+        article_data = {
+            "title": "new title",
+            "body": "mama mia is never going to England1",
+            "description": "happy feet",
+            "time_to_read": 1,
+            "tags": ["math", "science"]
+        }
+        response = self.client.post(
+            self.ARTICLES, article_data, HTTP_AUTHORIZATION=self.token,
+            format="json")
+
+        self.create_like()
+        response = self.client.delete(self.ARTICLE_LIKES.format("new-title"),
+                                      HTTP_AUTHORIZATION=self.token2)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Test deletion of a no like
+        response = self.client.delete(self.ARTICLE_LIKES.format("new-title"),
+                                      HTTP_AUTHORIZATION=self.token2)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        # Test unauthenticated user cannot delete dislike
+        self.client.post(self.ARTICLE_LIKES.format("new-title"), self.dislikes,
+                         format='json', HTTP_AUTHORIZATION=self.token2)
+        response = self.client.delete(self.ARTICLE_LIKES.format("new-title"))
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)

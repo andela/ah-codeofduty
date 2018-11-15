@@ -1,25 +1,27 @@
 '''articles/views.py'''
 import django_filters
+from django.contrib.postgres.fields import ArrayField
+from django.shortcuts import get_object_or_404
+from django_filters import rest_framework as filters
 from django_filters.rest_framework import DjangoFilterBackend
-from django.shortcuts import render
-from django.shortcuts import render, get_object_or_404
+from rest_framework import generics
+from rest_framework import status, viewsets
+from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.filters import SearchFilter
-from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView, ListAPIView, UpdateAPIView
+from rest_framework.generics import CreateAPIView, GenericAPIView
+from rest_framework.generics import ListAPIView, UpdateAPIView
 from rest_framework.permissions import (
     IsAuthenticated, IsAuthenticatedOrReadOnly, )
 from rest_framework.response import Response
-from rest_framework import status, viewsets, generics
-from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.views import APIView
-from django_filters import rest_framework as filters
-from django.contrib.postgres.fields import ArrayField
 
 from authors.apps.articles.renderers import ReportJSONRenderer
-from .serializers import (ArticleSerializer, CommentSerializer,
-                          CommentHistorySerializer, HighlightSerializer, ReportSerializer)
 from authors.apps.core.pagination import LimitOffsetPagination
-from .models import Article, Comment, CommentHistory, Highlight, Report
 from .exceptions import ArticleDoesNotExist
+from .models import Article, Comment, LikesDislikes
+from .models import CommentHistory, Highlight, Report
+from .serializers import ArticleSerializer, CommentSerializer, LikesDislikesSerializer
+from .serializers import (CommentHistorySerializer, HighlightSerializer, ReportSerializer)
 
 
 class ArticleMetaData:
@@ -507,52 +509,121 @@ class ReportCreateAPIView(generics.CreateAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class LikeArticles(UpdateAPIView):
-    """Class for comment likes"""
-    serializer_class = ArticleSerializer
+class ArticlesLikesDislikes(GenericAPIView):
+    """ Class for creating and deleting article likes/dislikes"""
+    queryset = LikesDislikes.objects.all()
+    serializer_class = LikesDislikesSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
-    def update(self, request, *args, **kwargs):
-        """Method for updating comment likes"""
-        slug = self.kwargs['slug']
+    def post(self, request, slug):
+        # Check if the article exists in the database
+        article = Article.objects.get(slug=slug)
+        if isinstance(article, dict):
+            return Response(article, status=status.HTTP_404_NOT_FOUND)
+        like = request.data.get('likes', None)
+        if type(like) == bool:
+            # Check if the article belongs to the current user
+            if article.author == request.user:
+                message = {'Error': 'You cannot like/unlike your own article'}
+                return Response(message, status=status.HTTP_400_BAD_REQUEST)
+            like_data = {
+                'reader': request.user.id,
+                'article': article.id,
+                'likes': like
+            }
+            try:
+                user_likes = LikesDislikes.objects.get(
+                    article=article.id, reader=request.user.id)
+                if user_likes:
+                    # checking true for stored and  request data
+                    if user_likes.likes and like:
+                        return Response(
+                            {
+                                'detail': 'You have already '
+                                          'liked this article.'
+                            }, status=status.HTTP_400_BAD_REQUEST)
+                    # checking false for stored and  request data
+                    elif not user_likes.likes and not like:
+                        return Response(
+                            {
+                                'detail': 'You have already '
+                                          'disliked this article.'
+                            }, status=status.HTTP_400_BAD_REQUEST)
+                    # checking true for stored and request data
+                    # one is true and the other false
+                    elif like and not user_likes.likes:
+                        user_likes.likes = True
+                        user_likes.save()
+                        article.likes.add(request.user)
+                        article.dislikes.remove(request.user)
+                        article.save()
+                        return Response(
+                            {
+                                'Success': 'You have liked this article.'
+                            }, status=status.HTTP_200_OK)
+                    else:
+                        user_likes.likes = False
+                        user_likes.save()
+                        article.likes.remove(request.user)
+                        article.dislikes.add(request.user)
+                        article.save()
+                        return Response(
+                            {
+                                'Success': 'You have disliked this article.'
+                            }, status=status.HTTP_200_OK)
+            except LikesDislikes.DoesNotExist:
+                serializer = self.serializer_class(data=like_data)
+                serializer.is_valid(raise_exception=True)
+                serializer.save(article=article, reader=request.user)
+                # if the request data is true, we update the article
+                # with the new data
+                if like:
+                    article.likes.add(request.user)
+                    article.save()
+                    return Response(
+                        {
+                            'Success': 'You have liked this article.'
+                        }, status=status.HTTP_201_CREATED)
+
+                # if the request data is false, we update the article
+                # with the new data
+                else:
+                    article.dislikes.add(request.user)
+                    article.save()
+                    return Response(
+                        {
+                            'Success': 'You have disliked this article.'
+                        }, status=status.HTTP_201_CREATED)
+        else:
+            return Response(
+                {
+                    'detail': 'Please indicate whether you '
+                              'like/dislike this article.'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, slug):
+        # Checking if the article is in the database
+        article = Article.objects.get(slug=slug)
+        if isinstance(article, dict):
+            return Response(article, status=status.HTTP_404_NOT_FOUND)
         try:
-            article = Article.objects.get(slug=slug)
-        except Article.DoesNotExist:
-            return Response({'Error': 'The article does not exist'}, status.HTTP_404_NOT_FOUND)
-
-        user = request.user
-        article.dislikes.remove(user.id)
-        # Confirmation user already liked the comment
-        confirm = bool(user in article.likes.all())
-        if confirm is True:
-            article.likes.remove(user.id)
-            return Response({"Success": "You have un-liked this article"}, status.HTTP_200_OK)
-        # Adding user like to list of likes
-        article.likes.add(user.id)
-        message = {"Success": "You liked this article"}
-        return Response(message, status.HTTP_200_OK)
-
-
-class DislikeArticles(UpdateAPIView):
-    """Class for comment dislikes"""
-    serializer_class = ArticleSerializer
-
-    def update(self, request, *args, **kwargs):
-        """Method for updating comment dislikes"""
-        slug = self.kwargs['slug']
-        try:
-            article = Article.objects.get(slug=slug)
-        except Article.DoesNotExist:
-            return Response({'Error': 'The article does not exist'}, status.HTTP_404_NOT_FOUND)
-        # fetch  user
-        user = request.user
-        article.likes.remove(user.id)
-        # Confirmation user already disliked the comment
-        confirm = bool(user in article.dislikes.all())
-        if confirm is True:
-            article.dislikes.remove(user.id)
-            message = {"Success": "You have un-disliked this article"}
-            return Response(message, status.HTTP_200_OK)
-        # This add the user to dislikes lists
-        article.dislikes.add(user.id)
-        message = {"success": "You disliked this article"}
-        return Response(message, status.HTTP_200_OK)
+            # Check existence of article and user in the db and get the like
+            user_like = LikesDislikes.objects.get(
+                article=article.id, reader=request.user.id)
+            if user_like:
+                if user_like.likes:
+                    article.likes.remove(request.user)
+                    article.save()
+                else:
+                    article.dislikes.remove(request.user)
+                    article.save()
+        except LikesDislikes.DoesNotExist:
+            return Response(
+                {
+                    'Error': 'Likes/dislikes not found.'
+                }, status=status.HTTP_404_NOT_FOUND)
+        user_like.delete()
+        return Response(
+            {
+                'Success': 'Your reaction has been deleted successfully.'
+            }, status=status.HTTP_200_OK)

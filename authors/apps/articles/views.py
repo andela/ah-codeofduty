@@ -250,34 +250,37 @@ class CommentsListCreateAPIView(ArticlesView):
             serializer.save(author=self.request.user, article=article)
 
             article_author_id = Article.objects.filter(slug=self.kwargs["slug"]).values()[0]['author_id']
-            article_username = User.objects.filter(id=article_author_id).values()[0]['username']
-            article_username_pk = User.objects.filter(id=article_author_id).values()[0]['id']
-            article_author = User.objects.filter(id=article_author_id).values()[0]['email']
-            article_title = Article.objects.filter(slug=self.kwargs["slug"]).values()[0]['title']
-            author_notification_subscription = User.objects.filter(id=article_author_id).values()[0]['is_subscribed']
             article_slug = Article.objects.filter(slug=self.kwargs["slug"]).values()[0]['slug']
+            article_title = Article.objects.filter(slug=self.kwargs["slug"]).values()[0]['title']
+            article_author = User.objects.filter(id=article_author_id).values()[0]['username']
+            articles_instance = Article.objects.get(slug=article_slug)
+            favouriters = articles_instance.favorited_by.values()
             commenter = request.user.username
-            token = JWTAuthentication.encode_token(self, article_username_pk)
 
-            if author_notification_subscription:
-                current_site = get_current_site(request)
-                link = "http://" + current_site.domain + \
-                '/api/notifications/subscription/'+token+'/'
-                article_link = "http://" + current_site.domain + \
-                '/api/articles/{}/'.format(article_slug)
+            for user_id in favouriters:
+                favouriters_name = User.objects.get(id=user_id['user_id'])
+                token = JWTAuthentication.encode_token(self, favouriters_name.pk)
+                author_notification_subscription = User.objects.filter(id=favouriters_name.pk).values()[0]['is_subscribed']
 
-                from_email = 'codeofd@gmail.com'
-                template='comments.html'
-                to = [article_author]
-                subject='New comment notification'
-                html_content = render_to_string(template, context={
-                                                "username": article_username,
-                                                "commenter": commenter,
-                                                'article_title': article_title,
-                                                'article_link': article_link,
-                                                "unsubscribe_url":link})
-                #send Email
-                send_mail(subject, '', from_email, to, html_message=html_content)
+                if author_notification_subscription:
+                    current_site = get_current_site(request)
+                    link = "http://" + current_site.domain + \
+                    '/api/notifications/subscription/'+token+'/'
+                    article_link = "http://" + current_site.domain + \
+                    '/api/articles/{}/'.format(article_slug)
+
+                    from_email = 'codeofd@gmail.com'
+                    template='comments.html'
+                    to = [favouriters_name.email]
+                    subject='New comment on one of your favorite articles, "{}" by "{}"'.format(article_title, article_author)
+                    html_content = render_to_string(template, context={
+                                                    "username": favouriters_name.username,
+                                                    "commenter": commenter,
+                                                    'article_title': article_title,
+                                                    'article_link': article_link,
+                                                    "unsubscribe_url":link})
+                    #send Email
+                    send_mail(subject, '', from_email, to, html_message=html_content)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

@@ -51,8 +51,6 @@ class Profile(TimeStamp):
 
     def favorite(self, article):
         ''' favorite an article '''
-        notify.send(self, verb='favorite_article', recipient=article.author,
-                    description="{} has just favorited your article".format(self.surname))
         self.favorites.add(article)
     
     def unfavorite(self, article):

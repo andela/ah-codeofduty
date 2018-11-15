@@ -6,7 +6,9 @@ from notifications.signals import notify
 
 from django.contrib.postgres.fields import ArrayField
 from authors.apps.authentication.models import User
+from django.utils.text import slugify
 
+from authors.apps.authentication.models import User
 from authors.apps.profiles.models import Profile
 
 
@@ -133,30 +135,34 @@ def article_handler(sender, instance, created, **kwargs):
     except Exception:
         "author not found"
 
-def comment_handler(sender, instance, created, **kwargs):
+
+def favorite_comment_handler(sender, instance, created, **kwargs):
     """
-    Comment handler to notify the author of any comments they get
-    on my article
+    Comment handler to notify the favouriters of a certain article
+    that it has received a comment
     :params: sender: the actor (commenter) who is doing the action of
        posting commenting on my article
     :params: instance: the comment
     :params: created: timestamp when the action happened
     """
-    # initialize the author of the comment
-    author = None
-    # initialize the author of the article
     try:
         # initialize the author of the comment
         author = instance.author
         # initialize the author of the article
-        article_author = instance.article.author
-        # send a notification to the author of the article
-        notify.send(
-            instance,
-            recipient=article_author,
-            verb='{} commented on your article'.format(author.username))
-    except Exception:
-        "author not found"
+        article_author = [instance.article.author]
+        article_slug = instance.article.slug
+        articles_instance = Article.objects.get(slug=article_slug)
+        favouriters = articles_instance.favorited_by.values()
+    
+        for user_id in articles_instance.favorited_by.values():
+            favouriters_name = User.objects.get(id=user_id['user_id'])
+            # notify each favouriter of an article
+            notify.send(
+                instance,
+                recipient=favouriters_name,
+                verb='{} commented on an article you have favorited'.format(author.username))
+    except:
+        "article not found"
 
 post_save.connect(article_handler, sender=Article)
-post_save.connect(comment_handler, sender=Comment)
+post_save.connect(favorite_comment_handler, sender=Comment)

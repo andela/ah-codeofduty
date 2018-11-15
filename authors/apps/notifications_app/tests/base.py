@@ -55,6 +55,14 @@ class BaseTest(TestCase):
 	        "tags": ["OOP"]
         }
 
+        self.test_article_data2 = {
+	        "title": "another article titles",
+	        "body": "Article body",
+	        "description": "Article description",
+	        "time_to_read": 3,
+	        "tags": ["OOP"]
+        }
+
         self.test_commnet = {"body": "sample comment"}
 
         # signup the first user (article author)
@@ -80,12 +88,20 @@ class BaseTest(TestCase):
         # test_user creates an article
         self.client.post(self.ARTICLES, self.test_article_datas, HTTP_AUTHORIZATION=self.token, format="json")
 
+        # test_non_author_user creates an article
+        self.client.post(self.ARTICLES, self.test_article_data2, HTTP_AUTHORIZATION=self.non_user_token, format="json")
+
         # test_another_non_author_user favourites test_user's article
         self.client.post(self.FAVOURITE.format("article-titles"), HTTP_AUTHORIZATION=self.non_user_token, format="json")
+
+        # test_user favourites test_non_author_user's article
+        self.client.post(self.FAVOURITE.format("another-article-titles"), HTTP_AUTHORIZATION=self.token, format="json")
 
         # test_another_non_author_user comments on test_user article
         self.client.post(self.COMMENT.format("article-titles"), self.test_commnet, HTTP_AUTHORIZATION=self.another_non_user_token, format="json")
 
+        # test_another_non_author_user comments on test_non_author_user article
+        self.client.post(self.COMMENT.format("another-article-titles"), self.test_commnet, HTTP_AUTHORIZATION=self.another_non_user_token, format="json")
 
         # test_user follows test_non_author_user
         self.client.put(self.FOLLOW.format('gitmax'), self.test_non_author_user['username'], HTTP_AUTHORIZATION=self.token, format="json")

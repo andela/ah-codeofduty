@@ -43,7 +43,7 @@ class UserAllNotificationsView(ListAPIView):
         """
         serializer_context = {'request': request}
         user = request.user
-        if user.is_subscribed:
+        if user.is_authenticated:
             queryset = user.notifications.all()
             serializer = self.serializer_class(
                 queryset, context=serializer_context, many=True)
@@ -206,8 +206,7 @@ class SubscriptionEmailAPIView(APIView):
             user.is_subscribed = True
             user.save()
             return Response({"message": "Successfully Subscribed to email notifications"},status=status.HTTP_200_OK)
-        if user.is_subscribed:
-            user.is_subscribed = False
-            user.save()
-            return Response({"message": "Successfully Unsubscribed from email notifications"},status=status.HTTP_200_OK)
+        user.is_subscribed = False
+        user.save()
+        return Response({"message": "Successfully Unsubscribed from email notifications"},status=status.HTTP_200_OK)
 

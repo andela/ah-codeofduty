@@ -7,7 +7,7 @@ from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView, ListAP
 from rest_framework.permissions import (
     AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly,)
 from rest_framework.response import Response
-from rest_framework import status, viewsets, mixins
+from rest_framework import status, viewsets, generics
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.views import APIView
 import django_filters
@@ -16,13 +16,29 @@ from django.contrib.postgres.fields import ArrayField
 
 from .serializers import (ArticleSerializer, CommentSerializer,
                           CommentHistorySerializer, HighlightSerializer)
+from authors.apps.core.pagination import LimitOffsetPagination
 from .models import Article, Comment, CommentHistory, Highlight
-
 from .exceptions import ArticleDoesNotExist
-from rest_framework import generics
+
 
 class ArticleMetaData:
     permission_classes = (IsAuthenticatedOrReadOnly,)
+    serializer_class = ArticleSerializer
+
+    def check_article_exists(self, slug):
+        '''method checking if article exists'''
+        try:
+            article = Article.objects.get(slug=slug)
+        except Article.DoesNotExist:
+            raise NotFound('This article doesn\'t exist')
+
+        return article
+
+
+class ArticlesView(ArticleMetaData, viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    serializer_class = ArticleSerializer
+    pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
         ''' method to filter by author, title, and tag '''
@@ -38,29 +54,18 @@ class ArticleMetaData:
 
         tag = self.request.query_params.get('tag', None)
         if tag is not None:
-            queryset = filter(lambda x: x if tag in x.tags else None, queryset)
+            queryset = list(filter(lambda x: x if tag in x.tags else None, queryset))
+
         return queryset
-
-    def check_article_exists(self, slug):
-        '''method checking if article exists'''
-        try:
-            article = Article.objects.get(slug=slug)
-        except Article.DoesNotExist:
-            raise NotFound('This article doesn\'t exist')
-
-        return article
-
-
-class ArticlesView(ArticleMetaData, viewsets.ModelViewSet):
-    serializer_class = ArticleSerializer
 
     def list(self, request):
         ''' method to fetch all articles'''
         serializer_context = {'request': request}
-        queryset = self.get_queryset()
+        
+        page = self.paginate_queryset(self.get_queryset())
         serializer = self.serializer_class(
-            queryset, context=serializer_context, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+            page, context=serializer_context, many=True)
+        return self.get_paginated_response(serializer.data)
 
     def create(self, request):
         '''method creating a new article(post)'''

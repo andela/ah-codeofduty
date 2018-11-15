@@ -3,6 +3,8 @@ from decimal import Decimal
 from django.db.models import Avg
 from rest_framework import serializers
 from django.utils.text import slugify
+from rest_framework.validators import UniqueTogetherValidator
+
 from authors.apps.authentication.serializers import UserSerializer
 from ..authentication.models import User
 from rest_framework.exceptions import PermissionDenied
@@ -11,7 +13,7 @@ from authors.apps.profiles.serializers import ProfileSerializer
 from authors.apps.profiles.models import Profile
 # django.forms.fields.ImageField
 
-from .models import Article, Comment
+from .models import Article, Comment, LikesDislikes
 from ..rating.models import Rating
 
 
@@ -182,3 +184,16 @@ class CommentSerializer(serializers.ModelSerializer):
         parent = self.context.get('parent', None)
         instance = Comment.objects.create(parent=parent, **valid_input)
         return instance
+
+
+class LikesDislikesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LikesDislikes
+        fields = '__all__'
+        validators = [
+            UniqueTogetherValidator(
+                queryset=LikesDislikes.objects.all(),
+                fields=('article', 'reader'),
+                message='You have already liked this article.'
+            )
+        ]

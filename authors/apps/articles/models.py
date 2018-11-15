@@ -1,7 +1,6 @@
 '''articles/models.py'''
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
-from django.utils.text import slugify
 from authors.apps.authentication.models import User
 
 
@@ -22,8 +21,8 @@ class Article(models.Model):
     time_updated = models.DateTimeField(auto_now=True, db_index=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     average_rating = models.IntegerField(default=0)
-    likes = models.ManyToManyField(User, related_name='comment_likes', blank=True)
-    dislikes = models.ManyToManyField(User, related_name='comment_dislikes', blank=True)
+    likes = models.ManyToManyField(User, blank=True, related_name='LikesDislikes.user+')
+    dislikes = models.ManyToManyField(User, blank=True, related_name='LikesDislikes.user+')
 
     class Meta():
         '''Meta class defining order'''
@@ -49,7 +48,7 @@ class Comment(models.Model):
     parent = models.ForeignKey(
         'self', null=True, blank=False, on_delete=models.CASCADE, related_name='thread')
     article = models.ForeignKey(
-        Article,  blank=True, null=True, on_delete=models.CASCADE, related_name='comments')
+        Article, blank=True, null=True, on_delete=models.CASCADE, related_name='comments')
     author = models.ForeignKey(
         User, blank=True, null=True, on_delete=models.CASCADE, related_name='comments')
     body = models.TextField()
@@ -58,3 +57,12 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.body
+
+
+class LikesDislikes(models.Model):
+    article = models.ForeignKey(Article, related_name='like', on_delete=models.CASCADE)
+    reader = models.ForeignKey(User, related_name='like', on_delete=models.CASCADE)
+    likes = models.BooleanField()
+
+    class Meta:
+        unique_together = ('article', 'reader')

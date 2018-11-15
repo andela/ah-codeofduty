@@ -26,6 +26,11 @@ class BaseTest(TestCase):
         self.UPDATE_A_COMMENT = '/api/articles/{}/comment/{}/'
         self.DELETE_A_COMMENT = '/api/articles/{}/comment/{}/'
 
+        self.ARTICLE_LIKES = '/api/articles/{}/like/'
+
+        self.likes = {"likes": True}
+        self.dislikes = {"likes": False}
+
         self.client = APIClient()
         test_user = {
             "email": "njery.ngigi@gmail.com",
@@ -61,6 +66,8 @@ class BaseTest(TestCase):
             self.SIGN_IN_URL, test_non_author_user, format="json")
         self.non_user_token = "bearer " + \
             json.loads(response.content)["user"]["token"]
+        response2 = self.client.post(self.SIGN_IN_URL, test_non_author_user, format="json")
+        self.token2 = "bearer " + json.loads(response2.content)["user"]["token"]
 
         self.client.post(self.ARTICLES, self.test_article_data,
                          HTTP_AUTHORIZATION=self.token, format="json")

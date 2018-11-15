@@ -5,7 +5,7 @@ from django.urls import path
 from .views import (ArticlesView, ArticlesFavoriteAPIView,
                     CommentRetrieveUpdateDestroy, CommentsListCreateAPIView,
                     ArticlesFeedAPIView, ArticlesSearchListAPIView,
-                    CommentHistoryAPIView, HighlightCommentView, DislikeComments, LikeComments)
+                    CommentHistoryAPIView, HighlightCommentView, LikeComments)
 
 from .views import ArticlesView, ArticlesFavoriteAPIView, LikeComments
 from .views import CommentRetrieveUpdateDestroy, CommentsListCreateAPIView

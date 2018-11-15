@@ -1,8 +1,6 @@
 '''articles/serializers'''
-
 import math
 from decimal import Decimal
-
 from django.db.models import Avg
 from rest_framework import serializers
 from django.utils.text import slugify

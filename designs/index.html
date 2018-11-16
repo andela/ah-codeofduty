@@ -7,23 +7,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
-        crossorigin="anonymous">
-        <link href="https://fonts.googleapis.com/css?family=Kodchasan|Lobster|Pacifico|Pattaya|Permanent+Marker|Poiret+One|Satisfy|Exo:100,200,400|Barlow|Concert+One|Fredoka+One|Raleway|Arimo|Yellowtail|Caveat+Brush"
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" 
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+    crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css?family=Kodchasan|Lobster|Pacifico|Pattaya|Permanent+Marker|Poiret+One|Satisfy|Exo:100,200,400|Barlow|Concert+One|Fredoka+One|Raleway|Arimo|Yellowtail|Caveat+Brush"
         rel="stylesheet">
-
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="static/css/main.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
-        crossorigin="anonymous">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU"
         crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Kodchasan|Lobster|Pacifico|Pattaya|Permanent+Marker|Poiret+One|Satisfy|Exo:100,200,400|Barlow|Concert+One|Fredoka+One|Raleway|Arimo|Yellowtail|Caveat+Brush"
-        rel="stylesheet">
     <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+   
     <title>Authors' Heaven</title>
 </head>
 
@@ -43,22 +39,28 @@
                     <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Technology</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Medicine</a>
-                </li>
-                <li class="nav-item">
-                        <a class="nav-link" 
-                        data-toggle="modal" 
-                        data-target="#signup_modal"
-                        >Login &nbsp;</a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link" href="UI/profile.html">Profile</a>
                 </li>
             </ul>
             <ul class="navbar-nav ml-auto">
+                <li class="nav-item" style="margin-right: 1em;">
+                    <div class="search-input">
+                        <span class="fa fa-search search" id="search"></span>
+                        <input type="text" class="form-control" placeholder="Search">
+                        <div class= "dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown">
+                            <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <input class="form-control" id="myInput"
+                                type="text" placeholder="Filter..">
+                                <li class="pl"><a href=""></a>Author</li>
+                                <li class="pl"><a href=""></a>Title</li>
+                                <li class="pl"><a href=""></a>Tag</li>
+                            </ul>
+                        </div>
+                    </div>
+                    </li>
                     <li class="nav-item">
                                 <i class="fas fa-bell"
                                 data-toggle="modal"
@@ -181,6 +183,14 @@
                 </div>
             </div>
         </div>
+    </div>
+    <div>
+        <ul class="pagination justify justify-content-center">
+            <li class="page-item disabled"><a class="page-link" href="javascript:void(0);">Previous</a></li>
+            <li class="page-item active"><a class="page-link" href="javascript:void(0);">1</a></li>
+            <li class="page-item"><a class="page-link" href="javascript:void(0);">2</a></li>
+            <li class="page-item"><a class="page-link" href="javascript:void(0);">Next</a></li>
+        </ul>
     </div>
     </div>
     <hr>
@@ -418,11 +428,7 @@
         crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
         crossorigin="anonymous"></script>
-</body>
-
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
-  </body>
+
+</body>
 </html>

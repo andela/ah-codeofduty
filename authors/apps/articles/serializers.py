@@ -9,8 +9,8 @@ from rest_framework.exceptions import PermissionDenied
 from authors.apps.authentication.models import User
 from authors.apps.profiles.serializers import ProfileSerializer
 from authors.apps.profiles.models import Profile
-
 from .models import Article, Comment, CommentHistory, Highlight, Report
+
 from ..rating.models import Rating
 
 

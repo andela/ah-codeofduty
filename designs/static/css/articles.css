@@ -109,15 +109,7 @@ i.fas{
 .text-orange{
     color: orange;
 }
-.logo{
-    border-right: 2px solid orange;
-    color: orange;
-}
-.logo:hover{
-    color: orange;
-    opacity: 0.8;
-    text-decoration: none;
-}
+
 .ave-rating{
     font-size: 150%;
     padding: 2%;

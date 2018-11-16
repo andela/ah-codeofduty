@@ -227,3 +227,6 @@ background: #1DA1F2
 .card-footer{
     margin-top: 20px;
 }
+mark{
+    background-color: khaki;
+}

@@ -19,7 +19,7 @@ img.round-image{
     width: 75px;
 }
 i.fas{
-    font-size: 1.2em;
+    font-size: 1em;
     border-bottom: 2px soild #333;
     transition: .5s ease;
 }
@@ -152,4 +152,7 @@ i.fas{
 .fa-thumbs-down:hover{
     color: red;
     opacity: 0.8;
+}
+.fa-highlighter{
+    font-size: 0.5em;
 }

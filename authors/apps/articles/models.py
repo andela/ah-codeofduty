@@ -21,6 +21,8 @@ class Article(models.Model):
     time_updated = models.DateTimeField(auto_now=True, db_index=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="articles")
     average_rating = models.IntegerField(default=0)
+    likes = models.ManyToManyField(User, blank=True, related_name='LikesDislikes.user+')
+    dislikes = models.ManyToManyField(User, blank=True, related_name='LikesDislikes.user+')
 
     class Meta():
         """Meta class defining order"""
@@ -102,3 +104,12 @@ class Report(models.Model):
 
     def __str__(self):
         return self.body
+
+
+class LikesDislikes(models.Model):
+    article = models.ForeignKey(Article, related_name='like', on_delete=models.CASCADE)
+    reader = models.ForeignKey(User, related_name='like', on_delete=models.CASCADE)
+    likes = models.BooleanField()
+
+    class Meta:
+        unique_together = ('article', 'reader')

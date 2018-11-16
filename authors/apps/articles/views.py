@@ -15,10 +15,11 @@ from rest_framework.views import APIView
 from django_filters import rest_framework as filters
 from django.contrib.postgres.fields import ArrayField
 
+from authors.apps.articles.renderers import ReportJSONRenderer
 from .serializers import (ArticleSerializer, CommentSerializer,
-                          CommentHistorySerializer, HighlightSerializer)
+                          CommentHistorySerializer, HighlightSerializer, ReportSerializer)
 from authors.apps.core.pagination import LimitOffsetPagination
-from .models import Article, Comment, CommentHistory, Highlight
+from .models import Article, Comment, CommentHistory, Highlight, Report
 from .exceptions import ArticleDoesNotExist
 
 
@@ -104,7 +105,7 @@ class ArticlesView(ArticleMetaData, viewsets.ModelViewSet):
 
 
 class ArticlesFavoriteAPIView(APIView):
-    """ 
+    """
     Implements favoriting and unfavoriting articles
     """
     permission_classes = (IsAuthenticated,)
@@ -313,7 +314,7 @@ class ArticlesFeedAPIView(ListAPIView):
 class ArticleFilterAPIView(filters.FilterSet):
     """
     creates a custom filter class for articles
-    
+
     """
     title = filters.CharFilter(field_name='title', lookup_expr='icontains')
     description = filters.CharFilter(
@@ -350,11 +351,11 @@ class ArticlesSearchListAPIView(ListAPIView):
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
 
-    # DjangoFilterBackend class, allows you to easily create filters across relationships, 
+    # DjangoFilterBackend class, allows you to easily create filters across relationships,
     # or create multiple filter lookup types for a given field.
     # SearchFilter class supports simple single query parameter based searching
-    # It will only be applied if the view has a search_fields attribute set. 
-    # The search_fields attribute should be a list of names of text type fields on the model, 
+    # It will only be applied if the view has a search_fields attribute set.
+    # The search_fields attribute should be a list of names of text type fields on the model,
     # such as CharField or TextField.
 
     filter_backends = (DjangoFilterBackend, SearchFilter)
@@ -475,3 +476,33 @@ class LikeComments(UpdateAPIView):
         comment.likes.add(user.id)
         message = {"Success": "You liked this comment"}
         return Response(message, status.HTTP_200_OK)
+
+
+class ReportCreateAPIView(generics.CreateAPIView):
+    """Facilitate create reports"""
+    slug = 'slug'
+
+    queryset = Report.objects.select_related()
+    serializer_class = ReportSerializer
+    renderer_classes = (ReportJSONRenderer,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+
+    def filter_queryset(self, queryset):
+        """Handle getting reports on an article."""
+        filters = {self.lookup_field: self.kwargs[self.slug]}
+        return queryset.filter(**filters)
+
+    def create(self, request, **kwargs):
+        """Create reports to an article"""
+        slug = self.kwargs['slug']
+        try:
+            article = Article.objects.get(slug=slug)
+        except Article.DoesNotExist:
+            raise NotFound("An article does not exist")
+        serializer_context = {"reporter": request.user, "slug": slug}
+        serializer_data = request.data
+        serializer = self.serializer_class(data=serializer_data, context=serializer_context)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

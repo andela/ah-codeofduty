@@ -9,8 +9,8 @@ from rest_framework.exceptions import PermissionDenied
 from authors.apps.authentication.models import User
 from authors.apps.profiles.serializers import ProfileSerializer
 from authors.apps.profiles.models import Profile
+from .models import Article, Comment, CommentHistory, Highlight, Report
 
-from .models import Article, Comment, CommentHistory, Highlight
 from ..rating.models import Rating
 
 
@@ -239,3 +239,25 @@ class HighlightSerializer(serializers.ModelSerializer):
         instance.highlighted_article_piece = highlight_text
         instance.save()
         return instance
+
+
+class ReportSerializer(serializers.ModelSerializer):
+    """mediates between the reporting an article model and python primitives"""
+    reporter = UserSerializer(read_only=True)
+
+    class Meta:
+        model = Report
+        fields = (
+            'id',
+            'created_at',
+            'body',
+            'article_id',
+            'reporter',
+        )
+
+    def create(self, validated_data):
+        slug = self.context.get('slug')
+        reporter = self.context.get('reporter', None)
+        article = Article.objects.get(slug=slug)
+        report = Report.objects.create(article=article, reporter=reporter, **validated_data)
+        return report

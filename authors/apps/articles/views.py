@@ -4,12 +4,10 @@ from django.contrib.postgres.fields import ArrayField
 from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as filters
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics
-from rest_framework import status, viewsets
+from rest_framework import status, viewsets, generics
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.filters import SearchFilter
-from rest_framework.generics import CreateAPIView, GenericAPIView
-from rest_framework.generics import ListAPIView, UpdateAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView, UpdateAPIView, GenericAPIView
 from rest_framework.permissions import (
     IsAuthenticated, IsAuthenticatedOrReadOnly, )
 from rest_framework.response import Response
@@ -18,10 +16,9 @@ from rest_framework.views import APIView
 from authors.apps.articles.renderers import ReportJSONRenderer
 from authors.apps.core.pagination import LimitOffsetPagination
 from .exceptions import ArticleDoesNotExist
-from .models import Article, Comment, LikesDislikes
-from .models import CommentHistory, Highlight, Report
-from .serializers import ArticleSerializer, CommentSerializer, LikesDislikesSerializer
-from .serializers import (CommentHistorySerializer, HighlightSerializer, ReportSerializer)
+from .models import Article, Comment, CommentHistory, Highlight, Report, LikesDislikes
+from .serializers import (ArticleSerializer, CommentSerializer,
+                          CommentHistorySerializer, HighlightSerializer, ReportSerializer, LikesDislikesSerializer)
 
 
 class ArticleMetaData:
@@ -315,7 +312,6 @@ class ArticlesFeedAPIView(ListAPIView):
 class ArticleFilterAPIView(filters.FilterSet):
     """
     creates a custom filter class for articles
-
     """
     title = filters.CharFilter(field_name='title', lookup_expr='icontains')
     description = filters.CharFilter(

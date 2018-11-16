@@ -286,6 +286,7 @@ class ReportSerializer(serializers.ModelSerializer):
         report = Report.objects.create(article=article, reporter=reporter, **validated_data)
         return report
 
+
 class LikesDislikesSerializer(serializers.ModelSerializer):
     class Meta:
         model = LikesDislikes

@@ -45,7 +45,6 @@ like_comment = LikeComments.as_view()
 # like a comment
 like_comment = LikeComments.as_view()
 
-
 urlpatterns = [
     path('articles/', articles_list),
     path('articles/feed/', ArticlesFeedAPIView.as_view()),

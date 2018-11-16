@@ -19,13 +19,12 @@ img.round-image{
     width: 75px;
 }
 i.fas{
-    font-size: 1.5em;
+    font-size: 1.2em;
     border-bottom: 2px soild #333;
     transition: .5s ease;
 }
 .fa-crown:hover{
     color: gold;
-    opacity: .9;
     transition: .5s ease;
 }
 .checked{
@@ -41,13 +40,16 @@ i.fas{
     width: 25px;
     border-radius: 50%;
 }
+.mid-avatar{
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+}
 .text-large, .fa-star{
     font-size: 1.2em
 }
 .fa-star:hover{
     color: gold;
-    opacity: 0.7;
-
 }
 .border-2{
     border-width: 2px !important;
@@ -57,6 +59,7 @@ i.fas{
 .font-raleway{ font-family: 'Raleway'}
 .card-text{
     font-family: 'Raleway', sans-serif;
+    text-align: justify;
 }
 .bg-orange{
     background-color:orange	;
@@ -83,7 +86,7 @@ i.fas{
     padding: 5px;
 }
 
-textarea{
+#add-article textarea{
     height: 50rem;
     width: 100%;
     border: none;
@@ -106,17 +109,47 @@ textarea{
 .text-orange{
     color: orange;
 }
-.logo{
-    border-right: 2px solid orange;
-    color: orange;
-}
-.logo:hover{
-    color: orange;
-    opacity: 0.8;
-    text-decoration: none;
-}
+
 .ave-rating{
     font-size: 150%;
     padding: 2%;
     margin: 2%;
+}
+.highlight-comment{
+    position: absolute;
+    margin-top: 25px;
+    display: none;
+}
+.highlight:hover .highlight-comment{
+    display: inline;
+}
+.highlight-comment textarea{
+    width: 150%;
+    height: 100px;
+}
+.highlight-comment textarea:focus{
+   border: none;
+}
+.highlight-comments{
+    margin-left: 40%;
+}
+.comment-container{
+    width: 37%;
+    margin-top: 25px;
+    box-shadow: 0px 0px 2px #333;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    border-radius: 5px;
+    display: none;
+}
+#highlight-comments:hover + #h-comment{
+    display: inline;
+}
+.fa-thumbs-up:hover{
+    color: green;
+    opacity: 0.8;
+}
+.fa-thumbs-down:hover{
+    color: red;
+    opacity: 0.8;
 }

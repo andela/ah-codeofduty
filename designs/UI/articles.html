@@ -13,17 +13,18 @@
     <link href="https://fonts.googleapis.com/css?family=Kodchasan|Lobster|Pacifico|Pattaya|Permanent+Marker|Poiret+One|Satisfy|Exo:100,200,400|Barlow|Concert+One|Fredoka+One|Raleway|Arimo|Yellowtail|Caveat+Brush"
         rel="stylesheet">
 
-    <link rel="stylesheet" href="./static/css/main.css">
-    <link rel="stylesheet" href="./static/css/articles.css">
+    <link rel="stylesheet" href="../static/css/main.css">
+    <link rel="stylesheet" href="../static/css/articles.css">
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
 
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light pt-4  p-3 font-raleway" id="navbar_home">
-        <a class="logo p-2 pr-4 mr-3 text-large font-weight-bold" href="#">AH</a>
+    <nav class="navbar navbar-expand-lg navbar-light pt-3 font-raleway" id="navbar_home">
+        <a class="logo pl-1 pr-4 mr-3 text-large font-weight-bold" href="#">AH</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo02"
             aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -32,36 +33,40 @@
         <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
             <ul class="navbar-nav">
                 <li class="nav-item active">
-                    <a class="nav-link" href="index.html">Home <span class="sr-only">(current)</span></a>
+                    <a class="nav-link" href="../index.html">Home <span class="sr-only">(current)</span></a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">Categories</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="article_form.html">Add an article</a>
-                </li>
-            </ul>
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <a class="nav-link">Login &nbsp;</a>
-                </li>
-                <li class="nav-item">
-                    <button type="button" class="btn btn-warning">Register</button>
+                    <a class="nav-link" href="./article_form.html">Add an article</a>
                 </li>
             </ul>
         </div>
+
+        <div class="float-right dropdown">
+
+            <img class="mid-avatar mr-5 dropdown-toggle" data-toggle="dropdown" data-offset="10,150" src="../photos/profile.jpg">
+            <div class="dropdown-menu p-3" role="menu">
+                <a href="#" class="dropdown-item">Your profile</a>
+                <a href="#" class="dropdown-item">Your stories</a>
+                <a href="#" class="dropdown-item">Create a story</a>
+                <a href="#" class="dropdown-item">Logout</a>
+                </ul>
+            </div>
+
     </nav>
     <hr>
     <div class="ave-rating position-fixed">
-            <i class="float-left fas fa-star mb-2 mt-5 text-warning" title="Average rating"></i>
-            <p class="small text-center">4.5</p>
+        <i class="float-left fas fa-star mb-2 mt-5 checked" title="Average rating"></i>
+        <p class="small text-center font-raleway">4.5</p>
     </div>
     <div class="container px-5 pb-5">
         <div class="row pb-4">
             <div class="px-5 pt-3 col-md-8">
                 <div class="row">
                     <div class="col-lg-2">
-                        <img class="round-image" src="./profile.jpg">
+                        <img class="round-image" src="../photos/profile.jpg">
                     </div>
                     <div class="col-lg-10 pt-2">
                         <i class="fas fa-crown float-right pr-5 pt-3 text-large" title="Favorite this article"></i>
@@ -70,7 +75,8 @@
 
                     </div>
                 </div>
-                <h1 class="card-title pt-4 pb-4 font-satisfy">Mitch Goes Crazy </h1>
+                <h1 class="card-title pt-4 font-satisfy">Mitch Goes Crazy </h1>
+                <p class="text-muted pb-3 font-raleway">2 Min Read</p>
                 <p class="card-text">
                     Mitch Camaro looked at the enchanted newspaper in her hands and felt anxious.
 
@@ -82,7 +88,12 @@
                     Then she saw something in the distance, or rather someone. It was the figure of Kate Wishmonger.
                     Kate was a wild god with brown spots and blonde eyelashes.
 
-                    Mitch gulped. She glanced at her own reflection. She was a tactless, predatory, brandy drinker with
+                    Mitch gulped. <mark class="highlight">
+                        <span class="highlight-comment">
+                            <textarea placeholder="Leave a comment ..."></textarea>
+                            <button class="btn-warning p-1 px-5"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
+                        </span>
+                        She glanced at her own reflection. She was a tactless, predatory,</mark> brandy drinker with
                     brunette spots and spiky eyelashes. Her friends saw her as a queasy, quirky queen. Once, she had
                     even helped a deadly toddler recover from a flying accident.
 
@@ -111,42 +122,82 @@
 
                     Kate's brown spots trembled and her blonde eyelashes wobbled. She looked jumpy, her emotions raw
                     like a hissing, handsome hawk.
+                    <span class="fa fa-comments position-absolute highlight-comments" id="highlight-comments">
+                        <sub class="font-raleway">5</sub>
+                    </span>
+                    <span class="position-absolute highlight-comments comment-container" id="h-comment">
+                        <span class="p-4">
+                            <span>@user_1</span><span class="fa fa-angle-double-right"></span>
+                            <span>Very good read!</span>
+                        </span><br><br>
+                        <span class="p-4">
+                            <span>@user_2</span><span class="fa fa-angle-double-right"></span>
+                            <span>Whaaaaaaaat!</span>
+                        </span><br><br>
+                        <span class="p-4">
+                            <span>@user_3</span><span class="fa fa-angle-double-right"></span>
+                            <span>Meh</span>
+                        </span>
 
-                    Then she let out an agonising groan and collapsed onto the ground. Moments later Kate Wishmonger
+                    </span>
+
+                    <!-- <div class="position-absolute d-none">
+                        <span>@user_1</span><span class="fa fa-angle-double-right"></span><span>Very good read!</span>
+                    </div> -->
+
+                    <mark>Then she let out an agonising groan and collapsed onto the ground.</mark>Moments later Kate
+                    Wishmonger
                     was dead.
 
                     Mitch Camaro went back inside and made herself a nice glass of brandy.
                 </p>
                 <p class="card-text pt-3">THE END </p>
             </div>
-            <div class="col-md-4 pl-5 side-column mt-3 font-satisfy">
+            <div class="col-md-4 pl-5 side-column mt-3 font-raleway">
                 <div class="fixed sticky-top">
-                    <h5 class="mb-4 mt-4 font-raleway ">Stories by Genny Motion</h5>
+                    <h5 class="mb-4 pt-5 font-raleway ">Stories by Genny Motion</h5>
                     <div class="">
                         <a href="#" class="card-title text-orange font-weight-bold font-raleway">Some story title</a>
-                        <p class="text-muted text-large">Some very summarized content showing what the story is
+                        <p class="text-muted">Some very summarized content showing what the story is
                             about...</p>
                     </div>
                     <div class="">
                         <a href="#" class="card-title text-orange font-weight-bold font-raleway">Some other creative
                             story title</a>
-                        <p class="text-muted text-large">Some very summarized content showing what the story is
+                        <p class="text-muted">Some very summarized content showing what the story is
                             about...</p>
                     </div>
                     <div class="">
                         <a href="#" class="card-title text-orange font-weight-bold font-raleway">Some twisted creative
                             story title</a>
-                        <p class="text-muted text-large">Some very summarized content showing what the story is
+                        <p class="text-muted">Some very summarized content showing what the story is
                             about...</p>
                     </div>
                     <div class="">
                         <a href="#" class="card-title text-orange font-weight-bold font-raleway">Something about
                             technology</a>
-                        <p class="text-muted text-large">Some very summarized content showing what the story is
+                        <p class="text-muted">Some very summarized content showing what the story is
                             about...</p>
                     </div>
                 </div>
             </div>
+        </div>
+        <div class="row pb-1 pt-3">
+            <div class="col-md-3 text-center pb-3">
+                <span class="fa fa-star"></span>
+                <span class="fa fa-star"></span>
+                <span class="fa fa-star"></span>
+                <span class="fa fa-star"></span>
+                <span class="fa fa-star"></span>
+            </div>
+            <div class="col-md-4 text-center pb-3">
+                <i class="fas fa-thumbs-up mr-5"></i>
+                <i class="fas fa-thumbs-down"></i>
+            </div>
+            <div class="col-md-4 text-center pb-2">
+                <span class="text-muted font-satisfy">Created at: 22<sup>nd</sup> November, 2018</span>
+            </div>
+
         </div>
         <hr class="mt-3">
         <div class="container">
@@ -156,22 +207,12 @@
                         data-toggle="collapse" data-target="#comments">
                         <sub class="pl-1 small">5</sub></i>
                 </div>
-                <div class="col-md-4 text-center pt-3">
-                    <span class="fa fa-star"></span>
-                    <span class="fa fa-star"></span>
-                    <span class="fa fa-star"></span>
-                    <span class="fa fa-star"></span>
-                    <span class="fa fa-star"></span>
-                </div>
-                <div class="col-md-6 text-center pt-3">
-                    <span class="text-muted font-satisfy">Created at: 22<sup>nd</sup> November, 2018</span>
-                </div>
             </div>
         </div>
 
         <div class="container pl-5 comments p-4 font-raleway collapse show" id="comments">
             <div class="p-3 mb-2">
-                <img class="avatar" src="./profile.jpg">
+                <img class="avatar" src="../photos/profile.jpg">
                 <span class="pl-3 font-satisfy"><b>@first-commenter</b></span>
                 <p class="pt-3">
                     Then she let out an agonising groan and collapsed onto the ground. Moments later Kate
@@ -189,13 +230,13 @@
                                     aria-hidden="true"></i></button>
                         </form>
                         <div class="ml-2 container mt-3 border-left border-warning">
-                            <img class="small-avatar" src="./profile.jpg">
+                            <img class="small-avatar" src="../photos/profile.jpg">
                             <span class="pr-2 font-satisfy"><b>@replier <span class="fa fa-angle-double-right"></span>
                                 </b></span>
                             <span class="pt-3">This is a demo reply.</span>
                         </div>
                         <div class="ml-2 container mt-3 border-left border-warning">
-                            <img class="small-avatar" src="./profile.jpg">
+                            <img class="small-avatar" src="../photos/profile.jpg">
                             <span class="pr-3 font-satisfy"><b>@replier2 <span class="fa fa-angle-double-right"></span></b>
                             </span>
                             <span class="pt-3">
@@ -203,7 +244,7 @@
                             </span>
                         </div>
                         <div class="ml-2 container mt-3 border-left border-warning">
-                            <img class="small-avatar" src="./profile.jpg">
+                            <img class="small-avatar" src="../photos/profile.jpg">
                             <span class="pr-2 font-satisfy"><b>@replier2 <span class="fa fa-angle-double-right"></span></b>
                             </span>
                             <span class="pt-3">
@@ -217,7 +258,7 @@
                 </div>
             </div>
             <div class="p-3 mb-2">
-                <img class="avatar" src="./profile.jpg">
+                <img class="avatar" src="../photos/profile.jpg">
                 <span class="pl-3 font-satisfy">@second-commenter</span>
                 <p class="pt-3">
                     Then she let out an agonising groan and collapsed onto the ground. Moments later Kate
@@ -235,7 +276,7 @@
                                     aria-hidden="true"></i></button>
                         </form>
                         <div class="ml-2 container mt-3 border-left border-warning">
-                            <img class="small-avatar" src="./profile.jpg">
+                            <img class="small-avatar" src="../photos/profile.jpg">
                             <span class="pr-2 font-satisfy"><b>@replier <span class="fa fa-angle-double-right"></span>
                                 </b></span>
                             <span class="pt-3">Now I'm just spamming.</span>
@@ -290,7 +331,6 @@
             </div>
         </div>
     </footer>
-
 </body>
 
 </html>

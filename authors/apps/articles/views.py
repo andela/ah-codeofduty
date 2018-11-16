@@ -12,7 +12,6 @@ from rest_framework.response import Response
 from rest_framework import status, viewsets, generics
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.views import APIView
-<<<<<<< HEAD
 from django_filters import rest_framework as filters
 from django.contrib.postgres.fields import ArrayField
 
@@ -21,7 +20,6 @@ from .serializers import (ArticleSerializer, CommentSerializer,
                           CommentHistorySerializer, HighlightSerializer, ReportSerializer)
 from authors.apps.core.pagination import LimitOffsetPagination
 from .models import Article, Comment, CommentHistory, Highlight, Report
-=======
 
 from django.core.mail import send_mail
 from django.template import Context
@@ -30,7 +28,6 @@ from django.contrib.sites.shortcuts import get_current_site
 
 from .serializers import ArticleSerializer, CommentSerializer
 from .models import Article, Comment
->>>>>>> feature(User notifications): Users should be able to receive notifications
 from .exceptions import ArticleDoesNotExist
 from authors.apps.authentication.models import User
 from authors.apps.authentication.backends import decode_token, JWTAuthentication
@@ -400,7 +397,6 @@ class CommentRetrieveUpdateDestroy(CommentsListCreateAPIView, CreateAPIView):
         return Response({"message": {"Comment was deleted successfully"}}, status.HTTP_200_OK)
 
 
-<<<<<<< HEAD
 class ArticlesFeedAPIView(ListAPIView):
     """
     Returns multiple articles created by followed users, ordered by most recent first.
@@ -533,27 +529,6 @@ class HighlightCommentView(ArticleMetaData, viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-=======
-# class ArticlesFavoriteAPIView(APIView):
-#     permission_classes = (IsAuthenticated,)
-#     # renderer_classes = (ArticleJSONRenderer,)
-#     serializer_class = ArticleSerializer
-
-#     def post(self, request, slug=None):
-#         profile = self.request.user.profile
-#         serializer_context = {'request': request}
-
-#         try:
-#             article = Article.objects.get(slug=slug)
-#         except Article.DoesNotExist:
-#             raise ArticleDoesNotExist
-
-#         profile.favorite(article)
-
-#         serializer = self.serializer_class(article, context=serializer_context)
-
-#         return Response(serializer.data, status=status.HTTP_201_CREATED)
->>>>>>> feature(User notifications): Users should be able to receive notifications
 
     def retrieve(self, request, slug, id):
         '''get a particular text highlight'''

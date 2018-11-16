@@ -49,6 +49,19 @@
                     <a class="nav-link" href="#">Medicine</a>
                 </li>
                 <li class="nav-item">
+                        <i class="fas fa-bell"
+                        data-toggle="modal"
+                        data-target="#notification_modal"
+                        style="font-size:36px;"
+                        >
+                            <span class="badge badge-danger"
+                            style="position:relative;
+                                   top: -20px;
+                                   left: -25px;
+                                   font-size: 12px">4</span>
+                        </i>
+                    </li>
+                <li class="nav-item">
                         <a class="nav-link" 
                         data-toggle="modal" 
                         data-target="#signup_modal"
@@ -377,7 +390,39 @@
         </div>
       </div>
 
+<!-- Notifications modal-->
+<div class="modal" id="notification_modal">
+        <div class="modal-dialog">
+          <div class="modal-content">
+      
+            <!-- Modal Header -->
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+      
+            <!-- Modal body -->
+            <div class="modal-body text-center login-form">
+                <div class="card" style="width: 18.5rem;">
+                    <div class="card-header">
+                            <span class="badge badge-dark"> <h6>Notifications</h6></span>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">Notification 1</li>
+                        <li class="list-group-item">Notification 2</li>
+                        <li class="list-group-item">Notification 3</li>
+                        <li class="list-group-item">Notification 4</li>
+                    </ul>
+                    <div class="card-footer">
+                        <span> <strong>Subscription</strong></span>
+                        <input type="checkbox" checked data-toggle="toggle" data-onstyle="success" data-offstyle="danger">
+                        </div>
+                    </div>
+              </div>
+          </div>
+        </div>
+      </div>
 
+    
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"

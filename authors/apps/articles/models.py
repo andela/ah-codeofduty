@@ -1,7 +1,15 @@
 """articles/models.py"""
 from django.db import models
+
+from django.db.models.signals import post_save
+from notifications.signals import notify
+
 from django.contrib.postgres.fields import ArrayField
 from authors.apps.authentication.models import User
+from django.utils.text import slugify
+
+from authors.apps.authentication.models import User
+from authors.apps.profiles.models import Profile
 
 
 class Article(models.Model):
@@ -104,6 +112,61 @@ class Report(models.Model):
 
     def __str__(self):
         return self.body
+
+
+def article_handler(sender, instance, created, **kwargs):
+    """
+    Notifications handler to notify all the followers
+    of an author that he has published a new article
+     :params: sender: the actor (author) who is doing the action of
+       posting an article
+    :params: instance: the author instance
+    :params: created: timestamp when the action happened
+    """
+    try:
+        author = instance.author
+        #get all users following the user
+        my_followers = author.profile.get_my_followers()
+        #notify each follower that the user has published an article
+        for followers in my_followers:
+            followers = User.objects.filter(username=followers)
+            notify.send(
+                instance,
+                recipient=followers,
+                verb='{} published a new article'.format(author.username))
+    except Exception:
+        "author not found"
+
+
+def favorite_comment_handler(sender, instance, created, **kwargs):
+    """
+    Comment handler to notify the favouriters of a certain article
+    that it has received a comment
+    :params: sender: the actor (commenter) who is doing the action of
+       posting commenting on my article
+    :params: instance: the comment
+    :params: created: timestamp when the action happened
+    """
+    try:
+        # initialize the author of the comment
+        author = instance.author
+        # initialize the author of the article
+        article_author = [instance.article.author]
+        article_slug = instance.article.slug
+        articles_instance = Article.objects.get(slug=article_slug)
+        favouriters = articles_instance.favorited_by.values()
+        for user_id in articles_instance.favorited_by.values():
+            favouriters_name = User.objects.get(id=user_id['user_id'])
+            # notify each favouriter of an article
+            notify.send(
+                instance,
+                recipient=favouriters_name,
+                verb='{} commented on an article you have favorited'.format(author.username))
+    except:
+        "article not found"
+
+post_save.connect(article_handler, sender=Article)
+post_save.connect(favorite_comment_handler, sender=Comment)
 
 
 class LikesDislikes(models.Model):

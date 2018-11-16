@@ -3,10 +3,12 @@ from django.db import models
 from authors.apps.authentication.models import User
 from authors.apps.core.models import TimeStamp
 
+from notifications.signals import notify
+
 
 class Profile(TimeStamp):
     """Class description of user profile"""
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     follows = models.ManyToManyField('self',
                                      related_name='followed_by',
                                      symmetrical=False)
@@ -23,6 +25,8 @@ class Profile(TimeStamp):
 
     def follow(self, profile):
         """ Follow profile """
+        notify.send(self, verb='user_following', recipient=profile.user,
+                    description="{} has just followed you".format(self.surname))
         self.follows.add(profile)
 
     def unfollow(self, profile):
@@ -48,10 +52,14 @@ class Profile(TimeStamp):
     def favorite(self, article):
         ''' favorite an article '''
         self.favorites.add(article)
-    
+
     def unfavorite(self, article):
         ''' unfavorite an article '''
         self.favorites.remove(article)
-    
+
     def has_favorited(self, article):
         return self.favorites.filter(pk=article.pk).exists()
+
+    def get_my_followers(self):
+        """ Get profile followers """
+        return self.followed_by.all()

@@ -50,12 +50,14 @@ INSTALLED_APPS = [
     'django_extensions',
     'rest_framework',
     'social_django',
+    'notifications',
 
     'authors.apps.authentication',
     'authors.apps.core',
     'authors.apps.profiles',
     'authors.apps.articles',
     'authors.apps.rating',
+    'authors.apps.notifications_app',
 ]
 
 MIDDLEWARE = [

@@ -83,6 +83,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     # A timestamp reprensenting when this object was last updated.
     updated_at = models.DateTimeField(auto_now=True)
 
+    # a subscription field to check whether a user has subscribed to
+    # notifications
+    is_subscribed = models.BooleanField(default=True)
+
     # More fields required by Django when specifying a custom user model.
 
     # The `USERNAME_FIELD` property tells us which field we will use to log in.

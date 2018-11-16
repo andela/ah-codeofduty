@@ -2,6 +2,7 @@
 JWT Configuration module
 """
 import jwt
+import os
 
 from datetime import datetime, timedelta
 
@@ -50,12 +51,7 @@ class JWTAuthentication(BaseAuthentication):
         token = auth[1]
         user = None
         try:
-            payload = jwt.decode(token, SECRET_KEY)
-            pk = payload['id']
-
-            user = User.objects.get(
-                pk=pk
-            )
+           user = decode_token(token)
         # Except custom errors while using the token
         except Exception as e:
             if e.__class__.__name__ == 'DecodeError':
@@ -81,3 +77,13 @@ class JWTAuthentication(BaseAuthentication):
             'iat': datetime.utcnow()
         }
         return jwt.encode(payload, SECRET_KEY).decode('UTF-8')
+
+def decode_token(token):
+    """decode token helper"""
+    SECRET_KEY = os.getenv('SECRET_KEY')
+    payload = jwt.decode(token, SECRET_KEY)
+    pk = payload['id']
+    user = User.objects.get(
+        pk=pk
+    )
+    return user

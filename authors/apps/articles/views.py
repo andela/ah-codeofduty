@@ -15,10 +15,11 @@ from rest_framework.views import APIView
 from django_filters import rest_framework as filters
 from django.contrib.postgres.fields import ArrayField
 
+from authors.apps.articles.renderers import ReportJSONRenderer
 from .serializers import (ArticleSerializer, CommentSerializer,
                           CommentHistorySerializer, HighlightSerializer, ReportSerializer)
 from authors.apps.core.pagination import LimitOffsetPagination
-from .models import Article, Comment, CommentHistory, Highlight
+from .models import Article, Comment, CommentHistory, Highlight, Report
 from .exceptions import ArticleDoesNotExist
 
 

@@ -90,6 +90,8 @@ class Highlight(models.Model):
 
     def __str__(self):
         return self.comment
+
+
 class Report(models.Model):
     """Reporting an article model"""
     body = models.TextField()

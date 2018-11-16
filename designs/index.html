@@ -13,7 +13,17 @@
         rel="stylesheet">
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="static/css/main.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+        crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU"
+        crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Kodchasan|Lobster|Pacifico|Pattaya|Permanent+Marker|Poiret+One|Satisfy|Exo:100,200,400|Barlow|Concert+One|Fredoka+One|Raleway|Arimo|Yellowtail|Caveat+Brush"
+        rel="stylesheet">
+    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
     <title>Authors' Heaven</title>
 </head>
 
@@ -39,13 +49,29 @@
                     <a class="nav-link" href="#">Medicine</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Space</a>
+                        <a class="nav-link" 
+                        data-toggle="modal" 
+                        data-target="#signup_modal"
+                        >Login &nbsp;</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="UI/profile.html">Profile</a>
                 </li>
             </ul>
             <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                                <i class="fas fa-bell"
+                                data-toggle="modal"
+                                data-target="#notification_modal"
+                                style="font-size:36px;"
+                                >
+                                    <span class="badge badge-danger"
+                                    style="position:relative;
+                                           top: -20px;
+                                           left: -25px;
+                                           font-size: 12px">4</span>
+                                </i>
+                            </li>
                 <li class="nav-item">
                     <a class="nav-link" data-toggle="modal" data-target="#signup_modal">Login &nbsp;</a>
                 </li>
@@ -319,7 +345,37 @@
         </div>
     </div>
 
-
+<!-- Notifications modal-->
+<div class="modal" id="notification_modal">
+        <div class="modal-dialog">
+          <div class="modal-content">
+      
+            <!-- Modal Header -->
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+      
+            <!-- Modal body -->
+            <div class="modal-body text-center login-form">
+                <div class="card" style="width: 18.5rem;">
+                    <div class="card-header">
+                            <span class="badge badge-dark"> <h6>Notifications</h6></span>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">Notification 1</li>
+                        <li class="list-group-item">Notification 2</li>
+                        <li class="list-group-item">Notification 3</li>
+                        <li class="list-group-item">Notification 4</li>
+                    </ul>
+                    <div class="card-footer">
+                        <span> <strong>Subscription</strong></span>
+                        <input type="checkbox" checked data-toggle="toggle" data-onstyle="success" data-offstyle="danger">
+                        </div>
+                    </div>
+              </div>
+          </div>
+        </div>
+      </div>
 
 
     <!-- Optional JavaScript -->
@@ -332,4 +388,9 @@
         crossorigin="anonymous"></script>
 </body>
 
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+  </body>
 </html>

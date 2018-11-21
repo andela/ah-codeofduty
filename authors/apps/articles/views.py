@@ -735,3 +735,33 @@ class ArticlesLikesDislikes(GenericAPIView):
             {
                 'Success': 'Your reaction has been deleted successfully.'
             }, status=status.HTTP_200_OK)
+
+
+class BookMarkArticle(ArticleMetaData, ListAPIView):
+    """Implements bookmarking an article"""
+    permission_classes = IsAuthenticated,
+
+    def put(self, request, slug):
+        """"Method to either bookmark or remove an article from bookmarks"""
+        article = self.check_article_exists(slug)
+        user = User.objects.get(email=request.user)
+        bookmarked_article = user.profile.bookmarks.filter(slug=slug).first()
+        if bookmarked_article:
+            user.profile.bookmarks.remove(bookmarked_article)
+            return Response(dict(message="Article removed from bookmarks!"))
+        user.profile.bookmarks.add(article)
+        return Response(dict(message="Article bookmarked!"), status=status.HTTP_200_OK)
+
+
+class BookMarksView(ListAPIView):
+    """Class retrieves all user bookmarks"""
+    permission_classes = IsAuthenticated,
+    serializer_class = ArticleSerializer
+
+    def get(self, request):
+        """fetch all a users bookmarks"""
+        user = User.objects.get(email=request.user)
+        bookmarked_articles = user.profile.bookmarks.all()
+        serializer = self.serializer_class(
+            bookmarked_articles, context={"request": request}, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

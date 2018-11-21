@@ -11,10 +11,10 @@ from rest_framework.exceptions import PermissionDenied
 from authors.apps.authentication.models import User
 from authors.apps.profiles.serializers import ProfileSerializer
 from authors.apps.profiles.models import Profile
-from .models import Article, Comment, CommentHistory, Highlight, Report
+from .models import Article, Comment, CommentHistory, Highlight, Report, LikesDislikes, Tag
 
-from .models import Article, Comment, LikesDislikes
 from ..rating.models import Rating
+from .relations import TagRelatedField
 
 
 class ArticleSerializer(serializers.ModelSerializer):
@@ -31,8 +31,7 @@ class ArticleSerializer(serializers.ModelSerializer):
         max_length=1000), min_length=None, max_length=None, required=False)
     description = serializers.CharField()
     slug = serializers.CharField(required=False)
-    tags = serializers.ListField(child=serializers.CharField(
-        max_length=25), min_length=None, max_length=None, required=False)
+    tagList = TagRelatedField(many=True, required=False, source='tags')
     time_to_read = serializers.IntegerField(required=False)
     time_created = serializers.SerializerMethodField()
     time_updated = serializers.SerializerMethodField()
@@ -45,9 +44,10 @@ class ArticleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Article
-        fields = ('title', 'body', 'images', 'description', 'slug', 'tags',
+        fields = ('title', 'body', 'images', 'description', 'slug', 'tagList',
                   'time_to_read', 'author', 'time_created', 'time_updated', 'favorited',
                   'favoritesCount', 'average_rating', 'likes', 'dislikes')
+
 
     def get_time_created(self, instance):
         '''get time the article was created and return in iso format'''
@@ -73,6 +73,7 @@ class ArticleSerializer(serializers.ModelSerializer):
         user = User.objects.get(email=email)
         validated_data["author"] = user
         images = validated_data.get("images", None)
+        tags = validated_data.pop('tags', [])
 
         slug = slugify(validated_data["title"])
         num = 1
@@ -83,7 +84,11 @@ class ArticleSerializer(serializers.ModelSerializer):
         validated_data["time_to_read"] = self.get_time_to_read(
             validated_data["body"], images)
 
-        return Article.objects.create(**validated_data)
+        article = Article.objects.create(**validated_data)
+        for tag in tags:
+            article.tags.add(tag)
+
+        return article
 
     def get_average_rating(self, obj):
         avarage = 0
@@ -98,13 +103,16 @@ class ArticleSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         '''method updating articles'''
         email = self.context.get('email')
+        tags = validated_data.get('tags', None)
+
         if email != instance.author:
             raise PermissionDenied
         instance.title = validated_data.get('title', instance.title)
         instance.body = validated_data.get('body', instance.body)
         instance.description = validated_data.get(
             'description', instance.description)
-        instance.tags = validated_data.get('tags', instance.tags)
+        if tags:
+            instance.tags.set(tags)
         instance.images = validated_data.get('images', instance.images)
         instance.time_to_read = self.get_time_to_read(instance.body, instance.images)
         instance.save()
@@ -298,3 +306,12 @@ class LikesDislikesSerializer(serializers.ModelSerializer):
                 message='You have already liked this article.'
             )
         ]
+
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ('tag',)
+
+    def to_representation(self, object):
+        return object.tag
+        

@@ -125,3 +125,10 @@ class BaseTest(TestCase):
             HTTP_AUTHORIZATION='Bearer ' + token,
             format='json'
         )
+
+    def create_comment(self, token, slug, test_comment_data):
+        """ Method to create an article then comment"""
+        self.client.post(self.ARTICLES, self.test_article_data,
+                         HTTP_AUTHORIZATION=self.token, format='json')
+        return self.client.post('/api/articles/test-title12/comment/', self.test_comment_data,
+                                HTTP_AUTHORIZATION=self.token, format='json')

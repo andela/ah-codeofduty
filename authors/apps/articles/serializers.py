@@ -11,7 +11,7 @@ from rest_framework.exceptions import PermissionDenied
 from authors.apps.authentication.models import User
 from authors.apps.profiles.serializers import ProfileSerializer
 from authors.apps.profiles.models import Profile
-from .models import Article, Comment, CommentHistory, Highlight, Report
+from .models import Article, Comment, CommentHistory, Highlight, Report, ArticleStatistics
 
 from .models import Article, Comment, LikesDislikes
 from ..rating.models import Rating
@@ -298,3 +298,20 @@ class LikesDislikesSerializer(serializers.ModelSerializer):
                 message='You have already liked this article.'
             )
         ]
+
+
+class ArticleStatSerializer(serializers.ModelSerializer):
+    """Serializer class for reading stats"""
+    slug = serializers.SlugField(read_only=True)
+    view_count = serializers.SerializerMethodField()
+    comment_count = serializers.SerializerMethodField()
+
+    def get_comment_count(self, value):
+        return Comment.objects.filter(article=value).count()
+
+    def get_view_count(self, value):
+        return ArticleStatistics.objects.filter(article=value).count()
+
+    class Meta:
+        model = Article
+        fields = ['slug', 'title', 'view_count', 'comment_count']

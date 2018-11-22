@@ -2,7 +2,8 @@
 from django.urls import path
 
 from .views import (ArticlesSearchListAPIView,
-                    CommentHistoryAPIView, HighlightCommentView, LikeComments, ArticlesFeedAPIView)
+                    CommentHistoryAPIView, HighlightCommentView, LikeComments, ArticlesFeedAPIView,
+                    ArticleStatisticsView)
 from .views import ArticlesFavoriteAPIView, ArticlesLikesDislikes
 from .views import ArticlesView
 from .views import CommentRetrieveUpdateDestroy, CommentsListCreateAPIView, ReportCreateAPIView
@@ -60,4 +61,5 @@ urlpatterns = [
     path('articles/<slug>/comment/<int:id>/like/', like_comment, name='like_comment'),
     path('articles/<slug>/report/', ReportCreateAPIView.as_view()),
     path('articles/<slug>/like/', ArticlesLikesDislikes.as_view(), name='article-like'),
+    path('articles/read/statistics/', ArticleStatisticsView.as_view(),  name='stats'),
 ]

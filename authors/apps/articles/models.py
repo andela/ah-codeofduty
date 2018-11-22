@@ -125,9 +125,9 @@ def article_handler(sender, instance, created, **kwargs):
     """
     try:
         author = instance.author
-        #get all users following the user
+        # get all users following the user
         my_followers = author.profile.get_my_followers()
-        #notify each follower that the user has published an article
+        # notify each follower that the user has published an article
         for followers in my_followers:
             followers = User.objects.filter(username=followers)
             notify.send(
@@ -165,6 +165,7 @@ def favorite_comment_handler(sender, instance, created, **kwargs):
     except:
         "article not found"
 
+
 post_save.connect(article_handler, sender=Article)
 post_save.connect(favorite_comment_handler, sender=Comment)
 
@@ -176,3 +177,9 @@ class LikesDislikes(models.Model):
 
     class Meta:
         unique_together = ('article', 'reader')
+
+
+class ArticleStatistics(models.Model):
+    """Model for reading statistics"""
+    user = models.ForeignKey(User, related_name="article_views", on_delete=models.CASCADE)
+    article = models.ForeignKey(Article, related_name="article_views", on_delete=models.CASCADE)

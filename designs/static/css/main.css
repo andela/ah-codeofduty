@@ -227,6 +227,59 @@ background: #1DA1F2
 .card-footer{
     margin-top: 20px;
 }
+
+/*search*/
+.form-control{
+    padding-left: 2.375rem;
+}
+
+.pl{
+    padding-left: 2.375rem;
+}
+
+.search-input {
+    display: inline-flex;
+    color: #aaa;
+    padding-left: 1.6rem;
+
+}
+
+.search {
+    position: absolute;
+    width: 2.375rem;
+    line-height: 2.375rem;
+    text-align: center;
+    pointer-events: none;
+    color: #aaa;
+}
+
+.dropdown-menu :hover {
+    background-color: #f1f1f1;
+}
+
+.card {
+    margin-bottom: 1rem !important;
+}
+
+#search{
+    line-height: 2.375rem;
+}
+
+#myInput {
+    margin-top: -8px;
+    border: 0;
+    border-radius: 0;
+    background: #f1f1f1;;
+}
+
+@media  (max-width: 992px) {
+    .search-input {
+        display: inline-flex;
+        padding-left: 0;
+    }
+}
+
 mark{
     background-color: khaki;
 }
+

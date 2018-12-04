@@ -36,6 +36,8 @@ class BaseTest(TestCase):
         self.DISLIKE_COMMENT = '/api/articles/{}/comment/{}/dislike/'
         self.ARTICLE_LIKES = '/api/articles/{}/like/'
 
+        self.GET_TAGS = '/api/tags/'
+
         self.likes = {"likes": True}
         self.dislikes = {"likes": False}
 
@@ -66,7 +68,7 @@ class BaseTest(TestCase):
             "body": "This is me testing. This line should be long enough to pass as a story.",
             "description": "testing",
             "time_to_read": 1,
-            "tags": ["TDD"]
+            "tagList": ["TDD"]
         }
 
         # define highlight data
@@ -103,6 +105,7 @@ class BaseTest(TestCase):
                          HTTP_AUTHORIZATION=self.token, format="json")
         self.client.post(self.ARTICLES, self.test_article_data,
                          HTTP_AUTHORIZATION=self.token, format="json")
+       
 
     def favorite_article(self, slug, token):
         return self.client.post(
@@ -123,5 +126,11 @@ class BaseTest(TestCase):
             self.ARTICLES,
             article,
             HTTP_AUTHORIZATION='Bearer ' + token,
+            format='json'
+        )
+        
+    def get_article_tags(self):
+        return self.client.get(
+            self.GET_TAGS,
             format='json'
         )

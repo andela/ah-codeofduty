@@ -199,3 +199,41 @@ class ArticleTestCase(BaseTest):
 
         serializer = ArticleSerializer()
         self.assertEqual(serializer.get_time_to_read(text, images), 2)
+    
+    def test_get_tags(self):
+        """Tests whether we can get all article tags"""
+        response = self.client.post(
+            self.SIGN_UP_URL,
+            self.fav_test_user,
+            format='json'
+        )
+        response = self.client.post(
+            self.SIGN_IN_URL,
+            self.fav_test_user,
+            format='json'
+        )
+        token = response.data["token"]
+        response = self.create_article(self.test_article_data, token)
+        response = self.get_article_tags()
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+        expected_tag = response.data['tags'][0]
+        self.assertEqual(expected_tag,'TDD')
+
+    def test_article_payload_tag(self):
+        """Tests whether article payload has tags upon creating"""
+        response = self.client.post(
+            self.SIGN_UP_URL,
+            self.fav_test_user,
+            format='json'
+        )
+        response = self.client.post(
+            self.SIGN_IN_URL,
+            self.fav_test_user,
+            format='json'
+        )
+        token = response.data["token"]
+        response = self.create_article(self.test_article_data, token)
+        self.assertTrue(response.data['tagList'])
+        self.assertEquals(response.status_code, status.HTTP_201_CREATED)
+        tag_in_payload =response.data['tagList'][0]
+        self.assertEqual(tag_in_payload,'TDD')

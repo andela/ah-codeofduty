@@ -9,20 +9,20 @@ from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import CreateAPIView, ListAPIView, UpdateAPIView, GenericAPIView
 from rest_framework.permissions import (
-    IsAuthenticated, IsAuthenticatedOrReadOnly, )
+    IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny)
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from authors.apps.articles.renderers import ReportJSONRenderer
 from authors.apps.core.pagination import LimitOffsetPagination
-from .models import Article, Comment, CommentHistory, Highlight, Report, LikesDislikes
+from .models import Article, Comment, CommentHistory, Highlight, Report, LikesDislikes, Tag
 
 from django.core.mail import send_mail
 from django.template import Context
 from django.template.loader import render_to_string, get_template
 from django.contrib.sites.shortcuts import get_current_site
 
-from .serializers import (ArticleSerializer, CommentSerializer,
+from .serializers import (ArticleSerializer, CommentSerializer, TagSerializer, 
                           CommentHistorySerializer, HighlightSerializer, ReportSerializer, LikesDislikesSerializer)
 from .models import Article, Comment
 from .exceptions import ArticleDoesNotExist
@@ -50,7 +50,7 @@ class ArticlesView(ArticleMetaData, viewsets.ModelViewSet):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        ''' method to filter by author, title, and tag '''
+        ''' method to filter article by author, title, and tag '''
         queryset = Article.objects.all()
 
         author = self.request.query_params.get('author', None)
@@ -86,7 +86,6 @@ class ArticlesView(ArticleMetaData, viewsets.ModelViewSet):
         profile = self.request.user.profile
         to = []
         my_followers = profile.get_my_followers()
-
 
         for follower in my_followers:
             subscribed = User.objects.filter(username=follower).values()[0]['is_subscribed']
@@ -155,7 +154,6 @@ class ArticlesFavoriteAPIView(APIView):
     Implements favoriting and unfavoriting articles
     """
     permission_classes = (IsAuthenticated,)
-    # renderer_classes = (ArticleJSONRenderer,)
     serializer_class = ArticleSerializer
 
     def post(self, request, slug=None):
@@ -736,6 +734,26 @@ class ArticlesLikesDislikes(GenericAPIView):
                 'Success': 'Your reaction has been deleted successfully.'
             }, status=status.HTTP_200_OK)
 
+
+class TagListAPIView(ListAPIView):
+    """
+    implements taggging
+    """
+    queryset = Tag.objects.all()
+    pagination_class= None
+    serializer_class=TagSerializer
+    permission_classes=(AllowAny,)
+
+    def list(self,request):
+        """
+        fetches existing article tags
+        """
+        serializer = self.serializer_class(self.get_queryset(), many=True)
+        return Response(
+            {
+                'tags': serializer.data
+            }, status=status.HTTP_200_OK
+        )
 
 class BookMarkArticle(ArticleMetaData, ListAPIView):
     """Implements bookmarking an article"""

@@ -2,7 +2,7 @@
 from django.urls import path
 from .views import (ArticlesView, ArticlesSearchListAPIView,
                     ArticlesFavoriteAPIView, ArticlesLikesDislikes,
-                    ArticlesFeedAPIViewTag, ListAPIView,
+                    ArticlesFeedAPIView, TagListAPIView,
                     BookMarkArticle, BookMarksView,
                     CommentHistoryAPIView, HighlightCommentView,
                     CommentRetrieveUpdateDestroy, CommentsListCreateAPIView,

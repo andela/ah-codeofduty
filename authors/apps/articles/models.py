@@ -10,6 +10,7 @@ from django.utils.text import slugify
 
 from authors.apps.authentication.models import User
 from authors.apps.profiles.models import Profile
+from rest_framework.reverse import reverse as api_reverse
 
 
 class Article(models.Model):
@@ -27,10 +28,13 @@ class Article(models.Model):
     time_created = models.DateTimeField(auto_now_add=True, db_index=True)
     # auto_now will update every time you save the model.
     time_updated = models.DateTimeField(auto_now=True, db_index=True)
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="articles")
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="articles")
     average_rating = models.IntegerField(default=0)
-    likes = models.ManyToManyField(User, blank=True, related_name='LikesDislikes.user+')
-    dislikes = models.ManyToManyField(User, blank=True, related_name='LikesDislikes.user+')
+    likes = models.ManyToManyField(
+        User, blank=True, related_name='LikesDislikes.user+')
+    dislikes = models.ManyToManyField(
+        User, blank=True, related_name='LikesDislikes.user+')
 
     class Meta():
         """Meta class defining order"""
@@ -43,6 +47,11 @@ class Article(models.Model):
     def __str__(self):
         """return string representation of object"""
         return self.title
+    # ...............................................................
+
+    def api_url(self, request=None):
+        return api_reverse('articles:articles_detail', kwargs={'slug': self.slug}, request=request)
+    # ...............................................................
 
 
 class Comment(models.Model):
@@ -62,7 +71,8 @@ class Comment(models.Model):
     body = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    likes = models.ManyToManyField(User, related_name='comment_likes', blank=True)
+    likes = models.ManyToManyField(
+        User, related_name='comment_likes', blank=True)
 
     def __str__(self):
         return self.body
@@ -105,7 +115,8 @@ class Highlight(models.Model):
 class Report(models.Model):
     """Reporting an article model"""
     body = models.TextField()
-    reporter = models.ForeignKey('authentication.User', on_delete=models.CASCADE)
+    reporter = models.ForeignKey(
+        'authentication.User', on_delete=models.CASCADE)
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -125,9 +136,9 @@ def article_handler(sender, instance, created, **kwargs):
     """
     try:
         author = instance.author
-        #get all users following the user
+        # get all users following the user
         my_followers = author.profile.get_my_followers()
-        #notify each follower that the user has published an article
+        # notify each follower that the user has published an article
         for followers in my_followers:
             followers = User.objects.filter(username=followers)
             notify.send(
@@ -165,13 +176,16 @@ def favorite_comment_handler(sender, instance, created, **kwargs):
     except:
         "article not found"
 
+
 post_save.connect(article_handler, sender=Article)
 post_save.connect(favorite_comment_handler, sender=Comment)
 
 
 class LikesDislikes(models.Model):
-    article = models.ForeignKey(Article, related_name='like', on_delete=models.CASCADE)
-    reader = models.ForeignKey(User, related_name='like', on_delete=models.CASCADE)
+    article = models.ForeignKey(
+        Article, related_name='like', on_delete=models.CASCADE)
+    reader = models.ForeignKey(
+        User, related_name='like', on_delete=models.CASCADE)
     likes = models.BooleanField()
 
     class Meta:

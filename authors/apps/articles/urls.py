@@ -1,15 +1,10 @@
 '''articles/urls.py'''
 from django.urls import path
 from .views import (ArticlesView,ArticlesSearchListAPIView, ArticlesFavoriteAPIView, ArticlesLikesDislikes, ArticlesFeedAPIViewTagListAPIView,
-                    BookMarkArticle, BookMarksView
+                    BookMarkArticle, BookMarksView,
                     CommentHistoryAPIView, HighlightCommentView,
                     CommentRetrieveUpdateDestroy, CommentsListCreateAPIView,
                     LikeComments, ReportCreateAPIView)
-
-from .views import ArticlesFavoriteAPIView, ArticlesLikesDislikes
-from .views import ArticlesView
-from .views import CommentRetrieveUpdateDestroy, CommentsListCreateAPIView, ReportCreateAPIView
-
 
 # map http methods to defined methods in ArticlesViews
 articles_list = ArticlesView.as_view({

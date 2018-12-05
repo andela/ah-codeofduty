@@ -1,11 +1,12 @@
 '''articles/urls.py'''
 from django.urls import path
-
-from .views import (ArticlesSearchListAPIView,
-                    CommentHistoryAPIView, HighlightCommentView, LikeComments, ArticlesFeedAPIView)
-from .views import ArticlesFavoriteAPIView, ArticlesLikesDislikes
-from .views import ArticlesView
-from .views import CommentRetrieveUpdateDestroy, CommentsListCreateAPIView, ReportCreateAPIView
+from .views import (ArticlesView, ArticlesSearchListAPIView,
+                    ArticlesFavoriteAPIView, ArticlesLikesDislikes,
+                    ArticlesFeedAPIView, TagListAPIView,
+                    BookMarkArticle, BookMarksView,
+                    CommentHistoryAPIView, HighlightCommentView,
+                    CommentRetrieveUpdateDestroy, CommentsListCreateAPIView,
+                    LikeComments, ReportCreateAPIView)
 
 app_name = 'articles'
 # map http methods to defined methods in ArticlesViews
@@ -36,7 +37,7 @@ comments_details = CommentsListCreateAPIView.as_view({
 highlights = HighlightCommentView.as_view({
     'get': 'list',
 })
-highlights_detal = HighlightCommentView.as_view({
+highlights_detail = HighlightCommentView.as_view({
     'get': 'retrieve',
 })
 
@@ -50,6 +51,7 @@ urlpatterns = [
     path('articles/', articles_list),
     path('articles/feed/', ArticlesFeedAPIView.as_view()),
     path('articles/<slug>/', articles_detail, name='articles_detail'),
+
     path('articles/<slug>/favorite', ArticlesFavoriteAPIView.as_view()),
     path('articles/<slug>/comment/<int:id>/',
          comments_list, name='comment_an_article'),
@@ -63,4 +65,6 @@ urlpatterns = [
     path('articles/<slug>/report/', ReportCreateAPIView.as_view()),
     path('articles/<slug>/like/',
          ArticlesLikesDislikes.as_view(), name='article-like'),
+    path('articles/<slug>/bookmark/', BookMarkArticle.as_view()),
+    path('tags/', TagListAPIView.as_view()),
 ]

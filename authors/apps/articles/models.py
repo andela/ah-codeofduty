@@ -10,7 +10,10 @@ from django.utils.text import slugify
 
 from authors.apps.authentication.models import User
 from authors.apps.profiles.models import Profile
+
 from rest_framework.reverse import reverse as api_reverse
+from authors.apps.core.models import TimeStamp
+
 
 
 class Article(models.Model):
@@ -21,8 +24,7 @@ class Article(models.Model):
                         blank=True, null=True)
     description = models.CharField(max_length=255)
     slug = models.SlugField(max_length=40, unique=True)
-    tags = ArrayField(models.CharField(max_length=30),
-                      default=None, blank=True, null=True)
+    tags = models.ManyToManyField('articles.Tag', related_name='articles')
     time_to_read = models.IntegerField()
     # auto_now_add automatically sets the field to now when the object is first created.
     time_created = models.DateTimeField(auto_now_add=True, db_index=True)
@@ -31,10 +33,12 @@ class Article(models.Model):
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="articles")
     average_rating = models.IntegerField(default=0)
+
     likes = models.ManyToManyField(
         User, blank=True, related_name='LikesDislikes.user+')
     dislikes = models.ManyToManyField(
         User, blank=True, related_name='LikesDislikes.user+')
+
 
     class Meta():
         """Meta class defining order"""
@@ -190,3 +194,9 @@ class LikesDislikes(models.Model):
 
     class Meta:
         unique_together = ('article', 'reader')
+
+class Tag(TimeStamp):
+    tag = models.CharField(max_length = 255, unique=True)
+
+    def __str__(self):
+        return self.tag

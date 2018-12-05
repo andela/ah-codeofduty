@@ -39,6 +39,35 @@ class ArticleSerializer(serializers.ModelSerializer):
     favoritesCount = serializers.SerializerMethodField(
         method_name='get_favorites_count')
     average_rating = serializers.SerializerMethodField()
+    # ...............................................................
+    url = serializers.SerializerMethodField(read_only=True)
+    facebook = serializers.SerializerMethodField(read_only=True)
+    Linkedin = serializers.SerializerMethodField(read_only=True)
+    twitter = serializers.SerializerMethodField(read_only=True)
+    mail = serializers.SerializerMethodField(read_only=True)
+    # ...............................................................
+
+    def get_url(self, obj):
+        request = self.context.get("request")
+        return obj.api_url(request=request)
+
+    def get_facebook(self, obj):
+        request = self.context.get("request")
+        return 'http://www.facebook.com/sharer.php?u='+obj.api_url(request=request)
+
+    def get_Linkedin(self, obj):
+        request = self.context.get("request")
+        return 'http://www.linkedin.com/shareArticle?mini=true&amp;url='+obj.api_url(request=request)
+
+    def get_twitter(self, obj):
+        request = self.context.get("request")
+        return 'https://twitter.com/share?url='+obj.api_url(request=request)+'&amp;text=Amazing Read'
+
+    def get_mail(self, obj):
+        request = self.context.get("request")
+        return 'mailto:?subject=New Article Alert&body={}'.format(
+            obj.api_url(request=request))
+    # ...............................................................
     likes = serializers.SerializerMethodField(method_name='count_likes')
     dislikes = serializers.SerializerMethodField(method_name='count_dislikes')
 
@@ -46,7 +75,8 @@ class ArticleSerializer(serializers.ModelSerializer):
         model = Article
         fields = ('title', 'body', 'images', 'description', 'slug', 'tagList',
                   'time_to_read', 'author', 'time_created', 'time_updated', 'favorited',
-                  'favoritesCount', 'average_rating', 'likes', 'dislikes')
+                  'favoritesCount', 'average_rating', 'likes', 'dislikes', 'facebook',
+                  'twitter', 'mail', 'Linkedin', 'url')
 
 
     def get_time_created(self, instance):
@@ -114,7 +144,8 @@ class ArticleSerializer(serializers.ModelSerializer):
         if tags:
             instance.tags.set(tags)
         instance.images = validated_data.get('images', instance.images)
-        instance.time_to_read = self.get_time_to_read(instance.body, instance.images)
+        instance.time_to_read = self.get_time_to_read(
+            instance.body, instance.images)
         instance.save()
         return instance
 
@@ -248,9 +279,10 @@ class HighlightSerializer(serializers.ModelSerializer):
         validated_data["highlighter"] = self.context.get('highlighter')
         validated_data["article"] = self.context.get('article')
         highlight_text = validated_data["article"].body[
-                         validated_data["index_start"]:validated_data["index_stop"]]
+            validated_data["index_start"]:validated_data["index_stop"]]
         if not highlight_text:
-            raise serializers.ValidationError("Text doesn't exist on this article")
+            raise serializers.ValidationError(
+                "Text doesn't exist on this article")
         validated_data["highlighted_article_piece"] = highlight_text
 
         return Highlight.objects.create(**validated_data)
@@ -264,7 +296,8 @@ class HighlightSerializer(serializers.ModelSerializer):
         index_stop = validated_data.get('index_stop', instance.index_stop)
         highlight_text = instance.article.body[index_start:index_stop]
         if not highlight_text:
-            raise serializers.ValidationError("Text doesn't exist on this article")
+            raise serializers.ValidationError(
+                "Text doesn't exist on this article")
         instance.comment = validated_data.get('comment', instance.comment)
         instance.index_start = index_start
         instance.index_stop = index_stop
@@ -291,7 +324,8 @@ class ReportSerializer(serializers.ModelSerializer):
         slug = self.context.get('slug')
         reporter = self.context.get('reporter', None)
         article = Article.objects.get(slug=slug)
-        report = Report.objects.create(article=article, reporter=reporter, **validated_data)
+        report = Report.objects.create(
+            article=article, reporter=reporter, **validated_data)
         return report
 
 

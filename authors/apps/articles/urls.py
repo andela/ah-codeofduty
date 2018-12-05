@@ -8,6 +8,7 @@ from .views import (ArticlesView, ArticlesSearchListAPIView,
                     CommentRetrieveUpdateDestroy, CommentsListCreateAPIView,
                     LikeComments, ReportCreateAPIView)
 
+app_name = 'articles'
 # map http methods to defined methods in ArticlesViews
 articles_list = ArticlesView.as_view({
     'get': 'list',
@@ -50,7 +51,8 @@ urlpatterns = [
     path('articles/', articles_list),
     path('articles/feed/', ArticlesFeedAPIView.as_view()),
     path('articles/bookmarks/', BookMarksView.as_view()),
-    path('articles/<slug>/', articles_detail),
+    path('articles/<slug>/', articles_detail, name='articles_detail'),
+
     path('articles/<slug>/favorite', ArticlesFavoriteAPIView.as_view()),
     path('articles/<slug>/comment/<int:id>/',
          comments_list, name='comment_an_article'),
@@ -59,9 +61,11 @@ urlpatterns = [
     path('articles/<slug>/history/<int:id>/', CommentHistoryAPIView.as_view()),
     path('articles/<slug>/highlight/', highlights),
     path('articles/<slug>/highlight/<id>/', highlights_detail),
-    path('articles/<slug>/comment/<int:id>/like/', like_comment, name='like_comment'),
+    path('articles/<slug>/comment/<int:id>/like/',
+         like_comment, name='like_comment'),
     path('articles/<slug>/report/', ReportCreateAPIView.as_view()),
-    path('articles/<slug>/like/', ArticlesLikesDislikes.as_view(), name='article-like'),
+    path('articles/<slug>/like/',
+         ArticlesLikesDislikes.as_view(), name='article-like'),
     path('articles/<slug>/bookmark/', BookMarkArticle.as_view()),
     path('tags/', TagListAPIView.as_view()),
 ]

@@ -50,6 +50,7 @@ like_comment = LikeComments.as_view()
 urlpatterns = [
     path('articles/', articles_list),
     path('articles/feed/', ArticlesFeedAPIView.as_view()),
+    path('articles/bookmarks/', BookMarksView.as_view()),
     path('articles/<slug>/', articles_detail, name='articles_detail'),
 
     path('articles/<slug>/favorite', ArticlesFavoriteAPIView.as_view()),
@@ -59,7 +60,7 @@ urlpatterns = [
     path('search/articles/', ArticlesSearchListAPIView.as_view(), name='search'),
     path('articles/<slug>/history/<int:id>/', CommentHistoryAPIView.as_view()),
     path('articles/<slug>/highlight/', highlights),
-    path('articles/<slug>/highlight/<id>/', highlights_detal),
+    path('articles/<slug>/highlight/<id>/', highlights_detail),
     path('articles/<slug>/comment/<int:id>/like/',
          like_comment, name='like_comment'),
     path('articles/<slug>/report/', ReportCreateAPIView.as_view()),

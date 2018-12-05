@@ -6,6 +6,7 @@ from .base import BaseTest
 
 class BookmarkTestCase(BaseTest):
     '''Test case for bookmarking an article'''
+
     def bookmark(self):
         '''bookmark an article'''
         response = self.client.put('/api/articles/test-title/bookmark/',

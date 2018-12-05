@@ -150,7 +150,7 @@ class UserForgotPassword(CreateAPIView):
             # reset_link = 'http://' + current_site.domain + \
             current_site = os.getenv('SITE_DOMAIN')
             reset_link = 'http://' + current_site + \
-                '/reset-password/{}/'.format(token)
+                '/reset-password?token={}/'.format(token)
             subject, from_email, to = 'Authors Haven Password Reset @no-reply', 'codeofd@gmail.com', [
                 email]
 

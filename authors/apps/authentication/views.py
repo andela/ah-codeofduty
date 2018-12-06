@@ -146,7 +146,8 @@ class UserForgotPassword(CreateAPIView):
 
             time = datetime.now()
             time = datetime.strftime(time, '%d-%B-%Y %H:%M')
-            # current_site = get_current_site(request)
+            current_site1 = get_current_site(request)
+            print(current_site1)
             # reset_link = 'http://' + current_site.domain + \
             current_site = os.getenv('SITE_DOMAIN')
             reset_link = 'http://' + current_site + \

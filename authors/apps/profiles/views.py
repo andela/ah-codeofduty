@@ -9,7 +9,9 @@ from django.shortcuts import get_object_or_404
 
 from authors.apps.profiles.renderers import ProfileJSONRenderer
 from authors.apps.profiles.serializers import ProfileSerializer
-from authors.apps.profiles.models import User, Profile
+from authors.apps.articles.serializers import ArticleSerializer
+from authors.apps.profiles.models import Profile
+from authors.apps.authentication.models import User
 from .exceptions import ProfileDoesNotExist
 
 
@@ -17,13 +19,14 @@ class ProfileRetrieveUpdateAPIView(RetrieveUpdateAPIView):
     """
     Users are able to edit their profile information
     """
-    permission_classes = (IsAuthenticated,AllowAny,)
+    permission_classes = (IsAuthenticated, AllowAny,)
     renderer_classes = (ProfileJSONRenderer,)
     serializer_class = ProfileSerializer
 
     def retrieve(self, request, username, *args, **kwargs):
         user = get_object_or_404(User, username=username)
-        serializer = self.serializer_class(user.profile, context={'request': request})
+        serializer = self.serializer_class(
+            user.profile, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def update(self, request, username, *args, **kwargs):
@@ -53,6 +56,7 @@ class ProfileList(ListAPIView):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
 
+
 class ProfileFollowAPIView(APIView):
     """
     implements functionality to follow and unfollow a user
@@ -72,7 +76,7 @@ class ProfileFollowAPIView(APIView):
             followee = Profile.objects.get(user__username=username)
         except Profile.DoesNotExist:
             raise ProfileDoesNotExist
-        
+
         if follower.pk is followee.pk:
             raise serializers.ValidationError('You cannot follow yourself')
 
@@ -80,9 +84,11 @@ class ProfileFollowAPIView(APIView):
             follower.follow(followee)
         else:
             follower.unfollow(followee)
-       
-        serializer = self.serializer_class(followee, context={'request': request})
+
+        serializer = self.serializer_class(
+            followee, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class FollowersAPIView(APIView):
     """
@@ -105,8 +111,10 @@ class FollowersAPIView(APIView):
             raise ProfileDoesNotExist
 
         followers = user.get_followers(profile)
-        serializer = self.serializer_class(followers, many = True, context={'request': request})
+        serializer = self.serializer_class(
+            followers, many=True, context={'request': request})
         return Response({"followers": serializer.data}, status=status.HTTP_200_OK)
+
 
 class FollowingAPIView(APIView):
     """
@@ -129,5 +137,16 @@ class FollowingAPIView(APIView):
             raise ProfileDoesNotExist
 
         following = user.get_following(profile)
-        serializer = self.serializer_class(following, many = True, context={'request': request})
+        serializer = self.serializer_class(
+            following, many=True, context={'request': request})
         return Response({"following": serializer.data}, status=status.HTTP_200_OK)
+
+
+class UserArticlesView(APIView):
+    def get(self, request, username):
+        user = User.objects.get(username=username)
+        articles = user.articles
+        serializer = ArticleSerializer(articles, context={'request': request},
+                                       many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)

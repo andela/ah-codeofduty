@@ -51,6 +51,12 @@ class ArticleTestCase(BaseTest):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertGreaterEqual(len(json.loads(response.content)), 0)
 
+    def test_get_user_articles(self):
+        '''test get a user's articles'''
+        response = self.client.get('/api/profiles/test_user/articles')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertGreaterEqual(len(json.loads(response.content)), 0)
+
     def test_get_single_article(self):
         '''test get single article'''
         # test successful get
@@ -225,7 +231,6 @@ class ArticleTestCase(BaseTest):
         serializer = ArticleSerializer()
         self.assertEqual(serializer.get_time_to_read(text, images), 2)
 
-
     def test_if_article_returns_share_links(self):
         """This method tests whether the API returns share links"""
         res = self.client.get(self.TESTARTICLE)
@@ -235,7 +240,6 @@ class ArticleTestCase(BaseTest):
         self.assertIn("mail", json.dumps(res.data))
         self.assertIn("url", json.dumps(res.data))
 
-    
     def test_get_tags(self):
         """Tests whether we can get all article tags"""
         response = self.client.post(
@@ -253,7 +257,7 @@ class ArticleTestCase(BaseTest):
         response = self.get_article_tags()
         self.assertEquals(response.status_code, status.HTTP_200_OK)
         expected_tag = response.data['tags'][0]
-        self.assertEqual(expected_tag,'TDD')
+        self.assertEqual(expected_tag, 'TDD')
 
     def test_article_payload_tag(self):
         """Tests whether article payload has tags upon creating"""
@@ -271,6 +275,5 @@ class ArticleTestCase(BaseTest):
         response = self.create_article(self.test_article_data, token)
         self.assertTrue(response.data['tagList'])
         self.assertEquals(response.status_code, status.HTTP_201_CREATED)
-        tag_in_payload =response.data['tagList'][0]
-        self.assertEqual(tag_in_payload,'TDD')
-
+        tag_in_payload = response.data['tagList'][0]
+        self.assertEqual(tag_in_payload, 'TDD')

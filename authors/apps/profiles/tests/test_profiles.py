@@ -19,12 +19,13 @@ class ProfilesTest(BaseTest):
 
     def test_update_profile(self):
         data = {
-                    "username": "mathias",
-                    "surname": "code",
-                    "last_name": "duty",
-                    "avatar": "https://pbs.twimg.com/profile_images/670856248678596608/2yr7o6QQ_400x400.jpg",
-                    "bio": "codeofdutycodeofdutycodeofduty"
-                }
-        response = self.client.put('/api/profiles/mathias', data, format="json")
+            "username": "mathias",
+            "surname": "code",
+            "last_name": "duty",
+            "avatar": "https://pbs.twimg.com/profile_images/670856248678596608/2yr7o6QQ_400x400.jpg",
+            "bio": "codeofdutycodeofdutycodeofduty"
+        }
+        response = self.client.put(
+            '/api/profiles/mathias', data, format="json")
         self.assertIn("codeofdutycodeofdutycodeofduty", response.data['bio'])
         self.assertEqual(response.status_code, status.HTTP_200_OK)

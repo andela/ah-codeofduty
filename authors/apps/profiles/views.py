@@ -1,6 +1,6 @@
 from rest_framework.generics import RetrieveUpdateAPIView, ListAPIView
 from rest_framework.views import APIView
-from rest_framework.pagination import LimitOffsetPagination
+from authors.apps.core.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from rest_framework.response import Response
@@ -12,6 +12,7 @@ from authors.apps.profiles.serializers import ProfileSerializer
 from authors.apps.articles.serializers import ArticleSerializer
 from authors.apps.profiles.models import Profile
 from authors.apps.authentication.models import User
+from authors.apps.articles.models import Article
 from .exceptions import ProfileDoesNotExist
 
 
@@ -142,11 +143,14 @@ class FollowingAPIView(APIView):
         return Response({"following": serializer.data}, status=status.HTTP_200_OK)
 
 
-class UserArticlesView(APIView):
+class UserArticlesView(ListAPIView):
+    pagination_class = LimitOffsetPagination
+
     def get(self, request, username):
         user = User.objects.get(username=username)
-        articles = user.articles
-        serializer = ArticleSerializer(articles, context={'request': request},
+        articles = Article.objects.filter(author=user.id)
+        page = self.paginate_queryset(articles)
+        serializer = ArticleSerializer(page, context={'request': request},
                                        many=True)
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return self.get_paginated_response(serializer.data)

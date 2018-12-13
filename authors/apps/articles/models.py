@@ -23,7 +23,7 @@ class Article(models.Model):
     images = ArrayField(models.TextField(), default=None,
                         blank=True, null=True)
     description = models.CharField(max_length=255)
-    slug = models.SlugField(max_length=40, unique=True)
+    slug = models.SlugField(unique=True)
     tags = models.ManyToManyField('articles.Tag', related_name='articles')
     time_to_read = models.IntegerField()
     # auto_now_add automatically sets the field to now when the object is first created.

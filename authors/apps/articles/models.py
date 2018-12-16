@@ -15,7 +15,6 @@ from rest_framework.reverse import reverse as api_reverse
 from authors.apps.core.models import TimeStamp
 
 
-
 class Article(models.Model):
     """Model representing articles"""
     title = models.CharField(db_index=True, max_length=255)
@@ -23,7 +22,7 @@ class Article(models.Model):
     images = ArrayField(models.TextField(), default=None,
                         blank=True, null=True)
     description = models.CharField(max_length=255)
-    slug = models.SlugField(max_length=40, unique=True)
+    slug = models.SlugField(max_length=1000, unique=True)
     tags = models.ManyToManyField('articles.Tag', related_name='articles')
     time_to_read = models.IntegerField()
     # auto_now_add automatically sets the field to now when the object is first created.

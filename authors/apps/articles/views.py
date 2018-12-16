@@ -22,7 +22,7 @@ from django.template import Context
 from django.template.loader import render_to_string, get_template
 from django.contrib.sites.shortcuts import get_current_site
 
-from .serializers import (ArticleSerializer, CommentSerializer, TagSerializer, 
+from .serializers import (ArticleSerializer, CommentSerializer, TagSerializer,
                           CommentHistorySerializer, HighlightSerializer, ReportSerializer, LikesDislikesSerializer)
 from .models import Article, Comment
 from .exceptions import ArticleDoesNotExist

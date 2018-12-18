@@ -63,7 +63,7 @@ class ArticlesView(ArticleMetaData, viewsets.ModelViewSet):
 
         tag = self.request.query_params.get('tag', None)
         if tag is not None:
-            queryset = list(filter(lambda x: x if tag in x.tags else None, queryset))
+            queryset = queryset.filter(tags__tag=tag)
 
         return queryset
 

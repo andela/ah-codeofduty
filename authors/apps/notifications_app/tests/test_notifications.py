@@ -39,6 +39,9 @@ class UserNotificationsTestCase(BaseTest):
             self.MARK_AS_READ.format(first_notification),
             HTTP_AUTHORIZATION=self.token)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            'Notification has been read',
+            json.loads(response.content)['message'])
 
     def test_get_all_read_notifications(self):
         """

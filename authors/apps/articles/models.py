@@ -38,7 +38,6 @@ class Article(models.Model):
     dislikes = models.ManyToManyField(
         User, blank=True, related_name='LikesDislikes.user+')
 
-
     class Meta():
         """Meta class defining order"""
         ordering = ('time_created', 'time_updated',)
@@ -194,8 +193,9 @@ class LikesDislikes(models.Model):
     class Meta:
         unique_together = ('article', 'reader')
 
+
 class Tag(TimeStamp):
-    tag = models.CharField(max_length = 255, unique=True)
+    tag = models.CharField(max_length=255, unique=True)
 
     def __str__(self):
         return self.tag

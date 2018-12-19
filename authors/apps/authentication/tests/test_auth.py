@@ -12,11 +12,13 @@ class ViewTestCase(BaseTest):
             self.user_email_exists,
             format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(len(response.data['errors']), 1)
     
     def test_register_user(self):
         """Test user signup capability."""
         response = self.register_user()
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['username'], "zawi")
 
     def test_user_registration_username_exists(self):
         """Test user with that username already exists"""
@@ -26,6 +28,7 @@ class ViewTestCase(BaseTest):
             self.user_username_exists,
             format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(len(response.data['errors']), 1)
 
     def test_user_registration_missing_fields(self):
         """Test user registers with missing fields"""
@@ -36,6 +39,7 @@ class ViewTestCase(BaseTest):
             format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertRaises(TypeError, response.data)
+        self.assertEqual(len(response.data['errors']), 3)
 
     def test_user_registration_missing_username_parameter(self):
         """Test user registers with missing username parameter"""
@@ -45,6 +49,7 @@ class ViewTestCase(BaseTest):
             self.user_missing_username_parameter,
             format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(len(response.data['errors']), 1)
 
     def test_user_registration_missing_email_parameter(self):
         """Test user registers with missing email parameter"""
@@ -54,6 +59,7 @@ class ViewTestCase(BaseTest):
             self.user_missing_email_parameter,
             format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(len(response.data['errors']), 1)
 
     def test_user_registration_short_password(self):
         """Test user registers with short password"""
@@ -62,7 +68,8 @@ class ViewTestCase(BaseTest):
             self.user_inputs_short_password,
             format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-    
+        self.assertEqual(len(response.data['errors']), 1)
+
     def test_user_registration_invalid_email(self):
         """Test user registers invalid email"""
 
@@ -71,12 +78,15 @@ class ViewTestCase(BaseTest):
             self.user_inputs_invalid_email,
             format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(len(response.data['errors']), 1)
+
 
     def test_login_user(self):
         """Test the api has user login capability."""
         response = self.register_user()
         response = self.login_user()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['username'], "zawi")
 
     def test_login_user_wrong_password(self):
         """Test wrong login credentials."""
@@ -87,6 +97,7 @@ class ViewTestCase(BaseTest):
             format="json")
         self.assertEqual(json.loads(response.content)["errors"]["error"], ["Incorrect password."])
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(len(response.data['errors']), 1)
 
     def test_login_user_non_existent(self):
         """Test if user does not exist"""
@@ -96,6 +107,7 @@ class ViewTestCase(BaseTest):
             self.user_does_not_exist,
             format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(len(response.data['errors']), 1)
 
     def test_missing_password(self):
         """Test missing password on registration."""
@@ -105,6 +117,7 @@ class ViewTestCase(BaseTest):
             self.missing_password,
             format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(len(response.data['errors']), 1)
 
     def test_verify_email(self):
         '''Test verify email'''
@@ -115,3 +128,4 @@ class ViewTestCase(BaseTest):
         response = self.client.get(VERIFY_URL)
         self.assertEqual(json.loads(response.content), 'Email Confirmed Successfully')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, "Email Confirmed Successfully")

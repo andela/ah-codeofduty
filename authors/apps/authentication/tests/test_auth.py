@@ -35,6 +35,7 @@ class ViewTestCase(BaseTest):
             self.user_missing_fields,
             format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertRaises(TypeError, response.data)
 
     def test_user_registration_missing_username_parameter(self):
         """Test user registers with missing username parameter"""

@@ -38,6 +38,7 @@ class ArticleSerializer(serializers.ModelSerializer):
     favorited = serializers.SerializerMethodField()
     favoritesCount = serializers.SerializerMethodField(
         method_name='get_favorites_count')
+    rating = serializers.SerializerMethodField()
     average_rating = serializers.SerializerMethodField()
     # ...............................................................
     url = serializers.SerializerMethodField(read_only=True)
@@ -75,9 +76,8 @@ class ArticleSerializer(serializers.ModelSerializer):
         model = Article
         fields = ('title', 'body', 'images', 'description', 'slug', 'tagList',
                   'time_to_read', 'author', 'time_created', 'time_updated', 'favorited',
-                  'favoritesCount', 'average_rating', 'likes', 'dislikes', 'facebook',
+                  'favoritesCount', 'average_rating', 'rating', 'likes', 'dislikes', 'facebook',
                   'twitter', 'mail', 'Linkedin', 'url')
-
 
     def get_time_created(self, instance):
         '''get time the article was created and return in iso format'''
@@ -119,6 +119,16 @@ class ArticleSerializer(serializers.ModelSerializer):
             article.tags.add(tag)
 
         return article
+
+    def get_rating(self, obj):
+        request = self.context.get('request')
+        try:
+            rating = Rating.objects.filter(
+                article=obj.id, rater=request.user.id)
+            user_rating = rating.values('rating')[0]['rating']
+        except Exception as e:
+            user_rating = 0
+        return user_rating
 
     def get_average_rating(self, obj):
         avarage = 0
@@ -341,6 +351,7 @@ class LikesDislikesSerializer(serializers.ModelSerializer):
             )
         ]
 
+
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
@@ -348,4 +359,3 @@ class TagSerializer(serializers.ModelSerializer):
 
     def to_representation(self, object):
         return object.tag
-        

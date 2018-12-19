@@ -25,6 +25,3 @@ class Rating(models.Model):
         readable form
         """
         return self.rating
-
-
-

@@ -207,7 +207,7 @@ class CommentSerializer(serializers.ModelSerializer):
     """
     This class creates the comments serializers
     """
-    author = serializers.SerializerMethodField()
+    author = UserSerializer(read_only=True)
     article = serializers.ReadOnlyField(source='article.title')
     thread = RecursiveSerializer(many=True, read_only=True)
     likes = serializers.SerializerMethodField(method_name='count_likes')
@@ -241,6 +241,8 @@ class CommentSerializer(serializers.ModelSerializer):
             profile = Profile.objects.get(user_id=author.id)
             serializer = ProfileSerializer(profile)
             return serializer.data
+        except Exception as e:
+            return {}
         except Exception as e:
             return {}
 

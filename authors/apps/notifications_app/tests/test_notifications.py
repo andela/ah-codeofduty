@@ -108,7 +108,7 @@ class UserNotificationsTestCase(BaseTest):
             self.ALL_NOTIFICATIONS,
             HTTP_AUTHORIZATION=self.token)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # self.assertEqual('you are not subscribed to notifications', 
+        # self.assertEqual('you are not subscribed to notifications',
         # json.loads(response.content)['message'])
         response = self.client.post(
             self.SUBSCRIPTION,

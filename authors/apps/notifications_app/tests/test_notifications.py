@@ -26,6 +26,17 @@ class UserNotificationsTestCase(BaseTest):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(3, len(json.loads(response.content)))
 
+    def test_get_all_notifications_unauth(self):
+        """
+        test get all user notifications
+        """
+        response = self.client.get(
+            self.ALL_NOTIFICATIONS)
+        message = json.loads(response.content.decode("utf-8"))['message']
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(message, 'you are not subscribed to notifications')
+
+
     def test_mark_notification_as_read(self):
         """
         test mark a notification as read

@@ -226,7 +226,6 @@ class CommentSerializer(serializers.ModelSerializer):
             'likes',
         )
 
-
     def update(self, instance, valid_input, **kwargs):
         """
         Update and return a comment instance, given valid_input

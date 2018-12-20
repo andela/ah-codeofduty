@@ -226,6 +226,16 @@ class CommentSerializer(serializers.ModelSerializer):
             'likes',
         )
 
+    def get_author(self, obj):
+        try:
+            author = obj.author
+            profile = Profile.objects.get(user_id=author.id)
+            serializer = ProfileSerializer(profile)
+            return serializer.data
+        except Exception as e:
+            return {}
+
+
     def update(self, instance, valid_input, **kwargs):
         """
         Update and return a comment instance, given valid_input

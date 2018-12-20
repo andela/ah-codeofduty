@@ -235,17 +235,6 @@ class CommentSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-    def get_author(self, obj):
-        try:
-            author = obj.author
-            profile = Profile.objects.get(user_id=author.id)
-            serializer = ProfileSerializer(profile)
-            return serializer.data
-        except Exception as e:
-            return {}
-        except Exception as e:
-            return {}
-
     def create(self, valid_input):
         """
         Create and return a new comment instance, given a valid_input

@@ -207,7 +207,7 @@ class CommentSerializer(serializers.ModelSerializer):
     """
     This class creates the comments serializers
     """
-    author = UserSerializer(read_only=True)
+    author = serializers.SerializerMethodField()
     article = serializers.ReadOnlyField(source='article.title')
     thread = RecursiveSerializer(many=True, read_only=True)
     likes = serializers.SerializerMethodField(method_name='count_likes')
@@ -227,6 +227,14 @@ class CommentSerializer(serializers.ModelSerializer):
         )
 
 
+    def update(self, instance, valid_input, **kwargs):
+        """
+        Update and return a comment instance, given valid_input
+        """
+        instance.body = valid_input.get('body', instance.body)
+        instance.save()
+        return instance
+
     def get_author(self, obj):
         try:
             author = obj.author
@@ -235,15 +243,6 @@ class CommentSerializer(serializers.ModelSerializer):
             return serializer.data
         except Exception as e:
             return {}
-
-
-    def update(self, instance, valid_input, **kwargs):
-        """
-        Update and return a comment instance, given valid_input
-        """
-        instance.body = valid_input.get('body', instance.body)
-        instance.save()
-        return instance
 
     def create(self, valid_input):
         """

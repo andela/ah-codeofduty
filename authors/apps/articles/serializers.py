@@ -216,6 +216,7 @@ class CommentSerializer(serializers.ModelSerializer):
             'likes',
         )
 
+
     def get_author(self, obj):
         try:
             author = obj.author

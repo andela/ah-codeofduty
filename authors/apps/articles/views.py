@@ -146,6 +146,7 @@ class ArticlesView(ArticleMetaData, viewsets.ModelViewSet):
         if email != article.author:
             raise PermissionDenied
         article.delete()
+        Tag.edit_tags()
         return Response(dict(message="Article {} deleted successfully".format(slug)), status=status.HTTP_200_OK)
 
 

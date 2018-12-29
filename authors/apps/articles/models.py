@@ -199,3 +199,10 @@ class Tag(TimeStamp):
 
     def __str__(self):
         return self.tag
+
+    @classmethod
+    def edit_tags(cls):
+        tags = set(Article.objects.values_list('tags', flat=True))
+        if None in tags:
+            tags.remove(None)
+        Tag.objects.exclude(pk__in=(tags)).delete()

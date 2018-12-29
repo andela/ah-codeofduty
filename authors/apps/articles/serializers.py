@@ -153,6 +153,7 @@ class ArticleSerializer(serializers.ModelSerializer):
             'description', instance.description)
         if tags:
             instance.tags.set(tags)
+            Tag.edit_tags()
         instance.images = validated_data.get('images', instance.images)
         instance.time_to_read = self.get_time_to_read(
             instance.body, instance.images)

@@ -2,7 +2,7 @@
 Rating Serializers module
 """
 
-from django.db.models import Sum
+from django.db.models import Sum, Avg
 
 from rest_framework import serializers
 
@@ -35,6 +35,18 @@ class RateSerializers(serializers.ModelSerializer):
         """
         model = Rating
         fields = ('rating', 'article', 'rater')
+
+    def set_average_rating(self, obj, rating):
+        average = rating
+        try:
+            ratings = Rating.objects.filter(article=obj.id)
+            if ratings:
+                average = ratings.all().aggregate(
+                Avg('rating'))['rating__avg']
+            obj.average_rating = average
+            obj.save()
+        except Exception as e:
+            print(e)
 
     def create(self, validated_data):
         """
@@ -73,14 +85,18 @@ class RateSerializers(serializers.ModelSerializer):
         try:
             rating_instance = Rating.objects.get(rater=user, article=article)
         except:
-            "Error, article does  not exist"
+            "Error, article does not exist"
+
         if rating_instance:
             """ Update the rating """
             rating_instance.rating = rate
             rating_instance.save()
-            return validated_data
+        else:
+            Rating.objects.create(**validated_data)
 
-        return Rating.objects.create(**validated_data)
+        self.set_average_rating(article, rate)
+
+        return validated_data
 
 
 def check_article_exists(slug):

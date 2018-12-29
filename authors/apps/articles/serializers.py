@@ -1,7 +1,6 @@
 '''articles/serializers'''
 import math
 from decimal import Decimal
-from django.db.models import Avg
 from rest_framework import serializers
 from django.utils.text import slugify
 from rest_framework.validators import UniqueTogetherValidator
@@ -39,7 +38,7 @@ class ArticleSerializer(serializers.ModelSerializer):
     favoritesCount = serializers.SerializerMethodField(
         method_name='get_favorites_count')
     rating = serializers.SerializerMethodField()
-    average_rating = serializers.SerializerMethodField()
+    average_rating = serializers.DecimalField(required=False, read_only=True, max_digits=5, decimal_places=1, coerce_to_string=False)
     # ...............................................................
     url = serializers.SerializerMethodField(read_only=True)
     facebook = serializers.SerializerMethodField(read_only=True)
@@ -123,22 +122,12 @@ class ArticleSerializer(serializers.ModelSerializer):
     def get_rating(self, obj):
         request = self.context.get('request')
         try:
-            rating = Rating.objects.filter(
+            rating = Rating.objects.get(
                 article=obj.id, rater=request.user.id)
-            user_rating = rating.values('rating')[0]['rating']
+            user_rating = rating.rating
         except Exception as e:
             user_rating = 0
         return user_rating
-
-    def get_average_rating(self, obj):
-        avarage = 0
-        try:
-            ratings = Rating.objects.filter(article=obj.id)
-            avarage = ratings.all().aggregate(
-                Avg('rating'))['rating__avg']
-        except Exception as e:
-            print(e)
-        return avarage
 
     def update(self, instance, validated_data):
         '''method updating articles'''

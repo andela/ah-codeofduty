@@ -6,7 +6,7 @@ from .views import (ArticlesView, ArticlesSearchListAPIView,
                     BookMarkArticle, BookMarksView,
                     CommentHistoryAPIView, HighlightCommentView,
                     CommentRetrieveUpdateDestroy, CommentsListCreateAPIView,
-                    LikeComments, ReportCreateAPIView)
+                    LikeComments, ReportCreateAPIView, ArticleStatisticsView)
 
 app_name = 'articles'
 # map http methods to defined methods in ArticlesViews
@@ -68,4 +68,6 @@ urlpatterns = [
          ArticlesLikesDislikes.as_view(), name='article-like'),
     path('articles/<slug>/bookmark/', BookMarkArticle.as_view()),
     path('tags/', TagListAPIView.as_view()),
+    path('articles/<slug>/like/', ArticlesLikesDislikes.as_view(), name='article-like'),
+    path('articles/read/statistics/', ArticleStatisticsView.as_view(),  name='stats'),
 ]

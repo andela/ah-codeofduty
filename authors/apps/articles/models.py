@@ -22,21 +22,18 @@ class Article(models.Model):
     images = ArrayField(models.TextField(), default=None,
                         blank=True, null=True)
     description = models.CharField(max_length=255)
-    slug = models.SlugField(max_length=1000, unique=True)
-    tags = models.ManyToManyField('articles.Tag', related_name='articles')
+    slug = models.SlugField(max_length=40, unique=True)
+    tags = ArrayField(models.CharField(max_length=30),
+                      default=None, blank=True, null=True)
     time_to_read = models.IntegerField()
     # auto_now_add automatically sets the field to now when the object is first created.
     time_created = models.DateTimeField(auto_now_add=True, db_index=True)
     # auto_now will update every time you save the model.
     time_updated = models.DateTimeField(auto_now=True, db_index=True)
-    author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="articles")
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="articles")
     average_rating = models.IntegerField(default=0)
-
-    likes = models.ManyToManyField(
-        User, blank=True, related_name='LikesDislikes.user+')
-    dislikes = models.ManyToManyField(
-        User, blank=True, related_name='LikesDislikes.user+')
+    likes = models.ManyToManyField(User, blank=True, related_name='LikesDislikes.user+')
+    dislikes = models.ManyToManyField(User, blank=True, related_name='LikesDislikes.user+')
 
     class Meta():
         """Meta class defining order"""
@@ -73,8 +70,7 @@ class Comment(models.Model):
     body = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    likes = models.ManyToManyField(
-        User, related_name='comment_likes', blank=True)
+    likes = models.ManyToManyField(User, related_name='comment_likes', blank=True)
 
     def __str__(self):
         return self.body
@@ -117,8 +113,7 @@ class Highlight(models.Model):
 class Report(models.Model):
     """Reporting an article model"""
     body = models.TextField()
-    reporter = models.ForeignKey(
-        'authentication.User', on_delete=models.CASCADE)
+    reporter = models.ForeignKey('authentication.User', on_delete=models.CASCADE)
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -184,10 +179,8 @@ post_save.connect(favorite_comment_handler, sender=Comment)
 
 
 class LikesDislikes(models.Model):
-    article = models.ForeignKey(
-        Article, related_name='like', on_delete=models.CASCADE)
-    reader = models.ForeignKey(
-        User, related_name='like', on_delete=models.CASCADE)
+    article = models.ForeignKey(Article, related_name='like', on_delete=models.CASCADE)
+    reader = models.ForeignKey(User, related_name='like', on_delete=models.CASCADE)
     likes = models.BooleanField()
 
     class Meta:
@@ -199,3 +192,9 @@ class Tag(TimeStamp):
 
     def __str__(self):
         return self.tag
+
+
+class ArticleStatistics(models.Model):
+    """Model for reading statistics"""
+    user = models.ForeignKey(User, related_name="article_views", on_delete=models.CASCADE)
+    article = models.ForeignKey(Article, related_name="article_views", on_delete=models.CASCADE)

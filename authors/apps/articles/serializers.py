@@ -1,20 +1,18 @@
 '''articles/serializers'''
 import math
-from decimal import Decimal
+
 from django.db.models import Avg
-from rest_framework import serializers
 from django.utils.text import slugify
+from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.validators import UniqueTogetherValidator
 
-from authors.apps.authentication.serializers import UserSerializer
-from rest_framework.exceptions import PermissionDenied
 from authors.apps.authentication.models import User
-from authors.apps.profiles.serializers import ProfileSerializer
+from authors.apps.authentication.serializers import UserSerializer
 from authors.apps.profiles.models import Profile
-from .models import Article, Comment, CommentHistory, Highlight, Report, LikesDislikes, Tag
-
+from authors.apps.profiles.serializers import ProfileSerializer
+from .models import Article, Comment, CommentHistory, Highlight, Report, ArticleStatistics, LikesDislikes, Tag
 from ..rating.models import Rating
-from .relations import TagRelatedField
 
 
 class ArticleSerializer(serializers.ModelSerializer):
@@ -31,7 +29,8 @@ class ArticleSerializer(serializers.ModelSerializer):
         max_length=1000), min_length=None, max_length=None, required=False)
     description = serializers.CharField()
     slug = serializers.CharField(required=False)
-    tagList = TagRelatedField(many=True, required=False, source='tags')
+    tags = serializers.ListField(child=serializers.CharField(
+        max_length=25), min_length=None, max_length=None, required=False)
     time_to_read = serializers.IntegerField(required=False)
     time_created = serializers.SerializerMethodField()
     time_updated = serializers.SerializerMethodField()
@@ -207,7 +206,7 @@ class CommentSerializer(serializers.ModelSerializer):
     """
     This class creates the comments serializers
     """
-    author = UserSerializer(read_only=True)
+    author = serializers.SerializerMethodField()
     article = serializers.ReadOnlyField(source='article.title')
     thread = RecursiveSerializer(many=True, read_only=True)
     likes = serializers.SerializerMethodField(method_name='count_likes')
@@ -233,6 +232,15 @@ class CommentSerializer(serializers.ModelSerializer):
         instance.body = valid_input.get('body', instance.body)
         instance.save()
         return instance
+
+    def get_author(self, obj):
+        try:
+            author = obj.author
+            profile = Profile.objects.get(user_id=author.id)
+            serializer = ProfileSerializer(profile)
+            return serializer.data
+        except Exception as e:
+            return {}
 
     def create(self, valid_input):
         """
@@ -280,10 +288,9 @@ class HighlightSerializer(serializers.ModelSerializer):
         validated_data["highlighter"] = self.context.get('highlighter')
         validated_data["article"] = self.context.get('article')
         highlight_text = validated_data["article"].body[
-            validated_data["index_start"]:validated_data["index_stop"]]
+                         validated_data["index_start"]:validated_data["index_stop"]]
         if not highlight_text:
-            raise serializers.ValidationError(
-                "Text doesn't exist on this article")
+            raise serializers.ValidationError("Text doesn't exist on this article")
         validated_data["highlighted_article_piece"] = highlight_text
 
         return Highlight.objects.create(**validated_data)
@@ -297,8 +304,7 @@ class HighlightSerializer(serializers.ModelSerializer):
         index_stop = validated_data.get('index_stop', instance.index_stop)
         highlight_text = instance.article.body[index_start:index_stop]
         if not highlight_text:
-            raise serializers.ValidationError(
-                "Text doesn't exist on this article")
+            raise serializers.ValidationError("Text doesn't exist on this article")
         instance.comment = validated_data.get('comment', instance.comment)
         instance.index_start = index_start
         instance.index_stop = index_stop
@@ -325,8 +331,7 @@ class ReportSerializer(serializers.ModelSerializer):
         slug = self.context.get('slug')
         reporter = self.context.get('reporter', None)
         article = Article.objects.get(slug=slug)
-        report = Report.objects.create(
-            article=article, reporter=reporter, **validated_data)
+        report = Report.objects.create(article=article, reporter=reporter, **validated_data)
         return report
 
 
@@ -350,3 +355,20 @@ class TagSerializer(serializers.ModelSerializer):
 
     def to_representation(self, object):
         return object.tag
+
+
+class ArticleStatSerializer(serializers.ModelSerializer):
+    """Serializer class for reading stats"""
+    slug = serializers.SlugField(read_only=True)
+    view_count = serializers.SerializerMethodField()
+    comment_count = serializers.SerializerMethodField()
+
+    def get_comment_count(self, value):
+        return Comment.objects.filter(article=value).count()
+
+    def get_view_count(self, value):
+        return ArticleStatistics.objects.filter(article=value).count()
+
+    class Meta:
+        model = Article
+        fields = ['slug', 'title', 'view_count', 'comment_count']

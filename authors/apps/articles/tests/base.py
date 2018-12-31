@@ -68,7 +68,7 @@ class BaseTest(TestCase):
             "body": "This is me testing. This line should be long enough to pass as a story.",
             "description": "testing",
             "time_to_read": 1,
-            "tagList": ["TDD"]
+            "tags": ["TDD"]
         }
 
         # define highlight data
@@ -105,7 +105,6 @@ class BaseTest(TestCase):
                          HTTP_AUTHORIZATION=self.token, format="json")
         self.client.post(self.ARTICLES, self.test_article_data,
                          HTTP_AUTHORIZATION=self.token, format="json")
-       
 
     def favorite_article(self, slug, token):
         return self.client.post(
@@ -128,9 +127,16 @@ class BaseTest(TestCase):
             HTTP_AUTHORIZATION='Bearer ' + token,
             format='json'
         )
-        
+
     def get_article_tags(self):
         return self.client.get(
             self.GET_TAGS,
             format='json'
         )
+
+    def create_comment(self, token, slug, test_comment_data):
+        """ Method to create an article then comment"""
+        self.client.post(self.ARTICLES, self.test_article_data,
+                         HTTP_AUTHORIZATION=self.token, format='json')
+        return self.client.post('/api/articles/test-title12/comment/', self.test_comment_data,
+                                HTTP_AUTHORIZATION=self.token, format='json')

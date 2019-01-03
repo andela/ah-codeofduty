@@ -1,18 +1,14 @@
 """articles/models.py"""
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
-
 from django.db.models.signals import post_save
 from notifications.signals import notify
-
-from django.contrib.postgres.fields import ArrayField
-from authors.apps.authentication.models import User
-from django.utils.text import slugify
-
-from authors.apps.authentication.models import User
-from authors.apps.profiles.models import Profile
-
 from rest_framework.reverse import reverse as api_reverse
+
+from authors.apps.authentication.models import User
+from authors.apps.authentication.models import User
 from authors.apps.core.models import TimeStamp
+from authors.apps.profiles.models import Profile
 
 
 class Article(models.Model):
@@ -49,6 +45,7 @@ class Article(models.Model):
     def __str__(self):
         """return string representation of object"""
         return self.title
+
     # ...............................................................
 
     def api_url(self, request=None):
@@ -199,3 +196,8 @@ class Tag(TimeStamp):
 
     def __str__(self):
         return self.tag
+
+
+class ArticleStatistics(models.Model):
+    """Model for reading statistics"""
+    article = models.ForeignKey(Article, related_name="article_views", on_delete=models.CASCADE)

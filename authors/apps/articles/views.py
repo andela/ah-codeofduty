@@ -1,7 +1,10 @@
 '''articles/views.py'''
 import django_filters
 from django.contrib.postgres.fields import ArrayField
+from django.contrib.sites.shortcuts import get_current_site
+from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
+from django.template.loader import render_to_string
 from django_filters import rest_framework as filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets, generics
@@ -14,20 +17,15 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from authors.apps.articles.renderers import ReportJSONRenderer
-from authors.apps.core.pagination import LimitOffsetPagination
-from .models import Article, Comment, CommentHistory, Highlight, Report, LikesDislikes, Tag
-
-from django.core.mail import send_mail
-from django.template import Context
-from django.template.loader import render_to_string, get_template
-from django.contrib.sites.shortcuts import get_current_site
-
-from .serializers import (ArticleSerializer, CommentSerializer, TagSerializer,
-                          CommentHistorySerializer, HighlightSerializer, ReportSerializer, LikesDislikesSerializer)
-from .models import Article, Comment
-from .exceptions import ArticleDoesNotExist
+from authors.apps.authentication.backends import JWTAuthentication
 from authors.apps.authentication.models import User
-from authors.apps.authentication.backends import decode_token, JWTAuthentication
+from authors.apps.core.pagination import LimitOffsetPagination
+from .exceptions import ArticleDoesNotExist
+from .models import Article, Comment
+from .models import CommentHistory, Highlight, Report, LikesDislikes, Tag, ArticleStatistics
+from .serializers import (ArticleSerializer, CommentSerializer, TagSerializer,
+                          CommentHistorySerializer, HighlightSerializer, ReportSerializer, LikesDislikesSerializer,
+                          ArticleStatSerializer)
 
 
 class ArticleMetaData:
@@ -102,22 +100,22 @@ class ArticlesView(ArticleMetaData, viewsets.ModelViewSet):
             # Setup the content to be sent
             # the url to send with the mail
             link = "http://" + current_site.domain + \
-            '/api/notifications/subscription/'+token+'/'
+                   '/api/notifications/subscription/' + token + '/'
             article_link = "http://" + current_site.domain + \
-            '/api/articles/{}/'.format(serializer.data['slug'])
+                           '/api/articles/{}/'.format(serializer.data['slug'])
 
             from_email = 'codeofd@gmail.com'
-            #username = request.user.username
-            template='index.html'
-            subject='"{}" added a new article "{}"'.format(request.user.username, request.data['title'])
+            # username = request.user.username
+            template = 'index.html'
+            subject = '"{}" added a new article "{}"'.format(request.user.username, request.data['title'])
 
             username = User.objects.filter(email=recipient).values()[0]['username']
             html_content = render_to_string(template, context={
-                                                "username": username,
-                                                "author": request.user.username,
-                                                "unsubscribe_url":link,
-                                                "article_link": article_link,
-                                                "article_title":request.data['title']})
+                "username": username,
+                "author": request.user.username,
+                "unsubscribe_url": link,
+                "article_link": article_link,
+                "article_title": request.data['title']})
             send_mail(subject, '', from_email, [recipient], html_message=html_content)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -127,6 +125,7 @@ class ArticlesView(ArticleMetaData, viewsets.ModelViewSet):
         serializer_context = {'request': request}
         article = self.check_article_exists(slug)
         serializer = self.serializer_class(article, context=serializer_context)
+        ArticleStatistics.objects.create(article=article)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def update(self, request, slug):
@@ -186,21 +185,21 @@ class ArticlesFavoriteAPIView(APIView):
         if author_notification_subscription:
             current_site = get_current_site(request)
             link = "http://" + current_site.domain + \
-            '/api/notifications/subscription/'+token+'/'
+                   '/api/notifications/subscription/' + token + '/'
             article_link = "http://" + current_site.domain + \
-            '/api/articles/{}/'.format(article_slug)
+                           '/api/articles/{}/'.format(article_slug)
 
             from_email = 'codeofd@gmail.com'
-            template='favorite.html'
+            template = 'favorite.html'
             to = [article_author]
-            subject='"{}" favourited your article, "{}"'.format(favouriter, article_title)
+            subject = '"{}" favourited your article, "{}"'.format(favouriter, article_title)
             html_content = render_to_string(template, context={
-                                            "username": article_username,
-                                            "favouriter": favouriter,
-                                            'article_title': article_title,
-                                            'article_link': article_link,
-                                            "unsubscribe_url":link})
-            #send Email
+                "username": article_username,
+                "favouriter": favouriter,
+                'article_title': article_title,
+                'article_link': article_link,
+                "unsubscribe_url": link})
+            # send Email
             send_mail(subject, '', from_email, to, html_message=html_content)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -252,26 +251,28 @@ class CommentsListCreateAPIView(ArticlesView):
             for user_id in favouriters:
                 favouriters_name = User.objects.get(id=user_id['user_id'])
                 token = JWTAuthentication.encode_token(self, favouriters_name.pk)
-                author_notification_subscription = User.objects.filter(id=favouriters_name.pk).values()[0]['is_subscribed']
+                author_notification_subscription = User.objects.filter(id=favouriters_name.pk).values()[0][
+                    'is_subscribed']
 
                 if author_notification_subscription:
                     current_site = get_current_site(request)
                     link = "http://" + current_site.domain + \
-                    '/api/notifications/subscription/'+token+'/'
+                           '/api/notifications/subscription/' + token + '/'
                     article_link = "http://" + current_site.domain + \
-                    '/api/articles/{}/'.format(article_slug)
+                                   '/api/articles/{}/'.format(article_slug)
 
                     from_email = 'codeofd@gmail.com'
-                    template='comments.html'
+                    template = 'comments.html'
                     to = [favouriters_name.email]
-                    subject='New comment on one of your favorite articles, "{}" by "{}"'.format(article_title, article_author)
+                    subject = 'New comment on one of your favorite articles, "{}" by "{}"'.format(article_title,
+                                                                                                  article_author)
                     html_content = render_to_string(template, context={
-                                                    "username": favouriters_name.username,
-                                                    "commenter": commenter,
-                                                    'article_title': article_title,
-                                                    'article_link': article_link,
-                                                    "unsubscribe_url":link})
-                    #send Email
+                        "username": favouriters_name.username,
+                        "commenter": commenter,
+                        'article_title': article_title,
+                        'article_link': article_link,
+                        "unsubscribe_url": link})
+                    # send Email
                     send_mail(subject, '', from_email, to, html_message=html_content)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -740,11 +741,11 @@ class TagListAPIView(ListAPIView):
     implements taggging
     """
     queryset = Tag.objects.all()
-    pagination_class= None
-    serializer_class=TagSerializer
-    permission_classes=(AllowAny,)
+    pagination_class = None
+    serializer_class = TagSerializer
+    permission_classes = (AllowAny,)
 
-    def list(self,request):
+    def list(self, request):
         """
         fetches existing article tags
         """
@@ -754,6 +755,7 @@ class TagListAPIView(ListAPIView):
                 'tags': serializer.data
             }, status=status.HTTP_200_OK
         )
+
 
 class BookMarkArticle(ArticleMetaData, ListAPIView):
     """Implements bookmarking an article"""
@@ -783,3 +785,11 @@ class BookMarksView(ListAPIView):
         serializer = self.serializer_class(
             bookmarked_articles, context={"request": request}, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ArticleStatisticsView(ListAPIView):
+    serializer_class = ArticleStatSerializer
+
+    def get_queryset(self):
+        """This method filters articles by authors"""
+        return Article.objects.filter(author=self.request.user)

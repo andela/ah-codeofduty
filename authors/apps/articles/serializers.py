@@ -1,20 +1,17 @@
 '''articles/serializers'''
 import math
-from decimal import Decimal
+
 from django.db.models import Avg
-from rest_framework import serializers
 from django.utils.text import slugify
+from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.validators import UniqueTogetherValidator
 
-from authors.apps.authentication.serializers import UserSerializer
-from rest_framework.exceptions import PermissionDenied
 from authors.apps.authentication.models import User
-from authors.apps.profiles.serializers import ProfileSerializer
-from authors.apps.profiles.models import Profile
-from .models import Article, Comment, CommentHistory, Highlight, Report, LikesDislikes, Tag
-
-from ..rating.models import Rating
+from authors.apps.authentication.serializers import UserSerializer
+from .models import Article, Comment, CommentHistory, Highlight, Report, LikesDislikes, Tag, ArticleStatistics
 from .relations import TagRelatedField
+from ..rating.models import Rating
 
 
 class ArticleSerializer(serializers.ModelSerializer):
@@ -47,34 +44,43 @@ class ArticleSerializer(serializers.ModelSerializer):
     twitter = serializers.SerializerMethodField(read_only=True)
     mail = serializers.SerializerMethodField(read_only=True)
     # ...............................................................
+    view_count = serializers.SerializerMethodField()
+    comment_count = serializers.SerializerMethodField()
 
     def get_url(self, obj):
         request = self.context.get("request")
         return obj.api_url(request=request)
 
+    def get_comment_count(self, value):
+        return Comment.objects.filter(article=value).count()
+
+    def get_view_count(self, value):
+        return ArticleStatistics.objects.filter(article=value).count()
+
     def get_facebook(self, obj):
         request = self.context.get("request")
-        return 'http://www.facebook.com/sharer.php?u='+obj.api_url(request=request)
+        return 'http://www.facebook.com/sharer.php?u=' + obj.api_url(request=request)
 
     def get_Linkedin(self, obj):
         request = self.context.get("request")
-        return 'http://www.linkedin.com/shareArticle?mini=true&amp;url='+obj.api_url(request=request)
+        return 'http://www.linkedin.com/shareArticle?mini=true&amp;url=' + obj.api_url(request=request)
 
     def get_twitter(self, obj):
         request = self.context.get("request")
-        return 'https://twitter.com/share?url='+obj.api_url(request=request)+'&amp;text=Amazing Read'
+        return 'https://twitter.com/share?url=' + obj.api_url(request=request) + '&amp;text=Amazing Read'
 
     def get_mail(self, obj):
         request = self.context.get("request")
         return 'mailto:?subject=New Article Alert&body={}'.format(
             obj.api_url(request=request))
+
     # ...............................................................
     likes = serializers.SerializerMethodField(method_name='count_likes')
     dislikes = serializers.SerializerMethodField(method_name='count_dislikes')
 
     class Meta:
         model = Article
-        fields = ('title', 'body', 'images', 'description', 'slug', 'tagList',
+        fields = ('title', 'body', 'images', 'description', 'slug', 'tagList', 'view_count', 'comment_count',
                   'time_to_read', 'author', 'time_created', 'time_updated', 'favorited',
                   'favoritesCount', 'average_rating', 'rating', 'likes', 'dislikes', 'facebook',
                   'twitter', 'mail', 'Linkedin', 'url')
@@ -280,7 +286,7 @@ class HighlightSerializer(serializers.ModelSerializer):
         validated_data["highlighter"] = self.context.get('highlighter')
         validated_data["article"] = self.context.get('article')
         highlight_text = validated_data["article"].body[
-            validated_data["index_start"]:validated_data["index_stop"]]
+                         validated_data["index_start"]:validated_data["index_stop"]]
         if not highlight_text:
             raise serializers.ValidationError(
                 "Text doesn't exist on this article")
@@ -350,3 +356,20 @@ class TagSerializer(serializers.ModelSerializer):
 
     def to_representation(self, object):
         return object.tag
+
+
+class ArticleStatSerializer(serializers.ModelSerializer):
+    """Serializer class for reading stats"""
+    slug = serializers.SlugField(read_only=True)
+    view_count = serializers.SerializerMethodField()
+    comment_count = serializers.SerializerMethodField()
+
+    def get_comment_count(self, value):
+        return Comment.objects.filter(article=value).count()
+
+    def get_view_count(self, value):
+        return ArticleStatistics.objects.filter(article=value).count()
+
+    class Meta:
+        model = Article
+        fields = ['slug', 'title', 'view_count', 'comment_count']

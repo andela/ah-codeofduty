@@ -50,6 +50,14 @@ class ArticleTestCase(BaseTest):
         response = self.client.get(self.ARTICLES)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertGreaterEqual(len(json.loads(response.content)), 0)
+        # test get popular artcles
+        response = self.client.get(self.ARTICLE.format("popular"))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertGreaterEqual(len(json.loads(response.content)), 0)
+        # test get recent artcles
+        response = self.client.get(self.ARTICLE.format("recent"))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertGreaterEqual(len(json.loads(response.content)), 0)
 
     def test_get_user_articles(self):
         '''test get a user's articles'''
@@ -82,6 +90,15 @@ class ArticleTestCase(BaseTest):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn(article_data["title"],
                       json.loads(response.content)["title"])
+        # test update tags
+        response = self.client.put(
+            self.TESTARTICLE, {"tagList": ["new tag"]}, HTTP_AUTHORIZATION=self.token, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("new tag",
+                      json.loads(response.content)["tagList"])
+        response2 = self.get_article_tags()
+        self.assertNotIn("math", json.loads(response2.content)["tags"])
+        
         # test non-author
         response = self.client.put(
             self.TESTARTICLE, article_data, HTTP_AUTHORIZATION=self.non_user_token, format="json")
@@ -234,11 +251,11 @@ class ArticleTestCase(BaseTest):
     def test_if_article_returns_share_links(self):
         """This method tests whether the API returns share links"""
         res = self.client.get(self.TESTARTICLE)
-        self.assertIn("facebook", json.dumps(res.data))
-        self.assertIn("Linkedin", json.dumps(res.data))
-        self.assertIn("twitter", json.dumps(res.data))
-        self.assertIn("mail", json.dumps(res.data))
-        self.assertIn("url", json.dumps(res.data))
+        self.assertIn("facebook", json.loads(res.content))
+        self.assertIn("Linkedin", json.loads(res.content))
+        self.assertIn("twitter", json.loads(res.content))
+        self.assertIn("mail", json.loads(res.content))
+        self.assertIn("url", json.loads(res.content))
 
     def test_get_tags(self):
         """Tests whether we can get all article tags"""

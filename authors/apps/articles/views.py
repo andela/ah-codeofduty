@@ -74,6 +74,18 @@ class ArticlesView(ArticleMetaData, viewsets.ModelViewSet):
             page, context=serializer_context, many=True)
         return self.get_paginated_response(serializer.data)
 
+    def list_by_recent(self, request):
+        page = self.paginate_queryset(self.get_queryset().order_by('-time_created'))
+        serializer = self.serializer_class(
+            page, context={"request": request}, many=True)
+        return self.get_paginated_response(serializer.data)
+
+    def list_by_popular(self, request):
+        page = self.paginate_queryset(self.get_queryset().order_by('-average_rating'))
+        serializer = self.serializer_class(
+            page, context={"request": request}, many=True)
+        return self.get_paginated_response(serializer.data)
+
     def create(self, request):
         '''method creating a new article(post)'''
         serializer = self.serializer_class(
@@ -145,6 +157,7 @@ class ArticlesView(ArticleMetaData, viewsets.ModelViewSet):
         if email != article.author:
             raise PermissionDenied
         article.delete()
+        Tag.edit_tags()
         return Response(dict(message="Article {} deleted successfully".format(slug)), status=status.HTTP_200_OK)
 
 

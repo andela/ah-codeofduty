@@ -27,7 +27,7 @@ class Article(models.Model):
     time_updated = models.DateTimeField(auto_now=True, db_index=True)
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="articles")
-    average_rating = models.IntegerField(default=0)
+    average_rating = models.DecimalField(default=0, max_digits=5, decimal_places=1)
 
     likes = models.ManyToManyField(
         User, blank=True, related_name='LikesDislikes.user+')
@@ -196,6 +196,13 @@ class Tag(TimeStamp):
 
     def __str__(self):
         return self.tag
+     
+    @classmethod
+    def edit_tags(cls):
+        tags = set(Article.objects.values_list('tags', flat=True))
+        if None in tags:
+            tags.remove(None)
+        Tag.objects.exclude(pk__in=(tags)).delete()
 
 
 class ArticleStatistics(models.Model):

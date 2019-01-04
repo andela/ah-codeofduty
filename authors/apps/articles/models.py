@@ -31,7 +31,7 @@ class Article(models.Model):
     time_updated = models.DateTimeField(auto_now=True, db_index=True)
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="articles")
-    average_rating = models.IntegerField(default=0)
+    average_rating = models.DecimalField(default=0, max_digits=5, decimal_places=1)
 
     likes = models.ManyToManyField(
         User, blank=True, related_name='LikesDislikes.user+')

@@ -13,8 +13,16 @@ app_name = 'articles'
 articles_list = ArticlesView.as_view({
     'get': 'list',
     'post': 'create',
-
 })
+
+recent_articles = ArticlesView.as_view({
+    'get': 'list_by_recent',
+})
+
+popular_articles = ArticlesView.as_view({
+    'get': 'list_by_popular',
+})
+
 articles_detail = ArticlesView.as_view({
     'get': 'retrieve',
     'put': 'update',
@@ -49,6 +57,8 @@ like_comment = LikeComments.as_view()
 
 urlpatterns = [
     path('articles/', articles_list),
+    path('articles/recent/', recent_articles),
+    path('articles/popular/', popular_articles),
     path('articles/feed/', ArticlesFeedAPIView.as_view()),
     path('articles/bookmarks/', BookMarksView.as_view()),
     path('articles/<slug>/', articles_detail, name='articles_detail'),

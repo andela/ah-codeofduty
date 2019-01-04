@@ -90,6 +90,15 @@ class ArticleTestCase(BaseTest):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn(article_data["title"],
                       json.loads(response.content)["title"])
+        # test update tags
+        response = self.client.put(
+            self.TESTARTICLE, {"tagList": ["new tag"]}, HTTP_AUTHORIZATION=self.token, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("new tag",
+                      json.loads(response.content)["tagList"])
+        response2 = self.get_article_tags()
+        self.assertNotIn("math", json.loads(response2.content)["tags"])
+        
         # test non-author
         response = self.client.put(
             self.TESTARTICLE, article_data, HTTP_AUTHORIZATION=self.non_user_token, format="json")
